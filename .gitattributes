@@ -1,0 +1,13 @@
+# Normalise line endings so a clone is byte-identical on Windows, macOS and Linux.
+# This repo is developed on Windows with core.autocrlf=true; without this file, a fresh
+# checkout would rewrite committed fixtures to CRLF while scripts/build_fixtures.py
+# writes LF, producing a spurious diff every time fixtures are regenerated.
+* text=auto eol=lf
+
+# Test fixtures are compared byte-for-byte and must never be rewritten.
+tests/fixtures/*.csv -text
+
+# Binary
+*.pdf binary
+*.png binary
+*.gz  binary
