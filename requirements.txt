@@ -1,0 +1,15 @@
+# ConjunctionTriage Agent — pinned to the versions installed in .venv (Python 3.11.9).
+# Only packages actually imported by code in this repo, plus the test runner.
+# Verified against `pip list` on 2026-08-18. See docs/PHASE1_REPORT.md.
+
+# --- core schema / data ---
+numpy==2.4.6            # covariance matrices (core/schema.py)
+pandas==3.0.3           # chunked / column-subset CSV reads (fixtures, Phase 2 ingestion)
+python-dotenv==1.2.2    # .env loading (core/config.py)
+
+# --- data-source clients (data/celestrak.py) ---
+requests==2.34.2
+rich==15.0.0
+
+# --- test harness ---
+pytest==9.1.1
