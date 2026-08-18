@@ -11,5 +11,10 @@ python-dotenv==1.2.2    # .env loading (core/config.py)
 requests==2.34.2
 rich==15.0.0
 
+# --- Phase 2: ingestion and documentation ---
+pyarrow==25.0.1         # parquet read/write (scripts/ingest.py)
+pypdf==6.16.1           # Users Guide text extraction (scripts/read_guide.py)
+psutil==7.2.2           # peak-memory measurement during chunked ingestion
+
 # --- test harness ---
 pytest==9.1.1
