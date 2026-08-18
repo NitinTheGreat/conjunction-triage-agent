@@ -1,8 +1,15 @@
-# Dataset files — too large for git
-dataset/
-*.csv
-*.csv.gz
-*.tar.gz
+# Dataset files — too large for git, and machine-local.
+# Directory contents are excluded, but the provenance manifest is tracked, so use
+# `dataset/*` + a negation rather than `dataset/` (git will not descend into an
+# ignored directory, which would make the negation unreachable).
+dataset/*
+!dataset/MANIFEST.md
+
+# Scope archive/CSV ignores to the dataset only. A bare `*.csv` / `*.csv.gz` would
+# silently swallow evaluation results, metrics tables and test fixtures.
+dataset/*.csv
+dataset/*.csv.gz
+dataset/*.tar.gz
 
 # Python
 __pycache__/
@@ -18,6 +25,7 @@ env/
 # IDE
 .vscode/
 .idea/
+.claude/
 
 # OS
 .DS_Store
