@@ -34,15 +34,23 @@ import numpy as np
 
 __all__ = [
     "PC_FLOOR",
+    "KELVINS_PC_FLOOR",
+    "SOURCE_PC_FLOOR",
     "EventSource",
     "SchemaValidationError",
     "ObjectState",
     "ConjunctionEvent",
+    "ConjunctionEventSeries",
 ]
 
 #: Reporting floor of the ``prob`` column in the TraCSS IV&V benchmark. Values at this
 #: value are censored -- the true probability is somewhere at or below it, unknown.
 PC_FLOOR = 1e-10
+
+#: Reporting floor of the ESA Kelvins ``risk`` column, which is log10(Pc) and is clamped
+#: at exactly -30.0. Like the TraCSS floor this is a bound, not a measurement -- but it is
+#: a *different* bound, so the two datasets' censored populations are not comparable.
+KELVINS_PC_FLOOR = 1e-30
 
 #: Timestamp layouts accepted for the IV&V ``epoch`` column, most specific first.
 _EPOCH_FORMATS = ("%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d %H:%M:%S")
@@ -53,6 +61,7 @@ class EventSource(str, Enum):
 
     TRACSS_SPHERICAL = "TRACSS_SPHERICAL"
     TRACSS_SFSH = "TRACSS_SFSH"
+    KELVINS = "KELVINS"
     CELESTRAK = "CELESTRAK"
     SPACETRACK = "SPACETRACK"
 
@@ -61,6 +70,18 @@ class EventSource(str, Enum):
 SOURCE_FILENAMES: dict[EventSource, str] = {
     EventSource.TRACSS_SPHERICAL: "IVV_Releasable_Dataset_Spherical_DefaultHBR.csv",
     EventSource.TRACSS_SFSH: "IVV_Releasable_Dataset_SFSH_DiscreteHBR.csv",
+}
+
+
+#: Reporting floor per source. ``None`` means the source publishes no floor, so no value
+#: can be treated as censored. Sources differ: TraCSS clamps Pc at 1e-10, Kelvins clamps
+#: log10(Pc) at -30. Using one floor for both would mislabel 41% of Kelvins CDMs.
+SOURCE_PC_FLOOR: dict[EventSource, Optional[float]] = {
+    EventSource.TRACSS_SPHERICAL: PC_FLOOR,
+    EventSource.TRACSS_SFSH: PC_FLOOR,
+    EventSource.KELVINS: KELVINS_PC_FLOOR,
+    EventSource.CELESTRAK: None,
+    EventSource.SPACETRACK: None,
 }
 
 
@@ -372,8 +393,10 @@ class ConjunctionEvent:
     provenance: str
 
     # -- encounter geometry ------------------------------------------------------------
-    #: Time of closest approach, timezone-aware UTC.
-    tca: datetime
+    #: Time of closest approach, timezone-aware UTC. ``None`` for anonymised sources that
+    #: publish no absolute epoch (ESA Kelvins), in which case
+    #: :attr:`time_to_tca_days` carries the only temporal information available.
+    tca: Optional[datetime]
     #: Julian date of TCA as published by the source (days).
     jdate: Optional[float]
     #: Miss distance at TCA, km.
@@ -393,6 +416,12 @@ class ConjunctionEvent:
     #: True when ``pc`` sits at the reporting floor (:data:`PC_FLOOR`) and is therefore
     #: censored -- a bound, not a measurement.
     pc_is_floored: bool
+
+    #: Interval from record creation to TCA, days. The only temporal information an
+    #: anonymised source provides; decreases toward 0 as a conjunction is refined.
+    #: Declared here rather than beside ``tca`` because it carries a default and a
+    #: dataclass cannot place a defaulted field before undefaulted ones.
+    time_to_tca_days: Optional[float] = None
 
     # -- the two objects ---------------------------------------------------------------
     object1: ObjectState = field(default_factory=lambda: ObjectState(catalog_id=""))
@@ -433,19 +462,33 @@ class ConjunctionEvent:
             mahalanobis_distance=_as_optional_float(row.get("mdistance"), "mdistance"),
             dilution=_as_optional_float(row.get("dilution"), "dilution"),
             pc=pc,
-            pc_is_floored=cls.compute_pc_is_floored(pc),
+            pc_is_floored=cls.compute_pc_is_floored(pc, SOURCE_PC_FLOOR[source]),
             object1=ObjectState.from_ivv_row(row, 1),
             object2=ObjectState.from_ivv_row(row, 2),
         )
 
+    @property
+    def pc_floor(self) -> Optional[float]:
+        """The reporting floor for this record's source, or ``None`` if it has none.
+
+        Sources clamp at different values -- TraCSS at Pc 1e-10, Kelvins at log10(Pc)
+        = -30 -- so the floor must be resolved per source, never assumed.
+        """
+        return SOURCE_PC_FLOOR.get(self.source)
+
     @staticmethod
-    def compute_pc_is_floored(pc: Optional[float]) -> bool:
-        """Whether ``pc`` is censored at the reporting floor.
+    def compute_pc_is_floored(
+        pc: Optional[float], floor: Optional[float] = PC_FLOOR
+    ) -> bool:
+        """Whether ``pc`` is censored at ``floor``.
 
         Uses ``<=`` rather than ``==`` so that any value at or below the floor is
-        treated as censored; nothing below it can be a real measurement.
+        treated as censored; nothing below it can be a real measurement. ``floor`` of
+        ``None`` means the source publishes no floor, so nothing is censored.
         """
-        return pc is not None and pc <= PC_FLOOR
+        if pc is None or floor is None:
+            return False
+        return pc <= floor
 
     # -- serialisation -----------------------------------------------------------------
 
@@ -461,7 +504,7 @@ class ConjunctionEvent:
             "conj_id": self.conj_id,
             "source": self.source.value,
             "provenance": self.provenance,
-            "tca": self.tca.isoformat(),
+            "tca": None if self.tca is None else self.tca.isoformat(),
             "jdate": self.jdate,
             "miss_distance_km": self.miss_distance_km,
             "relative_speed_kms": self.relative_speed_kms,
@@ -469,6 +512,7 @@ class ConjunctionEvent:
             "dilution": self.dilution,
             "pc": self.pc,
             "pc_is_floored": self.pc_is_floored,
+            "time_to_tca_days": self.time_to_tca_days,
             "object1": self.object1.to_dict(),
             "object2": self.object2.to_dict(),
         }
@@ -476,7 +520,8 @@ class ConjunctionEvent:
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> "ConjunctionEvent":
         """Inverse of :meth:`to_dict`."""
-        tca = _parse_epoch_utc(_require(payload, "tca"), "tca")
+        raw_tca = payload.get("tca")
+        tca = None if raw_tca is None else _parse_epoch_utc(raw_tca, "tca")
         return cls(
             event_id=str(_require(payload, "event_id")),
             run_id=int(_require(payload, "run_id")),
@@ -493,6 +538,7 @@ class ConjunctionEvent:
             dilution=payload.get("dilution"),
             pc=payload.get("pc"),
             pc_is_floored=bool(_require(payload, "pc_is_floored")),
+            time_to_tca_days=payload.get("time_to_tca_days"),
             object1=ObjectState.from_dict(_require(payload, "object1")),
             object2=ObjectState.from_dict(_require(payload, "object2")),
         )
@@ -510,10 +556,20 @@ class ConjunctionEvent:
         if not self.event_id:
             raise SchemaValidationError("event_id is empty")
 
-        if self.tca.tzinfo is None or self.tca.utcoffset() is None:
+        if self.tca is None:
+            # An anonymised source has no absolute epoch, but a record with neither an
+            # absolute nor a relative time has no temporal anchor at all and is useless.
+            if self.time_to_tca_days is None:
+                raise SchemaValidationError(
+                    "a record must carry either tca or time_to_tca_days; both are absent"
+                )
+        elif self.tca.tzinfo is None or self.tca.utcoffset() is None:
             raise SchemaValidationError(
                 "tca must be timezone-aware; got a naive datetime"
             )
+
+        if self.time_to_tca_days is not None and not math.isfinite(self.time_to_tca_days):
+            raise SchemaValidationError("time_to_tca_days is not finite")
 
         if not math.isfinite(self.miss_distance_km):
             raise SchemaValidationError("miss_distance_km is not finite")
@@ -528,10 +584,12 @@ class ConjunctionEvent:
             if not 0.0 <= self.pc <= 1.0:
                 raise SchemaValidationError(f"pc must lie in [0, 1], got {self.pc!r}")
 
-        if self.pc_is_floored != self.compute_pc_is_floored(self.pc):
+        expected_floor = self.pc_floor
+        if self.pc_is_floored != self.compute_pc_is_floored(self.pc, expected_floor):
             raise SchemaValidationError(
                 f"pc_is_floored={self.pc_is_floored} contradicts pc={self.pc!r} "
-                f"(floor {PC_FLOOR:g})"
+                f"(floor for {self.source.value}: "
+                f"{'none' if expected_floor is None else format(expected_floor, 'g')})"
             )
 
         if self.relative_speed_kms is not None and not math.isfinite(
@@ -553,7 +611,8 @@ class ConjunctionEvent:
 
     def __repr__(self) -> str:  # keep covariance arrays out of the representation
         return (
-            f"ConjunctionEvent(event_id={self.event_id!r}, tca={self.tca.isoformat()}, "
+            f"ConjunctionEvent(event_id={self.event_id!r}, "
+            f"tca={'none' if self.tca is None else self.tca.isoformat()}, "
             f"miss_distance_km={self.miss_distance_km:.6g}, pc={self.pc!r}, "
             f"pc_is_floored={self.pc_is_floored}, "
             f"objects=({self.object1.catalog_id}, {self.object2.catalog_id}))"
