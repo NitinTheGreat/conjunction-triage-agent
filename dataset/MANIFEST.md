@@ -63,6 +63,39 @@ Phase 1; `ObjectState.hbr_m` is left `None` and populated in Phase 2.
 - Covariances are supplied as six upper-triangular elements per object
   (`c*_11, c*_12, c*_13, c*_22, c*_23, c*_33`) in the local **UVW** frame.
 
+---
+
+## ESA Kelvins Collision Avoidance Challenge (added Phase 4)
+
+Downloaded 2026-08-19 from **Zenodo record 4463683**.
+
+- **Source:** https://zenodo.org/records/4463683
+- **DOI:** `10.5281/zenodo.4463683`
+- **Licence:** **CC-BY-4.0** (attribution required — this is *not* CC0 like the TraCSS files)
+- **Citation:** Uriot, T.; Izzo, D.; Martinez-Heras, J.; Letizia, F.; Siminski, J.; Merz, K.
+  *Collision Avoidance Challenge dataset*, ESA, 2021.
+- **Contents:** Conjunction Data Messages received by ESA 2015–2019, **anonymised**
+  (no absolute epochs, no real object identifiers).
+
+Files live in `dataset/kelvins/`. The archive's MD5 was verified against the Zenodo record
+at download time; SHA-256 below is computed locally.
+
+| File | Bytes | SHA-256 |
+|---|---:|---|
+| `Collision Avoidance Challenge - Dataset.zip` | 221,128,642 | `df1500146705305006ea506eeccc97f5c2e9593928d6650c503c4f5b5529d0bb` |
+| `raw_data_2015-2019.gz` | 118,399,589 | `9c30d0bcc42a66818ee0958482694ca7fc1168682b02d3f1e26220198e89c06b` |
+| `raw_data_2015-2019.txt` | 8,020 | `2f9290b4686de09a533ce64ab6f479987120c830030d088bfb736543a92b1f43` |
+| `test_data.csv` | 35,303,060 | `fc4110e979e7d569cb8aa819d450d29311e799115b2fe5b519b8a18eafa37323` |
+| `test_data_private.csv` | 3,042,300 | `f623dd155544edad62ad606b821104488403a88f259fd6779eece454202641c9` |
+| `train_data.csv` | 233,600,296 | `ba47ce80580d5d6ff523ddc1d724901dbdfb3a5afdc5e755f0ca2bcefe6e4eb6` |
+| `train_data.zip` | 87,718,091 | `68362fe5629cc80f17291f2d73f733bf4e922675e37b91a8ee79afadb46f3edc` |
+
+`train_data.csv` is extracted from `train_data.zip`; `raw_data_2015-2019.gz` is the full
+2015–2019 CDM set from which train/test were drawn. `raw_data_2015-2019.txt` is the
+official column dictionary.
+
+**Nothing in this phase modifies the TraCSS files above.**
+
 ## Verifying integrity
 
 ```bash
