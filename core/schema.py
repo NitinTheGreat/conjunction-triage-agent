@@ -617,3 +617,256 @@ class ConjunctionEvent:
             f"pc_is_floored={self.pc_is_floored}, "
             f"objects=({self.object1.catalog_id}, {self.object2.catalog_id}))"
         )
+
+
+# --------------------------------------------------------------------------------------
+# Kelvins: a CDM is one ConjunctionEvent; an *event* is an ordered series of them
+# --------------------------------------------------------------------------------------
+
+#: Kelvins covariance is published as RTN standard deviations plus correlation
+#: coefficients, in metres. TraCSS publishes UVW covariance elements in km^2. UVW and RTN
+#: are the same frame (radial / in-track / cross-track), so the two are directly
+#: comparable once Kelvins metres are converted to kilometres.
+_METRES_SQUARED_PER_KM_SQUARED = 1.0e6
+
+
+def _covariance_from_sigmas(
+    sigma_r: float,
+    sigma_t: float,
+    sigma_n: float,
+    rho_tr: float,
+    rho_nr: float,
+    rho_nt: float,
+) -> np.ndarray:
+    """Build a 3x3 RTN position covariance in km^2 from metre sigmas and correlations.
+
+    Kelvins gives standard deviations and correlation coefficients rather than covariance
+    elements, so each off-diagonal is ``rho * sigma_i * sigma_j``. The result is symmetric
+    by construction. Sigmas are metres, so the matrix is divided into km^2.
+    """
+    covariance = np.array(
+        [
+            [sigma_r * sigma_r, rho_tr * sigma_r * sigma_t, rho_nr * sigma_r * sigma_n],
+            [rho_tr * sigma_r * sigma_t, sigma_t * sigma_t, rho_nt * sigma_t * sigma_n],
+            [rho_nr * sigma_r * sigma_n, rho_nt * sigma_t * sigma_n, sigma_n * sigma_n],
+        ],
+        dtype=np.float64,
+    )
+    return covariance / _METRES_SQUARED_PER_KM_SQUARED
+
+
+def _kelvins_object_state(row: Mapping[str, Any], prefix: str) -> ObjectState:
+    """Build one object's state from a Kelvins CDM row.
+
+    ``prefix`` is ``"t"`` (target — the ESA satellite) or ``"c"`` (chaser — the debris).
+    Kelvins publishes no absolute positions, only the *relative* position of the pair, so
+    ``position_km`` and ``velocity_kms`` stay ``None``. The covariance is present and is
+    what later phases actually need.
+    """
+    if prefix not in ("t", "c"):
+        raise SchemaValidationError(f"object prefix must be 't' or 'c', got {prefix!r}")
+
+    sigmas = [
+        _as_optional_float(row.get(f"{prefix}_sigma_{axis}"), f"{prefix}_sigma_{axis}")
+        for axis in ("r", "t", "n")
+    ]
+    correlations = [
+        _as_optional_float(row.get(f"{prefix}_{name}"), f"{prefix}_{name}")
+        for name in ("ct_r", "cn_r", "cn_t")
+    ]
+
+    covariance = None
+    if all(v is not None for v in sigmas) and all(v is not None for v in correlations):
+        covariance = _covariance_from_sigmas(*sigmas, *correlations)
+
+    # `x_span` is the size the risk computation itself assumed, in metres, and is the
+    # closest Kelvins analogue of a hard-body radius. It is a *diameter-like* span rather
+    # than a radius, so it is carried as-is and named honestly rather than halved.
+    span = _as_optional_float(row.get(f"{prefix}_span"), f"{prefix}_span")
+
+    object_type = row.get("c_object_type") if prefix == "c" else "ESA_SATELLITE"
+
+    return ObjectState(
+        catalog_id=f"{prefix.upper()}:{object_type}" if object_type else prefix.upper(),
+        position_km=None,      # Kelvins is anonymised; no absolute state is published
+        velocity_kms=None,
+        local_position_km=None,
+        covariance=covariance,
+        hbr_m=span,
+        met_criteria=None,
+        source_filename=None,
+    )
+
+
+def conjunction_event_from_kelvins_row(
+    row: Mapping[str, Any],
+    provenance: str,
+    event_key: str,
+) -> "ConjunctionEvent":
+    """Build a :class:`ConjunctionEvent` from one Kelvins CDM row.
+
+    Kelvins ``risk`` is **log10(Pc)**, clamped at -30. It is converted to a linear
+    probability so that ``pc`` means the same thing across every source, and flagged
+    against the Kelvins floor rather than the TraCSS one.
+
+    Units are converted to the schema's: miss distance metres to km, relative speed
+    m/s to km/s.
+    """
+    risk = _as_optional_float(_require(row, "risk"), "risk")
+    if risk is None:
+        pc = None
+    else:
+        pc = 10.0 ** risk
+
+    time_to_tca = _as_float(_require(row, "time_to_tca"), "time_to_tca")
+    miss_distance_m = _as_float(_require(row, "miss_distance"), "miss_distance")
+
+    return ConjunctionEvent(
+        event_id=f"{event_key}@{time_to_tca:.9f}",
+        run_id=0,                       # Kelvins publishes no run identifier
+        conj_id=event_key,
+        source=EventSource.KELVINS,
+        provenance=provenance,
+        tca=None,                       # anonymised: no absolute epoch exists
+        jdate=None,
+        miss_distance_km=miss_distance_m / 1000.0,
+        relative_speed_kms=(
+            None
+            if _as_optional_float(row.get("relative_speed"), "relative_speed") is None
+            else _as_float(row["relative_speed"], "relative_speed") / 1000.0
+        ),
+        mahalanobis_distance=_as_optional_float(
+            row.get("mahalanobis_distance"), "mahalanobis_distance"
+        ),
+        dilution=None,                  # not published; see ConjunctionEventSeries
+        pc=pc,
+        pc_is_floored=ConjunctionEvent.compute_pc_is_floored(pc, KELVINS_PC_FLOOR),
+        time_to_tca_days=time_to_tca,
+        object1=_kelvins_object_state(row, "t"),
+        object2=_kelvins_object_state(row, "c"),
+    )
+
+
+@dataclass(eq=False)
+class ConjunctionEventSeries:
+    """An ordered sequence of CDMs describing one conjunction as it is refined.
+
+    TraCSS rows are isolated snapshots; Kelvins events are **time series**, so a series
+    is a distinct container rather than something forced into a single
+    :class:`ConjunctionEvent`. The meaning of ``ConjunctionEvent`` is unchanged: it is
+    still exactly one message about one encounter.
+
+    ``events`` is ordered by ``time_to_tca_days`` **descending** — earliest first, closest
+    to TCA last — which is the order in which an operator would have received them.
+    """
+
+    #: Globally unique key. Kelvins ``event_id`` restarts at 0 in each split, so the
+    #: split name is folded in; using the raw id as a key would silently merge
+    #: unrelated train and test events.
+    series_id: str
+    source: EventSource
+    provenance: str
+    #: Which split this series came from, e.g. ``"train"`` or ``"test"``.
+    split: Optional[str] = None
+    events: list[ConjunctionEvent] = field(default_factory=list)
+    #: The label: log10(Pc) of the final CDM. ``None`` when withheld (the public test set).
+    final_risk_log10: Optional[float] = None
+    #: True when the label sits at the reporting floor and is therefore a bound.
+    final_risk_is_floored: bool = False
+    #: Mission identifier, where the source publishes one.
+    mission_id: Optional[str] = None
+
+    # -- derived -----------------------------------------------------------------------
+
+    @property
+    def cdm_count(self) -> int:
+        return len(self.events)
+
+    @property
+    def final_event(self) -> Optional[ConjunctionEvent]:
+        """The CDM closest to TCA, i.e. the last one received."""
+        return self.events[-1] if self.events else None
+
+    @property
+    def final_pc(self) -> Optional[float]:
+        if self.final_risk_log10 is None:
+            return None
+        return 10.0 ** self.final_risk_log10
+
+    # -- validation --------------------------------------------------------------------
+
+    def validate(self) -> None:
+        """Raise :class:`SchemaValidationError` if the series is malformed.
+
+        Checks that it is non-empty, that every member validates, that they share the
+        series' source, and above all that they are **ordered** — an out-of-order series
+        would silently corrupt any trend computed over it.
+        """
+        if not self.series_id:
+            raise SchemaValidationError("series_id is empty")
+        if not self.events:
+            raise SchemaValidationError(f"{self.series_id}: series has no CDMs")
+
+        previous: Optional[float] = None
+        for index, event in enumerate(self.events):
+            event.validate()
+            if event.source is not self.source:
+                raise SchemaValidationError(
+                    f"{self.series_id}: CDM {index} has source {event.source.value}, "
+                    f"series is {self.source.value}"
+                )
+            if event.time_to_tca_days is None:
+                raise SchemaValidationError(
+                    f"{self.series_id}: CDM {index} has no time_to_tca_days, so the "
+                    "series cannot be ordered"
+                )
+            if previous is not None and event.time_to_tca_days > previous:
+                raise SchemaValidationError(
+                    f"{self.series_id}: CDMs are not ordered by descending "
+                    f"time_to_tca_days ({previous} then {event.time_to_tca_days})"
+                )
+            previous = event.time_to_tca_days
+
+        if self.final_risk_log10 is not None and not math.isfinite(self.final_risk_log10):
+            raise SchemaValidationError(f"{self.series_id}: final_risk_log10 is not finite")
+
+    # -- serialisation -----------------------------------------------------------------
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "series_id": self.series_id,
+            "source": self.source.value,
+            "provenance": self.provenance,
+            "split": self.split,
+            "final_risk_log10": self.final_risk_log10,
+            "final_risk_is_floored": self.final_risk_is_floored,
+            "mission_id": self.mission_id,
+            "events": [event.to_dict() for event in self.events],
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "ConjunctionEventSeries":
+        return cls(
+            series_id=str(_require(payload, "series_id")),
+            source=EventSource(_require(payload, "source")),
+            provenance=str(_require(payload, "provenance")),
+            split=payload.get("split"),
+            events=[
+                ConjunctionEvent.from_dict(e) for e in payload.get("events", [])
+            ],
+            final_risk_log10=payload.get("final_risk_log10"),
+            final_risk_is_floored=bool(payload.get("final_risk_is_floored", False)),
+            mission_id=payload.get("mission_id"),
+        )
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, ConjunctionEventSeries):
+            return NotImplemented
+        return self.to_dict() == other.to_dict() and self.events == other.events
+
+    def __repr__(self) -> str:
+        return (
+            f"ConjunctionEventSeries(series_id={self.series_id!r}, "
+            f"cdms={self.cdm_count}, final_risk_log10={self.final_risk_log10!r}, "
+            f"floored={self.final_risk_is_floored})"
+        )
