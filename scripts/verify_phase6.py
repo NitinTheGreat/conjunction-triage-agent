@@ -29,7 +29,8 @@ from agent.triage_agent import PROMPT_VERSION, SCOPE_THRESHOLD, in_scope  # noqa
 from core.config import settings  # noqa: E402
 from verify_phase1 import CheckFailure  # noqa: E402
 
-PREREGISTRATION = Path("docs/PHASE6_PREREGISTRATION.md")
+#: Git needs forward slashes in pathspecs even on Windows, so this stays a string.
+PREREGISTRATION = "docs/PHASE6_PREREGISTRATION.md"
 
 #: Every script that must never read the test split.
 TRAINING_CODE = (
@@ -58,21 +59,21 @@ def _predictions() -> pd.DataFrame:
 
 def check_preregistration_precedes_results() -> str:
     """The pre-registration is committed and predates the first agent-prediction commit."""
-    path = REPO_ROOT / PREREGISTRATION
+    path = REPO_ROOT / Path(PREREGISTRATION)
     if not path.is_file():
         raise CheckFailure(f"{PREREGISTRATION} does not exist")
 
-    tracked = _git("ls-files", str(PREREGISTRATION))
+    tracked = _git("ls-files", PREREGISTRATION)
     if not tracked:
         raise CheckFailure(f"{PREREGISTRATION} is not committed")
 
     # It must be unmodified since its commit: an edited protocol is not a protocol.
-    if _git("status", "--porcelain", str(PREREGISTRATION)):
+    if _git("status", "--porcelain", PREREGISTRATION):
         raise CheckFailure(
             f"{PREREGISTRATION} has uncommitted modifications; it is meant to be immutable"
         )
 
-    prereg_commit = _git("log", "--format=%H", "--diff-filter=A", "--", str(PREREGISTRATION))
+    prereg_commit = _git("log", "--format=%H", "--diff-filter=A", "--", PREREGISTRATION)
     if not prereg_commit:
         raise CheckFailure("could not find the commit that added the pre-registration")
     prereg_commit = prereg_commit.splitlines()[-1]
