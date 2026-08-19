@@ -91,6 +91,12 @@ CDM_SCHEMA = pa.schema([
         (f"{label}_c_13", pa.float64()), (f"{label}_c_22", pa.float64()),
         (f"{label}_c_23", pa.float64()), (f"{label}_c_33", pa.float64()),
         (f"{label}_sigma_max_km", pa.float64()),
+        (f"{label}_rcs_estimate_m2", pa.float64()),
+        (f"{label}_cd_area_over_mass", pa.float64()),
+        (f"{label}_h_per_km", pa.float64()),
+        (f"{label}_h_apo_km", pa.float64()),
+        (f"{label}_ecc", pa.float64()),
+        (f"{label}_inc_deg", pa.float64()),
     ]
 ])
 
@@ -323,6 +329,16 @@ def ingest_split(split: str, limit: int | None = None) -> dict[str, Any]:
                     }.items():
                         record[f"{label}_{name}"] = None if cov is None else float(cov[i, j])
                     record[f"{label}_sigma_max_km"] = _sigma_max_km(cov)
+                    # `rcs_estimate` is null for ~32.5% of chasers because the radar
+                    # cross-section of much debris is unknown. Carried as NULL, never
+                    # imputed; core.features adds an explicit missing indicator.
+                    prefix = "t" if label == "target" else "c"
+                    record[f"{label}_rcs_estimate_m2"] = _f(raw.get(f"{prefix}_rcs_estimate"))
+                    record[f"{label}_cd_area_over_mass"] = _f(raw.get(f"{prefix}_cd_area_over_mass"))
+                    record[f"{label}_h_per_km"] = _f(raw.get(f"{prefix}_h_per"))
+                    record[f"{label}_h_apo_km"] = _f(raw.get(f"{prefix}_h_apo"))
+                    record[f"{label}_ecc"] = _f(raw.get(f"{prefix}_ecc"))
+                    record[f"{label}_inc_deg"] = _f(raw.get(f"{prefix}_j2k_inc"))
                 cdm_rows.append(record)
 
             final_event = series.final_event
