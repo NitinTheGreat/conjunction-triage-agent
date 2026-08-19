@@ -283,7 +283,11 @@ def ingest_split(split: str, limit: int | None = None) -> dict[str, Any]:
             series_seen += 1
             any_diluted = False
 
-            for event, raw, line, index in events:
+            # cdm_index is renumbered densely over the CDMs actually stored. Taking it
+            # from the pre-rejection position would leave gaps wherever a CDM was
+            # rejected, so the index would no longer address the stored series.
+            # `source_line` preserves traceability back to the original row.
+            for index, (event, raw, line, _source_index) in enumerate(events):
                 scaling = _f(raw.get("max_risk_scaling"))
                 dilution = derived_dilution(scaling)
                 any_diluted = any_diluted or dilution == 1
