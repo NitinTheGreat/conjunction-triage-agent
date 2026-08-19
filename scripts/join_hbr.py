@@ -19,8 +19,8 @@ Unmatched objects are left ``NULL`` and counted. They are never filled with a de
 a silently substituted HBR would propagate into every later collision-probability
 computation as a plausible-looking wrong number.
 
-Idempotent -- safe to re-run. Operates batch-by-batch; no parquet file is ever fully
-resident in memory. ``dataset/`` is read-only.
+The join runs inside DuckDB, so nothing is materialised in Python. Idempotent: it
+rewrites each file from the source columns every time. ``dataset/`` is read-only.
 
     python scripts/join_hbr.py
 """
@@ -34,12 +34,11 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
-import pyarrow as pa
-import pyarrow.parquet as pq
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from core.config import settings  # noqa: E402
+from core.store import store  # noqa: E402
 
 SCREENING_VOLUMES = "AerospaceIVVDataset_20251009a_Size_ScreeningVolumes.csv"
 
@@ -51,17 +50,10 @@ SPHERICAL_DEFAULT_HBR_M = 0.5
 #: whose tabulated HBR is 0.0825 -- exactly its radius in metres.
 HBR_UNIT = "m"
 
-#: Rows per batch when rewriting parquet.
-BATCH_SIZE = 100_000
-
-ADDED_COLUMNS = [
-    (f"obj{i}_{suffix}", kind)
-    for i in (1, 2)
-    for suffix, kind in (("hbr_catalog_m", pa.float64()), ("hbr_source", pa.string()))
-]
+ADDED_COLUMNS = ("hbr_catalog_m", "hbr_source")
 
 
-def load_hbr_table(path: Path) -> tuple[dict[str, float], dict[str, Any]]:
+def load_hbr_table(path: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
     """Load catalogue -> HBR (metres), collapsing exact duplicate rows.
 
     Raises if a catalogue number carries genuinely conflicting HBR values, rather than
@@ -70,7 +62,11 @@ def load_hbr_table(path: Path) -> tuple[dict[str, float], dict[str, Any]]:
     if not path.is_file():
         raise FileNotFoundError(path)
 
-    frame = pd.read_csv(path, usecols=["catalog_num", "HBR"], dtype={"catalog_num": "int64", "HBR": "float64"})
+    frame = pd.read_csv(
+        path,
+        usecols=["catalog_num", "HBR"],
+        dtype={"catalog_num": "int64", "HBR": "float64"},
+    )
     if frame["HBR"].isna().any():
         raise ValueError(f"{path.name}: HBR column contains nulls")
 
@@ -82,11 +78,10 @@ def load_hbr_table(path: Path) -> tuple[dict[str, float], dict[str, Any]]:
             f"values, e.g. {conflicts.index[:5].tolist()}; refusing to guess"
         )
 
-    deduplicated = frame.drop_duplicates(subset="catalog_num")
-    lookup = {
-        str(int(c)): float(h)
-        for c, h in zip(deduplicated["catalog_num"], deduplicated["HBR"])
-    }
+    deduplicated = frame.drop_duplicates(subset="catalog_num").copy()
+    deduplicated["catalog_id"] = deduplicated["catalog_num"].astype(str)
+    lookup = deduplicated[["catalog_id", "HBR"]].rename(columns={"HBR": "hbr_m"})
+
     stats = {
         "rows": len(frame),
         "unique_catalog_num": len(lookup),
@@ -99,73 +94,98 @@ def load_hbr_table(path: Path) -> tuple[dict[str, float], dict[str, Any]]:
     return lookup, stats
 
 
-def join_file(key: str, lookup: dict[str, float]) -> dict[str, Any]:
+def join_file(key: str, lookup: pd.DataFrame) -> dict[str, Any]:
     """Rewrite one parquet file with HBR columns populated. Returns match statistics."""
-    path = settings.PROCESSED_DIR / f"{key}.parquet"
-    if not path.is_file():
-        raise FileNotFoundError(f"{path}; run scripts/ingest.py first")
-
-    parquet_file = pq.ParquetFile(path)
-    existing = set(parquet_file.schema_arrow.names)
-    schema = parquet_file.schema_arrow
-    for name, kind in ADDED_COLUMNS:
-        if name not in existing:
-            schema = schema.append(pa.field(name, kind))
-
+    path = store.path(key)
     is_spherical = key == "spherical"
-    matched = {1: 0, 2: 0}
-    unmatched = {1: 0, 2: 0}
-    unmatched_ids: set[str] = set()
-    total = 0
 
-    temp = path.with_suffix(".parquet.tmp")
-    writer = pq.ParquetWriter(temp, schema, compression="zstd")
+    connection = store.connect()
     try:
-        for batch in parquet_file.iter_batches(batch_size=BATCH_SIZE):
-            frame = batch.to_pandas()
-            total += len(frame)
+        connection.register("hbr", lookup)
 
-            for index in (1, 2):
-                catalog = frame[f"obj{index}_catalog_id"].astype("string")
-                catalogue_hbr = catalog.map(lookup)
+        base = [
+            c for c in store.columns(key)
+            if not any(c.endswith(f"_{added}") for added in ADDED_COLUMNS)
+        ]
+        # objN_hbr_m is recomputed, so drop the ingested (all-NULL) version too.
+        carried = [c for c in base if c not in ("obj1_hbr_m", "obj2_hbr_m")]
 
-                hit = catalogue_hbr.notna()
-                matched[index] += int(hit.sum())
-                unmatched[index] += int((~hit).sum())
-                unmatched_ids.update(catalog[~hit].dropna().unique().tolist())
+        if is_spherical:
+            # The spherical answer key was produced with a flat 0.5 m HBR.
+            hbr_expressions = [
+                f"{SPHERICAL_DEFAULT_HBR_M} as obj{i}_hbr_m" for i in (1, 2)
+            ] + [
+                f"'spherical_default' as obj{i}_hbr_source" for i in (1, 2)
+            ]
+        else:
+            hbr_expressions = [
+                f"h{i}.hbr_m as obj{i}_hbr_m" for i in (1, 2)
+            ] + [
+                f"case when h{i}.hbr_m is null then 'unmatched' "
+                f"else 'screening_volumes' end as obj{i}_hbr_source"
+                for i in (1, 2)
+            ]
 
-                frame[f"obj{index}_hbr_catalog_m"] = catalogue_hbr.astype("float64")
+        select = ", ".join(
+            [f"e.{c}" for c in carried]
+            + [f"h{i}.hbr_m as obj{i}_hbr_catalog_m" for i in (1, 2)]
+            + hbr_expressions
+        )
+        joined = (
+            f"select {select} from {key} e "
+            "left join hbr h1 on e.obj1_catalog_id = h1.catalog_id "
+            "left join hbr h2 on e.obj2_catalog_id = h2.catalog_id"
+        )
 
-                if is_spherical:
-                    # The spherical answer key was produced with a flat 0.5 m HBR.
-                    frame[f"obj{index}_hbr_m"] = SPHERICAL_DEFAULT_HBR_M
-                    frame[f"obj{index}_hbr_source"] = "spherical_default"
-                else:
-                    frame[f"obj{index}_hbr_m"] = catalogue_hbr.astype("float64")
-                    frame[f"obj{index}_hbr_source"] = pd.Series(
-                        ["screening_volumes"] * len(frame), index=frame.index
-                    ).where(hit, "unmatched")
+        stats = connection.execute(
+            f"""
+            select
+              count(*)                                             as events,
+              count(obj1_hbr_catalog_m)                            as matched_obj1,
+              count(obj2_hbr_catalog_m)                            as matched_obj2,
+              count(*) - count(obj1_hbr_catalog_m)                 as unmatched_obj1,
+              count(*) - count(obj2_hbr_catalog_m)                 as unmatched_obj2
+            from ({joined})
+            """
+        ).fetchone()
 
-            writer.write_table(pa.Table.from_pandas(frame, schema=schema, preserve_index=False))
+        unmatched_ids = connection.execute(
+            f"""
+            select distinct catalog_id from (
+              select obj1_catalog_id as catalog_id, obj1_hbr_catalog_m as hbr from ({joined})
+              union all
+              select obj2_catalog_id, obj2_hbr_catalog_m from ({joined})
+            ) where hbr is null
+            """
+        ).fetchdf()["catalog_id"].tolist()
+
+        # Write via a temp file: duckdb cannot read and overwrite the same parquet.
+        temp = path.with_suffix(".parquet.tmp")
+        location = str(temp).replace("\\", "/").replace("'", "''")
+        connection.execute(
+            f"copy ({joined}) to '{location}' (format parquet, compression zstd)"
+        )
     finally:
-        writer.close()
+        connection.close()
+
     temp.replace(path)
 
-    object_slots = 2 * total
-    if matched[1] + matched[2] + unmatched[1] + unmatched[2] != object_slots:
-        raise RuntimeError(f"{key}: match/miss counts do not sum to {object_slots}")
+    events, matched1, matched2, unmatched1, unmatched2 = (int(v) for v in stats)
+    slots = 2 * events
+    if matched1 + matched2 + unmatched1 + unmatched2 != slots:
+        raise RuntimeError(f"{key}: match/miss counts do not sum to {slots}")
 
     return {
         "source": key,
-        "events": total,
-        "object_slots": object_slots,
-        "matched": matched[1] + matched[2],
-        "unmatched": unmatched[1] + unmatched[2],
-        "matched_pct": round(100 * (matched[1] + matched[2]) / max(object_slots, 1), 4),
-        "matched_obj1": matched[1],
-        "matched_obj2": matched[2],
-        "unmatched_obj1": unmatched[1],
-        "unmatched_obj2": unmatched[2],
+        "events": events,
+        "object_slots": slots,
+        "matched": matched1 + matched2,
+        "unmatched": unmatched1 + unmatched2,
+        "matched_pct": round(100 * (matched1 + matched2) / max(slots, 1), 4),
+        "matched_obj1": matched1,
+        "matched_obj2": matched2,
+        "unmatched_obj1": unmatched1,
+        "unmatched_obj2": unmatched2,
         "distinct_unmatched_catalog_ids": len(unmatched_ids),
         "unmatched_examples": sorted(unmatched_ids)[:15],
         "hbr_applied": (
@@ -178,7 +198,7 @@ def join_file(key: str, lookup: dict[str, float]) -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", choices=["spherical", "sfsh"])
+    parser.add_argument("--source", choices=list(store.available()))
     args = parser.parse_args()
 
     lookup, stats = load_hbr_table(settings.DATASET_DIR / SCREENING_VOLUMES)
@@ -189,7 +209,7 @@ def main() -> int:
         f"HBR {stats['hbr_min']}-{stats['hbr_max']} {HBR_UNIT}"
     )
 
-    keys = [args.source] if args.source else ["spherical", "sfsh"]
+    keys = [args.source] if args.source else store.available()
     summaries = [join_file(key, lookup) for key in keys]
     for summary in summaries:
         print(
