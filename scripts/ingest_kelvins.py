@@ -97,6 +97,13 @@ CDM_SCHEMA = pa.schema([
         (f"{label}_h_apo_km", pa.float64()),
         (f"{label}_ecc", pa.float64()),
         (f"{label}_inc_deg", pa.float64()),
+        # Orbit-determination quality: how well this object's orbit is actually known.
+        (f"{label}_obs_used", pa.float64()),
+        (f"{label}_obs_available", pa.float64()),
+        (f"{label}_residuals_accepted", pa.float64()),
+        (f"{label}_weighted_rms", pa.float64()),
+        (f"{label}_actual_od_span", pa.float64()),
+        (f"{label}_recommended_od_span", pa.float64()),
     ]
 ])
 
@@ -354,6 +361,10 @@ def ingest_split(split: str, limit: int | None = None) -> dict[str, Any]:
                     record[f"{label}_h_apo_km"] = _f(_need(raw, f"{prefix}_h_apo"))
                     record[f"{label}_ecc"] = _f(_need(raw, f"{prefix}_j2k_ecc"))
                     record[f"{label}_inc_deg"] = _f(_need(raw, f"{prefix}_j2k_inc"))
+                    for suffix in ("obs_used", "obs_available", "residuals_accepted",
+                                   "weighted_rms", "actual_od_span",
+                                   "recommended_od_span"):
+                        record[f"{label}_{suffix}"] = _f(_need(raw, f"{prefix}_{suffix}"))
                 cdm_rows.append(record)
 
             final_event = series.final_event
