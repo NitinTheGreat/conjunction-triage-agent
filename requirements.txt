@@ -15,6 +15,9 @@ rich==15.0.0
 pyarrow==25.0.1         # parquet read/write (scripts/ingest.py)
 pypdf==6.16.1           # Users Guide text extraction (scripts/read_guide.py)
 psutil==7.2.2           # peak-memory measurement during chunked ingestion
+duckdb==1.5.5           # parquet I/O and aggregation (core/store.py); pyarrow's
+                        # _parquet DLL is blocked by machine policy on this host,
+                        # duckdb has its own parquet engine and reads the same files
 
 # --- test harness ---
 pytest==9.1.1
