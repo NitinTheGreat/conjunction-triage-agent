@@ -19,6 +19,7 @@ from typing import Final, Optional
 from dotenv import load_dotenv
 
 __all__ = [
+    "LLM_PROVIDERS",
     "ConfigError",
     "MissingCredentialError",
     "Settings",
@@ -44,6 +45,24 @@ _PLACEHOLDER_MARKERS: Final[tuple[str, ...]] = (
     "<",
     ">",
 )
+
+
+#: Supported LLM backends. Adding one means adding an entry here and a client in
+#: ``agent/llm.py``; nothing else in the project needs to know which provider is in use.
+LLM_PROVIDERS: Final[dict[str, dict[str, str]]] = {
+    "anthropic": {
+        "env_var": "ANTHROPIC_API_KEY",
+        "default_model": "claude-haiku-4-5-20251001",
+    },
+    "gemini": {
+        "env_var": "GEMINI_API_KEY",
+        "default_model": "gemini-2.5-flash",
+    },
+    "openai": {
+        "env_var": "OPENAI_API_KEY",
+        "default_model": "gpt-4o-mini",
+    },
+}
 
 
 class ConfigError(RuntimeError):
@@ -146,6 +165,40 @@ class Settings:
         """Whether :meth:`require` would succeed for ``variable``."""
         return self.get(variable) is not None
 
+    # -- LLM provider ------------------------------------------------------------------
+
+    @property
+    def LLM_PROVIDER(self) -> str:
+        """Which backend the agent uses: ``anthropic``, ``gemini`` or ``openai``.
+
+        Defaults to ``anthropic``. Unknown values raise rather than silently falling back,
+        because a typo here would otherwise send every request to the wrong provider.
+        """
+        value = (self.get("LLM_PROVIDER") or "anthropic").strip().lower()
+        if value not in LLM_PROVIDERS:
+            raise ConfigError(
+                f"LLM_PROVIDER={value!r} is not supported; expected one of "
+                f"{sorted(LLM_PROVIDERS)}"
+            )
+        return value
+
+    @property
+    def LLM_MODEL(self) -> str:
+        """Model id for the selected provider, or that provider's default."""
+        return self.get("LLM_MODEL") or LLM_PROVIDERS[self.LLM_PROVIDER]["default_model"]
+
+    def llm_api_key(self, provider: Optional[str] = None) -> str:
+        """The API key for the selected provider. Raises if unusable; never logged."""
+        provider = provider or self.LLM_PROVIDER
+        if provider not in LLM_PROVIDERS:
+            raise ConfigError(f"unknown provider {provider!r}")
+        return self.require(LLM_PROVIDERS[provider]["env_var"])
+
+    def llm_key_available(self, provider: Optional[str] = None) -> bool:
+        """Whether :meth:`llm_api_key` would succeed. Never logs the value."""
+        provider = provider or self.LLM_PROVIDER
+        return self.is_available(LLM_PROVIDERS[provider]["env_var"])
+
     @property
     def ANTHROPIC_API_KEY(self) -> str:
         """Anthropic API key. Raises if unusable. Needed from Phase 7 (agent) onward."""
@@ -167,6 +220,8 @@ class Settings:
             name: ("set" if self.is_available(name) else "missing-or-placeholder")
             for name in (
                 "ANTHROPIC_API_KEY",
+                "GEMINI_API_KEY",
+                "OPENAI_API_KEY",
                 "SPACETRACK_EMAIL",
                 "SPACETRACK_PASSWORD",
             )

@@ -19,5 +19,15 @@ duckdb==1.5.5           # parquet I/O and aggregation (core/store.py); pyarrow's
                         # _parquet DLL is blocked by machine policy on this host,
                         # duckdb has its own parquet engine and reads the same files
 
+# --- Phase 6: the reasoning agent (provider-agnostic) ---
+langgraph==1.2.6         # agent graph
+langchain-anthropic==1.4.7
+anthropic==0.111.0       # LLM_PROVIDER=anthropic
+google-genai==2.18.1     # LLM_PROVIDER=gemini
+openai==3.3.1            # LLM_PROVIDER=openai
+pydantic==2.13.4         # agent output schema validation
+scikit-learn==1.9.0      # baseline arms (scripts/run_baselines.py)
+scipy==1.17.1            # Wilcoxon signed-rank for the paired comparison
+
 # --- test harness ---
 pytest==9.1.1
