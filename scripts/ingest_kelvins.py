@@ -25,7 +25,7 @@ import json
 import sys
 import time
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any, Iterator, Mapping
 
 import duckdb
 import numpy as np
@@ -126,6 +126,21 @@ def sql_path(name: str) -> str:
     if not path.is_file():
         raise FileNotFoundError(f"{path}; run scripts/fetch_kelvins.py first")
     return str(path).replace("\\", "/").replace("'", "''")
+
+
+def _need(row: Mapping[str, Any], column: str) -> Any:
+    """Fetch a source column, raising if it is absent.
+
+    A plain ``.get()`` here silently yields None for a misspelt column name, which then
+    becomes an all-NaN feature that a model quietly ignores. That happened once already
+    (`t_ecc` is really `t_j2k_ecc`), so absence is now an error.
+    """
+    if column not in row:
+        raise KeyError(
+            f"source column {column!r} not present; available names include "
+            f"{sorted(k for k in row if k.startswith(column[:2]))[:8]}"
+        )
+    return row[column]
 
 
 def _f(value: Any) -> float | None:
@@ -333,12 +348,12 @@ def ingest_split(split: str, limit: int | None = None) -> dict[str, Any]:
                     # cross-section of much debris is unknown. Carried as NULL, never
                     # imputed; core.features adds an explicit missing indicator.
                     prefix = "t" if label == "target" else "c"
-                    record[f"{label}_rcs_estimate_m2"] = _f(raw.get(f"{prefix}_rcs_estimate"))
-                    record[f"{label}_cd_area_over_mass"] = _f(raw.get(f"{prefix}_cd_area_over_mass"))
-                    record[f"{label}_h_per_km"] = _f(raw.get(f"{prefix}_h_per"))
-                    record[f"{label}_h_apo_km"] = _f(raw.get(f"{prefix}_h_apo"))
-                    record[f"{label}_ecc"] = _f(raw.get(f"{prefix}_ecc"))
-                    record[f"{label}_inc_deg"] = _f(raw.get(f"{prefix}_j2k_inc"))
+                    record[f"{label}_rcs_estimate_m2"] = _f(_need(raw, f"{prefix}_rcs_estimate"))
+                    record[f"{label}_cd_area_over_mass"] = _f(_need(raw, f"{prefix}_cd_area_over_mass"))
+                    record[f"{label}_h_per_km"] = _f(_need(raw, f"{prefix}_h_per"))
+                    record[f"{label}_h_apo_km"] = _f(_need(raw, f"{prefix}_h_apo"))
+                    record[f"{label}_ecc"] = _f(_need(raw, f"{prefix}_j2k_ecc"))
+                    record[f"{label}_inc_deg"] = _f(_need(raw, f"{prefix}_j2k_inc"))
                 cdm_rows.append(record)
 
             final_event = series.final_event
