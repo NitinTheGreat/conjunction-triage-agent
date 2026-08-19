@@ -276,6 +276,12 @@ def main() -> int:
     parser.add_argument("--validation-fraction", type=float,
                         default=DEFAULT_VALIDATION_FRACTION)
     parser.add_argument("--base-seed", type=int, default=20260819)
+    parser.add_argument(
+        "--only", nargs="*", default=None,
+        help="restrict to these baselines (the cheap arms allow many more seeds, which "
+             "is how the split-induced noise floor is measured)",
+    )
+    parser.add_argument("--out", default="baseline_results.json")
     args = parser.parse_args()
 
     started = time.perf_counter()
@@ -288,8 +294,15 @@ def main() -> int:
         flush=True,
     )
 
+    selected = (
+        {k: v for k, v in BASELINES.items() if k in set(args.only)}
+        if args.only else dict(BASELINES)
+    )
+    if not selected:
+        raise SystemExit(f"no baselines matched {args.only}; known: {sorted(BASELINES)}")
+
     seeds = [args.base_seed + i for i in range(args.seeds)]
-    per_seed: dict[str, list[dict[str, Any]]] = {name: [] for name in BASELINES}
+    per_seed: dict[str, list[dict[str, Any]]] = {name: [] for name in selected}
     split_sizes = []
     predictions_store: dict[str, np.ndarray] = {}
     last_validation: pd.DataFrame | None = None
@@ -304,7 +317,7 @@ def main() -> int:
         })
         truth = validation["final_risk"].to_numpy(dtype=np.float64)
 
-        for name, factory in BASELINES.items():
+        for name, factory in selected.items():
             predictions = factory(seed)(fit, validation)
             result = evaluate(name, truth, predictions)
             per_seed[name].append(result.as_dict())
@@ -381,11 +394,11 @@ def main() -> int:
         "peak_memory_mb": round(_peak_memory_mb(), 1),
     }
 
-    destination = settings.PROCESSED_DIR / "baseline_results.json"
+    destination = settings.PROCESSED_DIR / args.out
     destination.write_text(json.dumps(report, indent=2), encoding="utf-8")
 
     # keep the last split's predictions for the error analysis
-    if last_validation is not None:
+    if last_validation is not None and args.out == "baseline_results.json":
         frame = last_validation[[
             "series_id", "final_risk", "is_high_risk", "final_risk_is_floored",
             "n_cdms_input", "has_trend", "any_diluted", "latest_risk", "slope_risk",
