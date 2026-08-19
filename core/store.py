@@ -60,8 +60,16 @@ class ParquetStore:
     # -- querying ----------------------------------------------------------------------
 
     def connect(self) -> duckdb.DuckDBPyConnection:
-        """A connection with each available source registered as a view."""
+        """A connection with each available source registered as a view.
+
+        The session timezone is pinned to UTC. DuckDB otherwise renders
+        ``timestamp with time zone`` in the machine's local zone -- on this host that
+        silently turned a stored 16:15:45 UTC into 21:45:45 +0530, which formats to a
+        wall-clock string that *looks* like UTC but is 5.5 hours off. Every ``tca`` in
+        the benchmark is UTC and must stay that way.
+        """
         connection = duckdb.connect()
+        connection.execute("set TimeZone = 'UTC'")
         for source in SOURCES:
             try:
                 location = self._sql_path(source)
