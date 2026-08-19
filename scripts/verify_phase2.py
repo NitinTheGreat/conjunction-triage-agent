@@ -19,13 +19,13 @@ from typing import Callable
 
 import numpy as np
 import pandas as pd
-import pyarrow.parquet as pq
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from core.config import settings  # noqa: E402
+from core.store import store  # noqa: E402
 from core.schema import (  # noqa: E402
     PC_FLOOR,
     ConjunctionEvent,
@@ -45,11 +45,12 @@ ROUND_TRIP_SAMPLE = 1000
 COVARIANCE_ELEMENTS = ("11", "12", "13", "22", "23", "33")
 
 
-def _parquet(key: str) -> Path:
-    path = settings.PROCESSED_DIR / f"{key}.parquet"
-    if not path.is_file():
-        raise CheckFailure(f"{path.name} missing; run scripts/ingest.py")
-    return path
+def _rows(key: str) -> int:
+    """Row count of one ingested source."""
+    try:
+        return store.count(key)
+    except Exception as exc:
+        raise CheckFailure(f"{key}: {exc}") from exc
 
 
 def _reject_count(key: str) -> int:
@@ -65,7 +66,7 @@ def check_row_counts() -> str:
     """Parquet row counts equal source CSV data rows minus rejects."""
     parts = []
     for key, (_, expected_rows) in SOURCES.items():
-        rows = pq.ParquetFile(_parquet(key)).metadata.num_rows
+        rows = _rows(key)
         rejects = _reject_count(key)
         if rows == 0:
             raise CheckFailure(f"{key}: parquet has zero rows")
@@ -84,22 +85,14 @@ def check_random_row_matches_csv() -> str:
     rng = np.random.default_rng(SEED)
     checked = 0
     for key, (filename, _) in SOURCES.items():
-        table = pq.ParquetFile(_parquet(key))
-        total = table.metadata.num_rows
+        total = _rows(key)
         target = int(rng.integers(0, total))
-
-        # Walk batches to the target row without materialising the file.
-        offset = 0
-        row = None
-        for batch in table.iter_batches(batch_size=50_000):
-            if offset + batch.num_rows > target:
-                row = batch.slice(target - offset, 1).to_pylist()[0]
-                break
-            offset += batch.num_rows
-        if row is None:
+        frame = store.query(f"select * from {key} limit 1 offset {target}")
+        if frame.empty:
             raise CheckFailure(f"{key}: could not reach row {target}")
+        row = frame.iloc[0].to_dict()
 
-        line = row["source_line"]
+        line = int(row["source_line"])
         csv_path = settings.DATASET_DIR / filename
         header = pd.read_csv(csv_path, nrows=0).columns.tolist()
         raw = pd.read_csv(
@@ -118,9 +111,9 @@ def check_random_row_matches_csv() -> str:
         ]
         for column, got in comparisons:
             want = raw[column]
-            if pd.isna(want) and got is None:
+            if pd.isna(want) and (got is None or pd.isna(got)):
                 continue
-            if got is None or not np.isclose(float(want), float(got), rtol=0, atol=0):
+            if got is None or float(want) != float(got):
                 raise CheckFailure(
                     f"{key} line {line}: {column} CSV={want!r} parquet={got!r}"
                 )
@@ -145,15 +138,14 @@ def check_random_row_matches_csv() -> str:
 # -- 3 ---------------------------------------------------------------------------------
 
 def check_covariances() -> str:
-    """Covariances rebuilt from parquet are symmetric and positive-semidefinite."""
+    """Covariances rebuilt from the store are symmetric and positive-semidefinite."""
     total = 0
     worst = np.inf
+    columns = ", ".join(
+        f"obj{i}_c_{e}" for i in (1, 2) for e in COVARIANCE_ELEMENTS
+    )
     for key in SOURCES:
-        columns = [f"obj{i}_c_{e}" for i in (1, 2) for e in COVARIANCE_ELEMENTS]
-        for batch in pq.ParquetFile(_parquet(key)).iter_batches(
-            batch_size=100_000, columns=columns
-        ):
-            frame = batch.to_pandas()
+        for frame in store.iter_batches(key, columns=columns, batch_size=200_000):
             for index in (1, 2):
                 stacked = np.empty((len(frame), 3, 3), dtype=np.float64)
                 get = lambda e: frame[f"obj{index}_c_{e}"].to_numpy(dtype=np.float64)  # noqa: E731
@@ -184,22 +176,26 @@ def check_covariances() -> str:
 
 def check_censoring_flag() -> str:
     """pc_is_floored agrees with pc on every row."""
-    total = censored = 0
+    total = censored = disagreeing = 0
     for key in SOURCES:
-        for batch in pq.ParquetFile(_parquet(key)).iter_batches(
-            batch_size=200_000, columns=["pc", "pc_is_floored"]
-        ):
-            frame = batch.to_pandas()
-            pc = frame["pc"].to_numpy(dtype=np.float64)
-            flag = frame["pc_is_floored"].fillna(False).to_numpy(dtype=bool)
-            expected = (~np.isnan(pc)) & (pc <= PC_FLOOR)
-            if not np.array_equal(flag, expected):
-                raise CheckFailure(
-                    f"{key}: {int((flag != expected).sum())} rows disagree with pc"
-                )
-            total += len(frame)
-            censored += int(expected.sum())
+        row = store.query(
+            f"""
+            select
+              count(*)                                                as total,
+              count(*) filter (where pc is not null and pc <= {PC_FLOOR}) as censored,
+              count(*) filter (
+                where pc_is_floored is distinct from
+                      (pc is not null and pc <= {PC_FLOOR})
+              )                                                       as disagreeing
+            from {key}
+            """
+        ).iloc[0]
+        total += int(row["total"])
+        censored += int(row["censored"])
+        disagreeing += int(row["disagreeing"])
 
+    if disagreeing:
+        raise CheckFailure(f"{disagreeing} rows disagree with their pc value")
     if total == 0:
         raise CheckFailure("zero rows checked")
     if censored == 0 or censored == total:
@@ -224,7 +220,7 @@ def check_hbr_totals() -> str:
 
     parts = []
     for join in joins:
-        rows = pq.ParquetFile(_parquet(join["source"])).metadata.num_rows
+        rows = _rows(join["source"])
         slots = 2 * rows
         if join["object_slots"] != slots:
             raise CheckFailure(
@@ -257,11 +253,26 @@ def check_viz_sample() -> str:
     if not declared:
         raise CheckFailure("sample_strata.json declares no strata")
 
-    table = pq.read_table(sample_path)
-    if table.num_rows == 0:
+    import duckdb
+
+    location = str(sample_path).replace("\\", "/").replace("'", "''")
+    connection = duckdb.connect()
+    try:
+        sample_rows = int(
+            connection.execute(f"select count(*) from read_parquet('{location}')").fetchone()[0]
+        )
+        actual = {
+            row[0]: int(row[1])
+            for row in connection.execute(
+                f"select stratum, count(*) from read_parquet('{location}') group by 1"
+            ).fetchall()
+        }
+    finally:
+        connection.close()
+
+    if sample_rows == 0:
         raise CheckFailure("viz sample is empty")
 
-    actual = pd.Series(table.column("stratum").to_pylist()).value_counts().to_dict()
     empty = [s for s, c in declared.items() if c == 0]
     if empty:
         raise CheckFailure(f"declared strata with zero count: {empty}")
@@ -278,7 +289,7 @@ def check_viz_sample() -> str:
     if "action" not in classes:
         raise CheckFailure("sample contains no high-probability (action) events")
     return (
-        f"{table.num_rows:,} events across {len(actual)} strata, "
+        f"{sample_rows:,} events across {len(actual)} strata, "
         f"{len(classes)} pc classes including 'action'"
     )
 
@@ -311,24 +322,28 @@ def check_random_round_trip() -> str:
     """
     rng = np.random.default_rng(SEED)
     checked = 0
+    expected = 0
     for key in SOURCES:
-        table = pq.ParquetFile(_parquet(key))
-        total = table.metadata.num_rows
-        wanted = set(rng.choice(total, size=min(ROUND_TRIP_SAMPLE, total), replace=False).tolist())
+        total = _rows(key)
+        size = min(ROUND_TRIP_SAMPLE, total)
+        expected += size
+        offsets = sorted(
+            int(v) for v in rng.choice(total, size=size, replace=False)
+        )
+        values = ", ".join(str(o) for o in offsets)
+        frame = store.query(
+            f"select * from (select *, row_number() over () - 1 as _rn from {key}) "
+            f"where _rn in ({values})"
+        )
+        if len(frame) != size:
+            raise CheckFailure(f"{key}: drew {len(frame)} rows, expected {size}")
+        for record in frame.to_dict(orient="records"):
+            event = _event_from_parquet_row(record)
+            event.validate()
+            if ConjunctionEvent.from_dict(event.to_dict()) != event:
+                raise CheckFailure(f"{key}: {event.event_id} failed round-trip")
+            checked += 1
 
-        offset = 0
-        for batch in table.iter_batches(batch_size=100_000):
-            rows = [i - offset for i in wanted if offset <= i < offset + batch.num_rows]
-            if rows:
-                for record in batch.take(rows).to_pylist():
-                    event = _event_from_parquet_row(record)
-                    event.validate()
-                    if ConjunctionEvent.from_dict(event.to_dict()) != event:
-                        raise CheckFailure(f"{key}: {event.event_id} failed round-trip")
-                    checked += 1
-            offset += batch.num_rows
-
-    expected = sum(min(ROUND_TRIP_SAMPLE, pq.ParquetFile(_parquet(k)).metadata.num_rows) for k in SOURCES)
     if checked != expected:
         raise CheckFailure(f"round-tripped {checked} rows, expected {expected}")
     return f"{checked:,} randomly drawn rows round-trip exactly (seed {SEED})"
