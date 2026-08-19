@@ -1,0 +1,2 @@
+three.js 0.185.1
+vendored from unpkg.com on 2026-08-19
