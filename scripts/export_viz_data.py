@@ -52,9 +52,16 @@ COVARIANCE_ELEMENTS = ("11", "12", "13", "22", "23", "33")
 
 
 def _round_sig(value: float | None, digits: int = SIGNIFICANT_DIGITS) -> float | None:
-    """Round to significant digits, preserving magnitude across many decades."""
-    if value is None or not np.isfinite(value) or value == 0:
-        return None if value is None else float(value)
+    """Round to significant digits, preserving magnitude across many decades.
+
+    Non-finite values become ``None``: ``json.dumps`` would otherwise emit bare
+    ``NaN``/``Infinity`` tokens, which are not valid JSON and which ``JSON.parse`` in the
+    browser rejects outright.
+    """
+    if value is None or not np.isfinite(value):
+        return None
+    if value == 0:
+        return 0.0
     return float(f"%.{digits}g" % value)
 
 
