@@ -146,6 +146,18 @@ def main() -> int:
 
     v2_frame = pd.read_parquet(settings.PROCESSED_DIR / "exploratory_v2_predictions.parquet")
     answered = v2_frame.loc[v2_frame["agent_answered"].fillna(False)]
+
+    # An unanswered in-scope event silently falls back to B1, so a partial run produces a
+    # comparison that looks valid and means nothing. Require near-complete coverage of the
+    # in-scope population before any number is reported.
+    in_scope_total = int(v2_frame["in_scope"].sum())
+    coverage = len(answered) / max(in_scope_total, 1)
+    if coverage < 0.95:
+        raise RuntimeError(
+            f"only {len(answered)} of {in_scope_total} in-scope events were answered "
+            f"({coverage:.1%}); the unanswered ones fall back to B1 and would make this "
+            "comparison meaningless. Finish scripts/exploratory_run_agent_v2.py first."
+        )
     revision_rate = float(answered["revised"].mean()) if len(answered) else float("nan")
 
     # Win/loss on the answers v2 actually changed.
