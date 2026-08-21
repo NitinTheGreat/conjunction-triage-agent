@@ -92,8 +92,10 @@ _PERSIST_PHRASES = (
 )
 
 
-def _visible_cdms() -> pd.DataFrame:
-    path = settings.PROCESSED_DIR / "kelvins" / "cdms_train.parquet"
+def _visible_cdms(split: str = "train") -> pd.DataFrame:
+    """Visible CDMs for one split. ``split`` is a parameter so the Phase 7 evaluation can
+    reuse this logic without this module ever naming the held-out split itself."""
+    path = settings.PROCESSED_DIR / "kelvins" / f"cdms_{split}.parquet"
     if not path.is_file():
         raise FileNotFoundError(f"{path}; run scripts/ingest_kelvins.py first")
     connection = duckdb.connect()
@@ -343,6 +345,23 @@ def check_discrimination_and_calibration(predictions: pd.DataFrame) -> dict[str,
         ),
     }
     return {"calibration": calibration, "discrimination": discrimination}
+
+
+def build_report(predictions_path: Path, split: str, consistency_sample: int = 100) -> dict:
+    """Run every faithfulness measurement for one split's predictions."""
+    predictions = pd.read_parquet(predictions_path)
+    cdms = _visible_cdms(split)
+    by_series = {sid: group for sid, group in cdms.groupby("series_id", sort=False)}
+    return {
+        "split": split,
+        "groundedness": check_groundedness(predictions, by_series),
+        "consistency": check_consistency(predictions, by_series, consistency_sample),
+        **check_discrimination_and_calibration(predictions),
+        "note": (
+            "Explanation quality has no baseline competitor and is reported as a "
+            "standalone measurement; it does not offset the ranking result."
+        ),
+    }
 
 
 def main() -> int:
