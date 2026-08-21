@@ -42,7 +42,49 @@ whatever this single frozen configuration produces.
 
 ---
 
-## Deviation 2 — none recorded
+## Implementation notes — not protocol deviations
 
-Any further deviation discovered during the run is appended below with its reason, before
-the affected result is interpreted.
+These changed **how** the run executes, not **what** it produces. The pre-registration
+fixes the endpoint, splits, test, alpha, effect size, decision rule, scope and prompt;
+none of those is touched. Recorded here for transparency.
+
+### N1 — `max_tokens` raised 900 → 4000 → 8000
+
+`gemini-3-flash-preview` reasons internally before answering, and those thinking tokens
+are drawn from the same `max_output_tokens` budget as the answer. At 900 the model spent
+the entire budget thinking and returned 32 tokens of truncated JSON — every response
+failed to parse. At 4000, two events in ten still truncated after 3,840 thinking tokens.
+8000 completes them.
+
+Two defects in our own client were fixed alongside, both of which would have corrupted the
+results silently:
+
+* **Thinking tokens were not counted.** Only `candidates_token_count` was recorded, so
+  roughly 80% of billable output was invisible and the cost figure would have been a large
+  under-report.
+* **Truncated responses were cached.** The client returned whatever text arrived without
+  checking `finish_reason`, so a truncated answer was written to cache and replayed even
+  after the budget was raised. `finish_reason == MAX_TOKENS` now raises, and `max_tokens`
+  is part of the cache key so a budget change cannot replay an answer produced under a
+  different one.
+
+### N2 — requests issued concurrently (12 in flight)
+
+Wall time only. Every call is independent, temperature is 0, cache keys do not depend on
+ordering, and results are sorted by `series_id` before writing, so the output is identical
+to a serial run. Serially the run would have taken about 16 hours.
+
+### N3 — cost is higher than projected
+
+Projected $1.09 for 1,215 calls; measured $0.0095 per call, so approximately **$11.60**.
+The gap is thinking tokens, which the projection did not anticipate. **Token counts are
+exact; the dollar figure is not** — public pricing for `gemini-3-flash-preview` was not
+available, so it is priced at the `gemini-2.5-flash` rate and every reported cost should be
+read as an estimate of that form.
+
+---
+
+## Further deviations — none recorded
+
+Any deviation discovered during the remainder of the run is appended below with its reason,
+before the affected result is interpreted.

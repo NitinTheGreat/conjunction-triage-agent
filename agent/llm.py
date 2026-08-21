@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import threading
 import os
 import time
 from dataclasses import asdict, dataclass, field
@@ -53,6 +54,10 @@ _PRICES_USD_PER_MTOK: dict[str, tuple[float, float]] = {
     "claude-sonnet-5": (3.00, 15.00),
     "claude-opus-5": (15.00, 75.00),
     "gemini-2.5-flash": (0.30, 2.50),
+    # Preview model: public pricing not confirmed at the time of writing. Priced here at
+    # the 2.5-flash rate so the figure is not silently zero; token counts are exact and
+    # the report states the price is an estimate.
+    "gemini-3-flash-preview": (0.30, 2.50),
     "gemini-2.5-pro": (1.25, 10.00),
     "gpt-4o-mini": (0.15, 0.60),
     "gpt-4o": (2.50, 10.00),
@@ -124,12 +129,17 @@ class LLMClient:
         self.cache_hits = 0
         self.input_tokens = 0
         self.output_tokens = 0
+        # Requests are issued concurrently, so the counters need a lock. The cache
+        # itself is safe already: each entry is written to a temp file and renamed.
+        self._lock = threading.Lock()
 
         self._client: Any = None
 
     # -- cache ---------------------------------------------------------------------------
 
-    def cache_key(self, prompt: str, system: str = "", salt: str = "") -> str:
+    def cache_key(
+        self, prompt: str, system: str = "", salt: str = "", max_tokens: int = 0
+    ) -> str:
         """SHA-256 over everything that could change the response.
 
         ``salt`` exists so the self-consistency runs can force distinct keys for an
@@ -146,6 +156,10 @@ class LLMClient:
                 "system": system,
                 "prompt": prompt,
                 "salt": salt,
+                # Part of the key because it changes the response: a budget too small to
+                # cover the model's internal reasoning truncates the answer, and that
+                # truncated text must not be replayed once the budget is raised.
+                "max_tokens": max_tokens,
             },
             sort_keys=True,
         )
@@ -234,11 +248,22 @@ class LLMClient:
                 ),
             )
             usage = getattr(response, "usage_metadata", None)
-            return (
-                response.text or "",
-                getattr(usage, "prompt_token_count", 0) or 0,
-                getattr(usage, "candidates_token_count", 0) or 0,
-            )
+            # Gemini 3 models reason internally before answering. Those thinking tokens
+            # are billed as output and are drawn from the same max_output_tokens budget,
+            # so they must be counted -- omitting them under-reports cost and hides the
+            # reason a response was truncated.
+            thoughts = getattr(usage, "thoughts_token_count", 0) or 0
+            answer = getattr(usage, "candidates_token_count", 0) or 0
+            finish = None
+            if getattr(response, "candidates", None):
+                finish = getattr(response.candidates[0], "finish_reason", None)
+            if finish is not None and "MAX_TOKENS" in str(finish):
+                raise LLMError(
+                    f"response truncated at max_output_tokens ({thoughts} thinking + "
+                    f"{answer} answer tokens); raise max_tokens"
+                )
+            return (response.text or "", getattr(usage, "prompt_token_count", 0) or 0,
+                    thoughts + answer)
 
         if self.provider == "openai":
             messages = []
@@ -274,10 +299,11 @@ class LLMClient:
         Raises rather than returning anything on failure: an exhausted retry budget, a
         missing key, or a cache miss while offline.
         """
-        key = self.cache_key(prompt, system, salt)
+        key = self.cache_key(prompt, system, salt, max_tokens)
         cached = self._read_cache(key)
         if cached is not None:
-            self.cache_hits += 1
+            with self._lock:
+                self.cache_hits += 1
             return cached
 
         if self.offline:
@@ -319,9 +345,10 @@ class LLMClient:
                 latency_seconds=round(time.perf_counter() - started, 3),
             )
             self._write_cache(key, response)
-            self.calls_made += 1
-            self.input_tokens += response.input_tokens
-            self.output_tokens += response.output_tokens
+            with self._lock:
+                self.calls_made += 1
+                self.input_tokens += response.input_tokens
+                self.output_tokens += response.output_tokens
             return response
 
         raise LLMError(

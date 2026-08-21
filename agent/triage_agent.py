@@ -307,7 +307,10 @@ class TriageAgent:
 
     client: LLMClient
     scope_threshold: float = SCOPE_THRESHOLD
-    max_tokens: int = 900
+    #: Generous enough to cover internal reasoning plus the JSON answer. Gemini 3 shares
+    #: this budget between thinking and output: 900 left only 32 tokens for the answer,
+    #: and 4000 still truncated events that spent 3,840 tokens thinking.
+    max_tokens: int = 8000
     _graph: Any = field(default=None, repr=False)
 
     def __post_init__(self) -> None:

@@ -21,7 +21,9 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Optional
 
@@ -45,6 +47,11 @@ TRAIN_SPLIT = "train"
 #: Fixed subsample size for the self-consistency measurement, per the pre-registration.
 SELF_CONSISTENCY_EVENTS = 200
 SELF_CONSISTENCY_RUNS = 3
+
+#: Concurrent in-flight requests. Affects wall time only: every call is independent, the
+#: model is at temperature 0, and cache keys do not depend on ordering, so results are
+#: identical to a serial run.
+DEFAULT_CONCURRENCY = 8
 
 
 def _peak_memory_mb() -> float:
@@ -93,12 +100,22 @@ def run_over_events(
     cdms_by_series: dict[str, pd.DataFrame],
     salt: str = "",
     progress_every: int = 25,
+    concurrency: int = DEFAULT_CONCURRENCY,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    """Analyse each event. Returns (records, failures)."""
+    """Analyse each event, several in flight at once. Returns (records, failures).
+
+    Concurrency changes wall time only. Each call is independent, temperature is 0, and
+    the cache key does not depend on ordering, so the output is identical to a serial run.
+    Results are sorted by ``series_id`` before returning so the file is deterministic
+    regardless of completion order.
+    """
     records: list[dict[str, Any]] = []
     failures: list[dict[str, Any]] = []
+    lock = threading.Lock()
+    done = 0
 
-    for position, (_, row) in enumerate(events.iterrows(), start=1):
+    def analyse_one(row: pd.Series) -> None:
+        nonlocal done
         series_id = row["series_id"]
         cdms = cdms_by_series.get(series_id)
         if cdms is None or cdms.empty:
@@ -110,10 +127,12 @@ def run_over_events(
         except LLMError as exc:
             # Recorded, never silently dropped: a failed event would otherwise vanish
             # from the comparison and quietly change the population being scored.
-            failures.append({"series_id": series_id, "error": str(exc)[:400]})
-            continue
+            with lock:
+                failures.append({"series_id": series_id, "error": str(exc)[:400]})
+                done += 1
+            return
 
-        records.append({
+        record = {
             "series_id": series_id,
             "agent_risk": float(verdict.predicted_final_risk),
             "will_collapse": bool(verdict.will_collapse),
@@ -127,14 +146,26 @@ def run_over_events(
             "from_cache": bool(meta.from_cache),
             "input_tokens": int(meta.input_tokens),
             "output_tokens": int(meta.output_tokens),
-        })
+        }
+        with lock:
+            records.append(record)
+            done += 1
+            if progress_every and done % progress_every == 0:
+                print(
+                    f"  {done}/{len(events)} analysed "
+                    f"({agent.client.cache_hits} cached, {agent.client.calls_made} called, "
+                    f"{len(failures)} failed)",
+                    flush=True,
+                )
 
-        if progress_every and position % progress_every == 0:
-            print(
-                f"  {position}/{len(events)} analysed "
-                f"({agent.client.cache_hits} cached, {agent.client.calls_made} called)",
-                flush=True,
-            )
+    rows = [row for _, row in events.iterrows()]
+    with ThreadPoolExecutor(max_workers=concurrency) as pool:
+        futures = [pool.submit(analyse_one, row) for row in rows]
+        for future in as_completed(futures):
+            future.result()  # re-raise anything that is not an LLMError
+
+    records.sort(key=lambda r: r["series_id"])
+    failures.sort(key=lambda r: r["series_id"])
     return records, failures
 
 
@@ -145,6 +176,8 @@ def main() -> int:
     parser.add_argument("--model", help="override LLM_MODEL")
     parser.add_argument("--offline", action="store_true",
                         help="serve only from cache; raises on a miss")
+    parser.add_argument("--concurrency", type=int, default=DEFAULT_CONCURRENCY,
+                        help="in-flight requests; affects wall time only")
     parser.add_argument("--self-consistency", action="store_true",
                         help="also run 3 passes over a fixed 200-event subsample")
     args = parser.parse_args()
@@ -177,7 +210,9 @@ def main() -> int:
 
     agent = TriageAgent(client=client)
     cdms_by_series = load_visible_cdms(in_scope_events["series_id"].tolist())
-    records, failures = run_over_events(agent, in_scope_events, cdms_by_series)
+    records, failures = run_over_events(
+        agent, in_scope_events, cdms_by_series, concurrency=args.concurrency
+    )
 
     if not records:
         raise RuntimeError("no agent predictions were produced; refusing to write output")
@@ -230,7 +265,7 @@ def main() -> int:
 
     if args.self_consistency:
         report["self_consistency"] = measure_self_consistency(
-            agent, in_scope_events, cdms_by_series
+            agent, in_scope_events, cdms_by_series, concurrency=args.concurrency
         )
 
     out = settings.PROCESSED_DIR / "agent_run_report.json"
@@ -252,6 +287,7 @@ def measure_self_consistency(
     agent: TriageAgent,
     in_scope_events: pd.DataFrame,
     cdms_by_series: dict[str, pd.DataFrame],
+    concurrency: int = DEFAULT_CONCURRENCY,
 ) -> dict[str, Any]:
     """Run the agent 3 times over a fixed 200-event subsample with distinct cache keys.
 
@@ -264,7 +300,8 @@ def measure_self_consistency(
     for index in range(SELF_CONSISTENCY_RUNS):
         print(f"self-consistency run {index + 1}/{SELF_CONSISTENCY_RUNS} ...", flush=True)
         records, failures = run_over_events(
-            agent, subsample, cdms_by_series, salt=f"consistency-{index}", progress_every=50
+            agent, subsample, cdms_by_series, salt=f"consistency-{index}",
+            progress_every=50, concurrency=concurrency,
         )
         if failures:
             print(f"  {len(failures)} failures in run {index + 1}")
