@@ -147,17 +147,26 @@ def main() -> int:
     v2_frame = pd.read_parquet(settings.PROCESSED_DIR / "exploratory_v2_predictions.parquet")
     answered = v2_frame.loc[v2_frame["agent_answered"].fillna(False)]
 
-    # An unanswered in-scope event silently falls back to B1, so a partial run produces a
-    # comparison that looks valid and means nothing. Require near-complete coverage of the
-    # in-scope population before any number is reported.
+    # An unanswered in-scope event silently falls back to B1, so a *partial* run produces
+    # a comparison that looks valid and means nothing. What matters is whether the run
+    # finished, not what fraction the model happened to answer: an event the model tried
+    # and failed on is a property of the arm and belongs in the comparison, whereas an
+    # event never attempted is missing data.
+    run_report_path = settings.PROCESSED_DIR / "exploratory_v2_run_report.json"
+    if not run_report_path.is_file():
+        raise RuntimeError(f"{run_report_path} missing; run the v2 runner first")
+    run_report = json.loads(run_report_path.read_text(encoding="utf-8"))
+
     in_scope_total = int(v2_frame["in_scope"].sum())
-    coverage = len(answered) / max(in_scope_total, 1)
-    if coverage < 0.95:
+    attempted = int(run_report["analysed"]) + int(run_report["n_failures"])
+    if attempted != in_scope_total:
         raise RuntimeError(
-            f"only {len(answered)} of {in_scope_total} in-scope events were answered "
-            f"({coverage:.1%}); the unanswered ones fall back to B1 and would make this "
+            f"the v2 run is incomplete: {attempted} of {in_scope_total} in-scope events "
+            "were attempted. Unattempted events fall back to B1 and would make this "
             "comparison meaningless. Finish scripts/exploratory_run_agent_v2.py first."
         )
+    coverage = len(answered) / max(in_scope_total, 1)
+
     revision_rate = float(answered["revised"].mean()) if len(answered) else float("nan")
 
     # Win/loss on the answers v2 actually changed.
@@ -185,7 +194,15 @@ def main() -> int:
             "minimum_important_difference": MINIMUM_IMPORTANT_DIFFERENCE,
         },
         "v2_behaviour": {
+            "in_scope_events": in_scope_total,
             "events_answered": int(len(answered)),
+            "events_failed": int(run_report["n_failures"]),
+            "answer_coverage": round(coverage, 4),
+            "coverage_note": (
+                "Events the model failed to answer (all truncated at max_output_tokens) "
+                "fall back to B1 unchanged, which is what an operational system would do. "
+                "They are counted, not dropped."
+            ),
             "events_revised": int(answered["revised"].sum()),
             "revision_rate": round(revision_rate, 4),
             "v1_revision_rate_for_comparison": 0.997,
