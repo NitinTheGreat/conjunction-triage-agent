@@ -1,0 +1,367 @@
+"""EXPLORATORY - run the restraint prompt v2 over the in-scope train events.
+
+**EXPLORATORY.** The primary result is fixed and published in ``docs/PHASE7_REPORT.md``:
+agent L = 1.6606 against B1 0.6940, median paired D = +0.9462, 0.0% of resamples favouring
+the agent. Nothing produced here can change, replace, amend or soften that finding
+(``docs/PHASE6_PREREGISTRATION.md`` section 10.3).
+
+v2 makes *unchanged* the default. When the model declines to revise, the prediction is B1's
+byte-identical value and no number is taken from the model at all -- the schema forbids one.
+
+    python scripts/exploratory_run_agent_v2.py --self-consistency --concurrency 4
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+from typing import Any, Optional
+
+import duckdb
+import numpy as np
+import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from agent.llm import LLMClient, LLMError  # noqa: E402
+from agent.exploratory_v2 import (  # noqa: E402
+    PROMPT_VERSION_V2 as PROMPT_VERSION,
+    TriageAgentV2 as TriageAgent,
+)
+from agent.triage_agent import SCOPE_THRESHOLD, in_scope  # noqa: E402
+from core.config import settings  # noqa: E402
+from core.features import build_dataset  # noqa: E402
+
+TRAIN_SPLIT = "train"
+#: Fixed subsample size for the self-consistency measurement, per the pre-registration.
+SELF_CONSISTENCY_EVENTS = 200
+SELF_CONSISTENCY_RUNS = 3
+
+#: Concurrent in-flight requests. Affects wall time only: every call is independent, the
+#: model is at temperature 0, and cache keys do not depend on ordering, so results are
+#: identical to a serial run.
+DEFAULT_CONCURRENCY = 8
+
+
+def _peak_memory_mb() -> float:
+    import psutil
+
+    info = psutil.Process().memory_info()
+    return getattr(info, "peak_wset", info.rss) / 1024**2
+
+
+def _cdm_source() -> str:
+    path = settings.PROCESSED_DIR / "kelvins" / f"cdms_{TRAIN_SPLIT}.parquet"
+    if not path.is_file():
+        raise FileNotFoundError(f"{path}; run scripts/ingest_kelvins.py first")
+    return str(path).replace("\\", "/").replace("'", "''")
+
+
+def load_visible_cdms(series_ids: list[str]) -> dict[str, pd.DataFrame]:
+    """Load the visible (>= 2 day) CDMs for the given events, grouped by series.
+
+    One query for the whole batch rather than one per event; the result is only the
+    in-scope subset, so nothing approaching the full table is resident.
+    """
+    if not series_ids:
+        return {}
+    connection = duckdb.connect()
+    try:
+        connection.execute("set TimeZone = 'UTC'")
+        connection.execute("set memory_limit = '2GB'")
+        connection.register("wanted", pd.DataFrame({"series_id": series_ids}))
+        frame = connection.execute(
+            f"""
+            select c.* from read_parquet('{_cdm_source()}') c
+            join wanted w using (series_id)
+            where c.time_to_tca_days >= 2.0
+            order by c.series_id, c.time_to_tca_days desc
+            """
+        ).fetchdf()
+    finally:
+        connection.close()
+    return {sid: group for sid, group in frame.groupby("series_id", sort=False)}
+
+
+def run_over_events(
+    agent: TriageAgent,
+    events: pd.DataFrame,
+    cdms_by_series: dict[str, pd.DataFrame],
+    salt: str = "",
+    progress_every: int = 25,
+    concurrency: int = DEFAULT_CONCURRENCY,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Analyse each event, several in flight at once. Returns (records, failures).
+
+    Concurrency changes wall time only. Each call is independent, temperature is 0, and
+    the cache key does not depend on ordering, so the output is identical to a serial run.
+    Results are sorted by ``series_id`` before returning so the file is deterministic
+    regardless of completion order.
+    """
+    records: list[dict[str, Any]] = []
+    failures: list[dict[str, Any]] = []
+    lock = threading.Lock()
+    done = 0
+
+    def analyse_one(row: pd.Series) -> None:
+        nonlocal done
+        series_id = row["series_id"]
+        cdms = cdms_by_series.get(series_id)
+        if cdms is None or cdms.empty:
+            raise RuntimeError(
+                f"{series_id}: no visible CDMs found; the event should not be in scope"
+            )
+        try:
+            verdict, meta = agent.analyse(series_id, cdms, row, salt=salt)
+        except LLMError as exc:
+            # Recorded, never silently dropped: a failed event would otherwise vanish
+            # from the comparison and quietly change the population being scored.
+            with lock:
+                failures.append({"series_id": series_id, "error": str(exc)[:400]})
+                done += 1
+            return
+
+        record = {
+            "series_id": series_id,
+            # None when the model declined to revise. The B1 value is substituted later,
+            # from our own data -- never from anything the model emitted.
+            "agent_risk": (
+                None if verdict.predicted_final_risk is None
+                else float(verdict.predicted_final_risk)
+            ),
+            "revise": bool(verdict.revise),
+            "revision_justification": verdict.revision_justification or "",
+            "will_collapse": bool(verdict.will_collapse),
+            "confidence": verdict.confidence,
+            "reasoning": verdict.reasoning,
+            "evidence_cited": json.dumps(verdict.evidence_cited),
+            "n_citations": len(verdict.evidence_cited),
+            "provider": meta.provider,
+            "model": meta.model,
+            "prompt_version": meta.prompt_version,
+            "from_cache": bool(meta.from_cache),
+            "input_tokens": int(meta.input_tokens),
+            "output_tokens": int(meta.output_tokens),
+        }
+        with lock:
+            records.append(record)
+            done += 1
+            if progress_every and done % progress_every == 0:
+                print(
+                    f"  {done}/{len(events)} analysed "
+                    f"({agent.client.cache_hits} cached, {agent.client.calls_made} called, "
+                    f"{len(failures)} failed)",
+                    flush=True,
+                )
+
+    rows = [row for _, row in events.iterrows()]
+    with ThreadPoolExecutor(max_workers=concurrency) as pool:
+        futures = [pool.submit(analyse_one, row) for row in rows]
+        for future in as_completed(futures):
+            future.result()  # re-raise anything that is not an LLMError
+
+    records.sort(key=lambda r: r["series_id"])
+    failures.sort(key=lambda r: r["series_id"])
+    return records, failures
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--limit", type=int, help="only the first N in-scope events")
+    parser.add_argument("--provider", help="override LLM_PROVIDER")
+    parser.add_argument("--model", help="override LLM_MODEL")
+    parser.add_argument("--offline", action="store_true",
+                        help="serve only from cache; raises on a miss")
+    parser.add_argument("--concurrency", type=int, default=DEFAULT_CONCURRENCY,
+                        help="in-flight requests; affects wall time only")
+    parser.add_argument("--self-consistency", action="store_true",
+                        help="also run 3 passes over a fixed 200-event subsample")
+    args = parser.parse_args()
+
+    started = time.perf_counter()
+    events = build_dataset(TRAIN_SPLIT)
+    scope_mask = events["latest_risk"].apply(lambda v: in_scope(v, SCOPE_THRESHOLD))
+    in_scope_events = events.loc[scope_mask].sort_values("series_id").reset_index(drop=True)
+    if args.limit:
+        in_scope_events = in_scope_events.head(args.limit)
+
+    print(
+        f"eligible train events: {len(events):,}\n"
+        f"  in scope (latest_risk >= {SCOPE_THRESHOLD}): {len(in_scope_events):,} "
+        f"({100 * len(in_scope_events) / len(events):.2f}%), "
+        f"saving {100 * (1 - len(in_scope_events) / len(events)):.1f}% of LLM calls\n"
+        f"  high-risk in scope: {int(in_scope_events.is_high_risk.sum())} of "
+        f"{int(events.is_high_risk.sum())}",
+        flush=True,
+    )
+
+    client = LLMClient(
+        provider=args.provider,
+        model=args.model,
+        temperature=0.0,
+        prompt_version=PROMPT_VERSION,
+        offline=args.offline,
+    )
+    print(f"  provider {client.provider} / {client.model} @ T={client.temperature}", flush=True)
+
+    agent = TriageAgent(client=client)
+    cdms_by_series = load_visible_cdms(in_scope_events["series_id"].tolist())
+    records, failures = run_over_events(
+        agent, in_scope_events, cdms_by_series, concurrency=args.concurrency
+    )
+
+    if not records:
+        raise RuntimeError("no agent predictions were produced; refusing to write output")
+
+    analysed = pd.DataFrame(records)
+
+    # Assemble the complete prediction vector: agent where in scope, B1 elsewhere.
+    combined = events[[
+        "series_id", "latest_risk", "final_risk", "is_high_risk",
+        "final_risk_is_floored", "n_cdms_input", "has_trend", "any_diluted",
+        "latest_max_risk_scaling", "latest_sigma_target_km", "c_object_type",
+    ]].copy()
+    combined["b1_risk"] = combined["latest_risk"]
+    combined["in_scope"] = scope_mask.to_numpy()
+    combined = combined.merge(analysed, on="series_id", how="left")
+
+    # Out-of-scope events take B1's prediction exactly. In-scope events that failed keep
+    # B1's too, and are counted as failures rather than hidden.
+    # "Analysed" means the model answered, whether or not it chose to revise. A declined
+    # revision is a real answer, not a failure, so it must not be counted as one.
+    combined["agent_answered"] = combined["revise"].notna()
+    combined["agent_analysed"] = combined["agent_answered"]
+    combined["revised"] = combined["revise"].fillna(False).astype(bool)
+    combined["agent_prediction"] = np.where(
+        combined["revised"] & combined["agent_risk"].notna(),
+        combined["agent_risk"],
+        combined["b1_risk"],
+    )
+
+    destination = settings.PROCESSED_DIR / "exploratory_v2_predictions.parquet"
+    combined.to_parquet(destination)
+
+    elapsed = time.perf_counter() - started
+    report: dict[str, Any] = {
+        "scope_threshold": SCOPE_THRESHOLD,
+        "_usage_placeholder": None,
+        "prompt_version": PROMPT_VERSION,
+        "eligible_events": int(len(events)),
+        "in_scope_events": int(len(in_scope_events)),
+        "in_scope_pct": round(100 * len(in_scope_events) / len(events), 3),
+        "llm_calls_saved_pct": round(100 * (1 - len(in_scope_events) / len(events)), 2),
+        "high_risk_in_scope": int(in_scope_events.is_high_risk.sum()),
+        "high_risk_total": int(events.is_high_risk.sum()),
+        "analysed": int(len(analysed)),
+        "failures": failures,
+        "n_failures": len(failures),
+        "wall_time_seconds": round(elapsed, 1),
+        "peak_memory_mb": round(_peak_memory_mb(), 1),
+        "prompt_version": PROMPT_VERSION,
+        "exploratory": True,
+        "primary_result_unchanged": (
+            "docs/PHASE7_REPORT.md: agent L = 1.6606 vs B1 0.6940; this run cannot "
+            "replace it"
+        ),
+        "revised_events": int(combined["revised"].sum()),
+        "revision_rate": round(
+            float(combined.loc[combined["agent_answered"], "revised"].mean()), 4
+        ),
+        "test_set_read": False,
+        "note": (
+            "Neither arm trains on the split, so this single pass is reused across all "
+            "validation splits at zero additional API cost."
+        ),
+    }
+
+    if args.self_consistency:
+        report["self_consistency"] = measure_self_consistency(
+            agent, in_scope_events, cdms_by_series, concurrency=args.concurrency
+        )
+
+    # Captured last so the self-consistency calls are counted. Taking it earlier left
+    # 600 calls out of the reported cost.
+    usage = client.usage_summary()
+    report["usage"] = usage
+    report.pop("_usage_placeholder", None)
+    report["wall_time_seconds"] = round(time.perf_counter() - started, 1)
+
+    out = settings.PROCESSED_DIR / "exploratory_v2_run_report.json"
+    out.write_text(json.dumps(report, indent=2), encoding="utf-8")
+
+    print(
+        f"\nanalysed {len(analysed):,} events, {len(failures)} failures\n"
+        f"  API calls {usage['api_calls']:,} | cache hits {usage['cache_hits']:,}\n"
+        f"  tokens in {usage['input_tokens']:,} out {usage['output_tokens']:,}\n"
+        f"  estimated cost ${usage['estimated_cost_usd']:.4f} "
+        f"(price table approximate)\n"
+        f"  wall time {elapsed:.1f}s | peak memory {report['peak_memory_mb']} MB\n"
+        f"-> {destination}\n-> {out}"
+    )
+    return 0
+
+
+def measure_self_consistency(
+    agent: TriageAgent,
+    in_scope_events: pd.DataFrame,
+    cdms_by_series: dict[str, pd.DataFrame],
+    concurrency: int = DEFAULT_CONCURRENCY,
+) -> dict[str, Any]:
+    """Run the agent 3 times over a fixed 200-event subsample with distinct cache keys.
+
+    Distinct salts force genuinely separate calls; without them the cache would return
+    the same response three times and report a flip rate of zero, which would be an
+    artefact rather than a measurement.
+    """
+    subsample = in_scope_events.head(SELF_CONSISTENCY_EVENTS)
+    runs: list[pd.DataFrame] = []
+    for index in range(SELF_CONSISTENCY_RUNS):
+        print(f"self-consistency run {index + 1}/{SELF_CONSISTENCY_RUNS} ...", flush=True)
+        records, failures = run_over_events(
+            agent, subsample, cdms_by_series, salt=f"consistency-{index}",
+            progress_every=50, concurrency=concurrency,
+        )
+        if failures:
+            print(f"  {len(failures)} failures in run {index + 1}")
+        runs.append(pd.DataFrame(records).set_index("series_id"))
+
+    common = set(runs[0].index)
+    for frame in runs[1:]:
+        common &= set(frame.index)
+    common_ids = sorted(common)
+    if not common_ids:
+        raise RuntimeError("no events completed all runs; cannot measure self-consistency")
+
+    verdicts = np.array([
+        runs[i].loc[common_ids, "will_collapse"].to_numpy(dtype=bool)
+        for i in range(SELF_CONSISTENCY_RUNS)
+    ])
+    flipped = (verdicts.sum(axis=0) % SELF_CONSISTENCY_RUNS) != 0
+    predictions = np.array([
+        runs[i].loc[common_ids, "agent_risk"].to_numpy(dtype=float)
+        for i in range(SELF_CONSISTENCY_RUNS)
+    ])
+    spread = predictions.max(axis=0) - predictions.min(axis=0)
+
+    return {
+        "runs": SELF_CONSISTENCY_RUNS,
+        "events": len(common_ids),
+        "verdict_flip_rate": round(float(flipped.mean()), 4),
+        "n_flipped": int(flipped.sum()),
+        "risk_spread_median": round(float(np.median(spread)), 4),
+        "risk_spread_mean": round(float(spread.mean()), 4),
+        "risk_spread_max": round(float(spread.max()), 4),
+        "identical_all_runs": int((spread == 0).sum()),
+        "gate": (
+            "flip rate above 10% means the comparison sits at or near the agent's own "
+            "noise floor (pre-registration section 8)"
+        ),
+    }
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
