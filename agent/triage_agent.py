@@ -291,6 +291,10 @@ class AgentState(TypedDict, total=False):
     series_id: str
     cdms: Any
     features: Any
+    #: Declared, not incidental: LangGraph drops keys the TypedDict does not name, so an
+    #: undeclared salt silently became "" and every self-consistency run reused one cache
+    #: key -- producing a flip rate of exactly zero as an artefact.
+    salt: str
     prompt: str
     raw_response: str
     response_meta: Any

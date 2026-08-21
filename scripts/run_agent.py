@@ -239,10 +239,10 @@ def main() -> int:
     destination = settings.PROCESSED_DIR / "agent_predictions.parquet"
     combined.to_parquet(destination)
 
-    usage = client.usage_summary()
     elapsed = time.perf_counter() - started
     report: dict[str, Any] = {
         "scope_threshold": SCOPE_THRESHOLD,
+        "_usage_placeholder": None,
         "prompt_version": PROMPT_VERSION,
         "eligible_events": int(len(events)),
         "in_scope_events": int(len(in_scope_events)),
@@ -253,7 +253,6 @@ def main() -> int:
         "analysed": int(len(analysed)),
         "failures": failures,
         "n_failures": len(failures),
-        "usage": usage,
         "wall_time_seconds": round(elapsed, 1),
         "peak_memory_mb": round(_peak_memory_mb(), 1),
         "test_set_read": False,
@@ -267,6 +266,13 @@ def main() -> int:
         report["self_consistency"] = measure_self_consistency(
             agent, in_scope_events, cdms_by_series, concurrency=args.concurrency
         )
+
+    # Captured last so the self-consistency calls are counted. Taking it earlier left
+    # 600 calls out of the reported cost.
+    usage = client.usage_summary()
+    report["usage"] = usage
+    report.pop("_usage_placeholder", None)
+    report["wall_time_seconds"] = round(time.perf_counter() - started, 1)
 
     out = settings.PROCESSED_DIR / "agent_run_report.json"
     out.write_text(json.dumps(report, indent=2), encoding="utf-8")
