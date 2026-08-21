@@ -51,8 +51,10 @@ def cached_client(tmp_path):
 
 
 def _seed_cache(client: LLMClient, prompt: str, system: str = "", salt: str = "",
-                text: str = VALID_RESPONSE) -> str:
-    key = client.cache_key(prompt, system, salt)
+                text: str = VALID_RESPONSE, max_tokens: int = 1024) -> str:
+    """Seed one cache entry. ``max_tokens`` must match the value the caller will use:
+    it is part of the key, so that a raised budget cannot replay a truncated answer."""
+    key = client.cache_key(prompt, system, salt, max_tokens)
     client._write_cache(key, LLMResponse(
         text=text, provider=client.provider, model=client.model,
         temperature=client.temperature, prompt_version=client.prompt_version,
@@ -94,6 +96,11 @@ class TestCache:
         b = LLMClient(prompt_version="v2", cache_dir=tmp_path, offline=True)
         assert a.cache_key("p") != b.cache_key("p")
 
+    def test_max_tokens_is_part_of_the_key(self, tmp_path) -> None:
+        """A raised budget must not replay an answer truncated under a smaller one."""
+        client = LLMClient(cache_dir=tmp_path, offline=True)
+        assert client.cache_key("p", max_tokens=900) != client.cache_key("p", max_tokens=8000)
+
     def test_salt_forces_a_distinct_key(self, tmp_path) -> None:
         """Self-consistency needs distinct keys for an identical prompt."""
         client = LLMClient(cache_dir=tmp_path, offline=True)
@@ -111,7 +118,7 @@ class TestCache:
             assert field in payload
 
     def test_corrupt_entry_raises(self, cached_client, tmp_path) -> None:
-        key = cached_client.cache_key("bad")
+        key = cached_client.cache_key("bad", "", "", 1024)
         path = tmp_path / key[:2]
         path.mkdir(parents=True, exist_ok=True)
         (path / f"{key}.json").write_text("{not json", encoding="utf-8")
@@ -268,8 +275,10 @@ class TestGraphOffline:
         prepared = agent._node_prepare({
             "series_id": "train:1", "cdms": cdms, "features": features
         })
-        _seed_cache(cached_client, prepared["prompt"],
-                    system=__import__("agent.triage_agent", fromlist=["SYSTEM_PROMPT"]).SYSTEM_PROMPT)
+        from agent.triage_agent import SYSTEM_PROMPT
+
+        _seed_cache(cached_client, prepared["prompt"], system=SYSTEM_PROMPT,
+                    max_tokens=agent.max_tokens)
 
         verdict, meta = agent.analyse("train:1", cdms, features)
         assert verdict.will_collapse is True
