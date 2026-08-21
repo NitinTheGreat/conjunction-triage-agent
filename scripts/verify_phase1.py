@@ -34,6 +34,8 @@ EXCLUDED_DIRS = {".venv", ".git", "__pycache__", "node_modules", ".pytest_cache"
 #: import name -> distribution name as it appears in requirements.txt
 IMPORT_TO_DISTRIBUTION = {
     "dotenv": "python-dotenv",
+    # `from google import genai` comes from the google-genai distribution.
+    "google": "google-genai",
     "yaml": "pyyaml",
     "sklearn": "scikit-learn",
     "dateutil": "python-dateutil",
@@ -41,6 +43,25 @@ IMPORT_TO_DISTRIBUTION = {
 
 #: Packages defined inside this repo; they are not third-party dependencies.
 FIRST_PARTY = {"core", "data", "agent", "orbital", "scripts", "tests", "legacy"}
+
+
+def _local_module_names() -> set[str]:
+    """Modules that live in this repo and are imported by sibling path insertion.
+
+    Scripts add ``scripts/`` to ``sys.path`` and import each other by bare name
+    (``import run_baselines``). Those are first-party by definition; without this they
+    would be reported as undeclared third-party dependencies.
+    """
+    names = set(FIRST_PARTY)
+    for directory in (REPO_ROOT, REPO_ROOT / "scripts", REPO_ROOT / "tests"):
+        if not directory.is_dir():
+            continue
+        for path in directory.glob("*.py"):
+            names.add(path.stem)
+        for path in directory.iterdir():
+            if path.is_dir() and (path / "__init__.py").is_file():
+                names.add(path.name)
+    return names
 
 
 class CheckFailure(AssertionError):
@@ -311,10 +332,11 @@ def check_requirements_cover_imports() -> str:
         raise CheckFailure("no Python files found to scan (trivial pass guard)")
 
     stdlib = set(sys.stdlib_module_names)
+    first_party = _local_module_names()
     imported: dict[str, set[Path]] = {}
     for path in files:
         for name in _top_level_imports(path):
-            if name in stdlib or name in FIRST_PARTY:
+            if name in stdlib or name in first_party:
                 continue
             imported.setdefault(name, set()).add(path)
 
