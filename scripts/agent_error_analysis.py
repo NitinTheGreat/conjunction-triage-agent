@@ -151,13 +151,15 @@ def main() -> int:
     # Changes that cross the decision threshold are the ones that move the metric.
     crossed_down = changed & (b1 >= HIGH_RISK_THRESHOLD) & (agent < HIGH_RISK_THRESHOLD)
     crossed_up = changed & (b1 < HIGH_RISK_THRESHOLD) & (agent >= HIGH_RISK_THRESHOLD)
+    # Distinct key names per direction: reusing "of_which_correct" for both silently
+    # overwrote the downgrade figures with the upgrade ones.
     report["threshold_crossings"] = {
         "downgraded_to_low_risk": int(crossed_down.sum()),
-        "of_which_correct": int(np.sum(crossed_down & ~truth_high)),
-        "of_which_wrong": int(np.sum(crossed_down & truth_high)),
+        "downgrade_correct": int(np.sum(crossed_down & ~truth_high)),
+        "downgrade_wrong_false_negative": int(np.sum(crossed_down & truth_high)),
         "upgraded_to_high_risk": int(crossed_up.sum()),
-        "of_which_correct": int(np.sum(crossed_up & truth_high)),
-        "of_which_wrong": int(np.sum(crossed_up & ~truth_high)),
+        "upgrade_correct": int(np.sum(crossed_up & truth_high)),
+        "upgrade_wrong_false_positive": int(np.sum(crossed_up & ~truth_high)),
         "note": (
             "Only crossings change F2, and Phase 5 showed the whole oracle gain came "
             "through F2. A wrong downgrade is a false negative, which beta=2 punishes "
