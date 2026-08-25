@@ -126,6 +126,7 @@ class PcResult:
     relative_speed_kms: float
     combined_hbr_m: float
     mahalanobis_distance: float
+    mahalanobis_distance_3d: float
     projected_covariance: np.ndarray
     conditioning: ConditioningReport
     method: str = "Alfano 2004, 2D short-encounter"
@@ -140,6 +141,7 @@ class PcResult:
             "relative_speed_kms": self.relative_speed_kms,
             "combined_hbr_m": self.combined_hbr_m,
             "mahalanobis_distance": self.mahalanobis_distance,
+            "mahalanobis_distance_3d": self.mahalanobis_distance_3d,
             "projected_covariance_km2": self.projected_covariance.tolist(),
             "conditioning": self.conditioning.as_dict(),
             "method": self.method,
@@ -257,8 +259,19 @@ def alfano_pc(
         # The Gaussian lies wholly outside the disc.
         return 0.0
 
-    x = np.linspace(lower, upper, intervals + 1)
-    half_chord = np.sqrt(np.maximum(radius * radius - x * x, 0.0))
+    # Integrate in the angle ``t`` with ``x = R sin t`` rather than in x directly.
+    #
+    # The chord half-width sqrt(R^2 - x^2) meets the rim of the disc with infinite slope, and
+    # Simpson's rule converges at only O(h^1.5) against that square-root singularity: at 200
+    # intervals it under-reads the disc area by 1.46e-4 relative, and that bias lands
+    # straight on Pc. The substitution makes the half-width R cos t and the integrand smooth,
+    # restoring O(h^4). It matters here because the whole point of this module is a
+    # reproduction test measured in parts per thousand.
+    t_lower = math.asin(max(-1.0, min(1.0, lower / radius)))
+    t_upper = math.asin(max(-1.0, min(1.0, upper / radius)))
+    t = np.linspace(t_lower, t_upper, intervals + 1)
+    x = radius * np.sin(t)
+    half_chord = radius * np.cos(t)
 
     root_two = math.sqrt(2.0)
     # Analytic in y: the difference of error functions over the chord.
@@ -267,10 +280,11 @@ def alfano_pc(
         - erf((y0 - half_chord) / (root_two * sigma_y))
     )
     x_term = np.exp(-0.5 * ((x - x0) / sigma_x) ** 2) / (sigma_x * math.sqrt(2.0 * math.pi))
-    integrand = x_term * y_term
+    # dx = R cos t dt, and R cos t is the half-chord itself.
+    integrand = x_term * y_term * half_chord
 
-    # Composite Simpson's rule.
-    step = (upper - lower) / intervals
+    # Composite Simpson's rule, now in t.
+    step = (t_upper - t_lower) / intervals
     weights = np.ones(intervals + 1)
     weights[1:-1:2] = 4.0
     weights[2:-1:2] = 2.0
@@ -332,8 +346,19 @@ def pc_from_states(
     combined_radius_km = (float(hbr1_m) + float(hbr2_m)) / 1000.0
 
     probability = alfano_pc(conditioned, miss_in_plane, combined_radius_km)
+
+    # Two Mahalanobis distances, because they are different quantities and conflating them
+    # is a silent error. The 2D one is the encounter-plane distance the Alfano integral
+    # actually works in. The 3D one is the full-space distance, and it is what TraCSS
+    # publishes as `mdistance`: scripts/validate_pc.py reproduces that column to a median
+    # relative error of 6e-8, which is what pins down the covariance units (km^2) and the
+    # UVW-to-ECI rotation independently of Pc.
     mahalanobis = float(
         np.sqrt(miss_in_plane @ np.linalg.solve(conditioned, miss_in_plane))
+    )
+    conditioned_3d, _ = condition_covariance(combined_eci)
+    mahalanobis_3d = float(
+        np.sqrt(relative_position @ np.linalg.solve(conditioned_3d, relative_position))
     )
 
     return PcResult(
@@ -342,6 +367,7 @@ def pc_from_states(
         relative_speed_kms=relative_speed,
         combined_hbr_m=float(hbr1_m) + float(hbr2_m),
         mahalanobis_distance=mahalanobis,
+        mahalanobis_distance_3d=mahalanobis_3d,
         projected_covariance=conditioned,
         conditioning=report,
     )
