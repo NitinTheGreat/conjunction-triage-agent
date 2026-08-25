@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='5' fill='%235eb0ff'/%3E%3Ccircle cx='14' cy='3' r='1.6' fill='%23ff5c5c'/%3E%3C/svg%3E">
+<title>ConjunctionTriage — end-to-end</title>
+<style>
+  :root {
+    --bg: #07090f;
+    --panel: #10141f;
+    --panel-2: #161b29;
+    --line: #232a3d;
+    --ink: #e6e9f2;
+    --ink-dim: #98a0b8;
+    --ink-faint: #6a7288;
+    --accent: #5eb0ff;
+    --warn: #ffb638;
+    --danger: #ff5c5c;
+    --censored: #8891a8;
+    --null: #b26bd8;
+    --robust: #35d0a5;
+    --diluted: #ffb638;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 13px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    overflow: hidden;
+  }
+  a { color: var(--accent); }
+
+  /* ---------- layout ---------- */
+  #app { display: grid; grid-template-rows: auto auto 1fr; height: 100%; }
+  header {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    padding: 8px 14px; background: var(--panel); border-bottom: 1px solid var(--line);
+  }
+  header h1 { font-size: 14px; margin: 0; font-weight: 650; letter-spacing: .2px; }
+  header .sub { color: var(--ink-faint); font-size: 11.5px; }
+  .tabs { margin-left: auto; display: flex; gap: 4px; }
+  .tab {
+    background: var(--panel-2); color: var(--ink-dim); border: 1px solid var(--line);
+    padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;
+  }
+  .tab[aria-selected="true"] { background: var(--accent); color: #04121f; border-color: var(--accent); font-weight: 600; }
+
+  .view { position: relative; overflow: hidden; }
+  .view[hidden] { display: none; }
+
+  /* ---------- 3d view ---------- */
+  #scene-view { display: grid; grid-template-columns: 268px 1fr 366px; height: 100%; }
+  #canvas-wrap { position: relative; min-width: 0; }
+  canvas { display: block; width: 100%; height: 100%; }
+
+  aside {
+    background: var(--panel); border-right: 1px solid var(--line);
+    overflow-y: auto; padding: 12px;
+  }
+  aside.right { border-right: none; border-left: 1px solid var(--line); }
+  aside h2 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .09em;
+    color: var(--ink-faint); margin: 16px 0 7px; font-weight: 600;
+  }
+  aside h2:first-child { margin-top: 0; }
+
+  .control { margin-bottom: 11px; }
+  .control label { display: block; color: var(--ink-dim); margin-bottom: 4px; font-size: 12px; }
+  select, input[type=range] { width: 100%; }
+  select {
+    background: var(--panel-2); color: var(--ink); border: 1px solid var(--line);
+    border-radius: 5px; padding: 5px 7px; font-size: 12px;
+  }
+  input[type=range] { accent-color: var(--accent); }
+  .rangeval { color: var(--ink-faint); font-variant-numeric: tabular-nums; font-size: 11.5px; }
+  .checkrow { display: flex; align-items: center; gap: 7px; margin: 5px 0; color: var(--ink-dim); }
+  .checkrow input { accent-color: var(--accent); }
+  button.reset {
+    width: 100%; background: var(--panel-2); color: var(--ink-dim);
+    border: 1px solid var(--line); border-radius: 5px; padding: 6px; cursor: pointer;
+  }
+  button.reset:hover { color: var(--ink); border-color: var(--accent); }
+
+  .count {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+    padding: 8px 10px; margin-bottom: 12px;
+  }
+  .count .big { font-size: 19px; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .count .of { color: var(--ink-faint); font-size: 11.5px; }
+
+  /* ---------- legend ---------- */
+  .legend-item { display: flex; align-items: center; gap: 8px; margin: 4px 0; font-size: 12px; color: var(--ink-dim); }
+  .swatch { width: 13px; height: 13px; border-radius: 50%; flex: 0 0 auto; }
+  .swatch.ring { background: transparent; border: 2px solid var(--diluted); }
+  .swatch.line { height: 0; border-top: 2px solid; border-radius: 0; }
+  .gradient { height: 11px; border-radius: 3px; margin: 5px 0 3px;
+    background: linear-gradient(90deg,#2b3fd6,#22b1d6,#3fd07a,#ffd84d,#ff8c34,#ff2f2f); }
+  .gradient-labels { display: flex; justify-content: space-between; color: var(--ink-faint); font-size: 10.5px; }
+
+  /* ---------- detail panel ---------- */
+  #detail .empty { color: var(--ink-faint); font-style: italic; }
+  .kv { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; font-size: 12px; margin-bottom: 3px; }
+  .kv dt { color: var(--ink-faint); }
+  .kv dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+  .objgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .objcard .kv { font-size: 11px; gap: 1px 6px; }
+  .objcard .kv dt { font-size: 10.5px; }
+  .objcard { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
+  .objcard h3 { margin: 0 0 6px; font-size: 12px; color: var(--accent); }
+  .status {
+    border-radius: 5px; padding: 7px 9px; margin: 8px 0; font-size: 12px; line-height: 1.45;
+    border: 1px solid;
+  }
+  .status.censored { background: rgba(136,145,168,.13); border-color: #4c5468; color: #c3cad9; }
+  .status.robust   { background: rgba(53,208,165,.11);  border-color: #1f6b58; color: #7fe6cb; }
+  .status.diluted  { background: rgba(255,182,56,.11);  border-color: #7a5b1c; color: #ffd489; }
+  .status.nullpc   { background: rgba(178,107,216,.12); border-color: #6b3f85; color: #dcb0f0; }
+
+  /* ---------- honesty ---------- */
+  .notice {
+    background: var(--panel-2); border: 1px solid var(--line);
+    border-left: 3px solid var(--warn); border-radius: 5px;
+    padding: 8px 10px; margin-bottom: 9px; font-size: 11.5px; color: var(--ink-dim); line-height: 1.5;
+  }
+  .notice strong { color: var(--ink); }
+  .notice.hard { border-left-color: var(--danger); }
+
+  #hud {
+    position: absolute; left: 10px; bottom: 10px; z-index: 5;
+    background: rgba(16,20,31,.85); border: 1px solid var(--line); border-radius: 6px;
+    padding: 5px 9px; font-size: 11px; color: var(--ink-faint);
+    font-variant-numeric: tabular-nums; pointer-events: none;
+  }
+  #hint {
+    position: absolute; right: 10px; bottom: 10px; z-index: 5;
+    background: rgba(16,20,31,.85); border: 1px solid var(--line); border-radius: 6px;
+    padding: 5px 9px; font-size: 11px; color: var(--ink-faint); pointer-events: none;
+  }
+  #loading {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    background: var(--bg); z-index: 20; color: var(--ink-dim);
+  }
+
+  /* ---------- charts ---------- */
+  #charts-view { overflow-y: auto; padding: 16px 20px 40px; height: 100%; }
+  .charts-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(390px, 1fr));
+    gap: 14px; margin-top: 12px;
+  }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 8px; padding: 12px 14px 6px;
+  }
+  .card h3 { margin: 0 0 2px; font-size: 13px; font-weight: 620; }
+  .card .scope {
+    font-size: 10.5px; letter-spacing: .05em; text-transform: uppercase;
+    font-weight: 600; margin-bottom: 8px; display: inline-block;
+    padding: 1.5px 6px; border-radius: 3px;
+  }
+  .scope.population { background: rgba(94,176,255,.16); color: #9ccdff; }
+  .scope.sample     { background: rgba(255,182,56,.16);  color: #ffcf7a; }
+  .card .note { color: var(--ink-faint); font-size: 11px; margin: 2px 0 8px; line-height: 1.45; }
+  svg { display: block; width: 100%; overflow: visible; }
+  .axis line, .axis path { stroke: var(--line); }
+  .axis text { fill: var(--ink-faint); font-size: 10px; }
+  .bar-label { fill: var(--ink-faint); font-size: 9.5px; }
+
+  /* ---------- phase 9: live API strip ---------- */
+  .api-strip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 14px; font-size: 11.5px; color: var(--ink-dim);
+    background: var(--panel-2); border-bottom: 1px solid var(--line);
+  }
+  .api-strip .dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; background: var(--ink-faint); }
+  .api-strip.probing .dot { background: var(--warn); }
+  .api-strip.online  .dot { background: var(--robust); }
+  .api-strip.offline .dot { background: var(--ink-faint); }
+  .api-strip.online  { color: #7fe6cb; }
+  .api-strip code { color: var(--ink); background: rgba(255,255,255,.05); padding: 0 4px; border-radius: 3px; }
+
+  /* ---------- phase 9: forms and panels ---------- */
+  .panel-view { overflow-y: auto; padding: 16px 20px 48px; height: 100%; }
+  .panel-view h2.section { font-size: 15px; margin: 0 0 4px; font-weight: 650; }
+  .panel-view .lede { color: var(--ink-dim); max-width: 820px; margin: 0 0 14px; font-size: 12.5px; }
+  .split { display: grid; grid-template-columns: minmax(320px, 420px) 1fr; gap: 16px; align-items: start; }
+  @media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
+
+  fieldset {
+    border: 1px solid var(--line); border-radius: 7px; margin: 0 0 12px; padding: 10px 12px 12px;
+    background: var(--panel);
+  }
+  fieldset legend { color: var(--accent); font-size: 11.5px; padding: 0 5px; font-weight: 600; }
+  .field { margin-bottom: 8px; }
+  .field label { display: block; color: var(--ink-dim); font-size: 11.5px; margin-bottom: 3px; }
+  .field .unit { color: var(--ink-faint); }
+  input[type=text], input[type=number], textarea {
+    width: 100%; background: var(--panel-2); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 5px; padding: 5px 7px;
+    font: 12px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
+  }
+  textarea { resize: vertical; }
+  button.action {
+    background: var(--accent); color: #04121f; border: none; border-radius: 6px;
+    padding: 8px 16px; font-size: 12.5px; font-weight: 650; cursor: pointer;
+  }
+  button.action:disabled { background: var(--panel-2); color: var(--ink-faint); cursor: not-allowed; }
+  button.ghost {
+    background: var(--panel-2); color: var(--ink-dim); border: 1px solid var(--line);
+    border-radius: 6px; padding: 7px 12px; font-size: 12px; cursor: pointer;
+  }
+  button.ghost:hover { color: var(--ink); border-color: var(--accent); }
+
+  .result-card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 14px; margin-bottom: 12px;
+  }
+  .result-card h3 { margin: 0 0 8px; font-size: 12.5px; color: var(--accent); font-weight: 620; }
+  .bignum { font-size: 26px; font-weight: 680; font-variant-numeric: tabular-nums; letter-spacing: -.5px; }
+  .bignum .exp { font-size: 15px; color: var(--ink-dim); }
+  .error-box {
+    background: rgba(255,92,92,.1); border: 1px solid #7a2a2a; border-left: 3px solid var(--danger);
+    border-radius: 5px; padding: 9px 11px; font-size: 12px; color: #ffb3b3; margin-bottom: 10px;
+  }
+  .error-box code { color: #ffd7d7; }
+
+  table.results { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.results th, table.results td {
+    text-align: right; padding: 6px 9px; border-bottom: 1px solid var(--line);
+    font-variant-numeric: tabular-nums;
+  }
+  table.results th:first-child, table.results td:first-child { text-align: left; }
+  table.results thead th { color: var(--ink-faint); font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; }
+  table.results tr.baseline td { background: rgba(53,208,165,.08); }
+  table.results tr.agent td { background: rgba(255,92,92,.08); }
+  table.results td .desc { display: block; color: var(--ink-faint); font-size: 10.5px; font-weight: 400; }
+  .headline-box {
+    background: rgba(255,92,92,.09); border: 1px solid #7a2a2a; border-left: 3px solid var(--danger);
+    border-radius: 6px; padding: 12px 14px; margin-bottom: 14px;
+  }
+  .headline-box .big { font-size: 16px; font-weight: 660; color: #ffc9c9; }
+  .provenance {
+    font-size: 11px; color: var(--ink-faint); line-height: 1.55;
+    border-top: 1px solid var(--line); margin-top: 10px; padding-top: 8px;
+  }
+  .provenance strong { color: var(--ink-dim); }
+  .provenance ul { margin: 4px 0 0; padding-left: 16px; }
+  .verdict {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+    padding: 10px 12px; margin-bottom: 9px;
+  }
+  .verdict h4 { margin: 0 0 6px; font-size: 12px; font-family: ui-monospace, monospace; color: var(--ink); }
+  .verdict .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 7px; }
+  .verdict .pair > div { background: var(--bg); border: 1px solid var(--line); border-radius: 5px; padding: 7px 9px; }
+  .verdict .pair .who { font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-faint); }
+  .verdict .pair .val { font-size: 17px; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .verdict .pair .baseline .val { color: var(--robust); }
+  .verdict .pair .agent .val { color: var(--warn); }
+  .verdict .reasoning { font-size: 11.5px; color: var(--ink-dim); line-height: 1.5; }
+  .verdict .cites { font-size: 11px; color: var(--ink-faint); margin-top: 6px; font-family: ui-monospace, monospace; }
+  .spinner { color: var(--ink-faint); font-style: italic; font-size: 12px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <h1>ConjunctionTriage</h1>
+    <span class="sub">Conjunction geometry at time of closest approach · 2025-01-01 → 2025-01-08 UTC</span>
+    <div class="tabs" role="tablist">
+      <button class="tab" id="tab-scene"  role="tab" aria-selected="true"  aria-controls="scene-view">3D geometry</button>
+      <button class="tab" id="tab-charts" role="tab" aria-selected="false" aria-controls="charts-view">Distributions</button>
+      <button class="tab" id="tab-pc"     role="tab" aria-selected="false" aria-controls="pc-view">P<sub>c</sub> calculator</button>
+      <button class="tab" id="tab-triage" role="tab" aria-selected="false" aria-controls="triage-view">Triage</button>
+      <button class="tab" id="tab-results" role="tab" aria-selected="false" aria-controls="results-view">Results</button>
+    </div>
+  </header>
+
+  <div id="api-strip" class="api-strip probing">
+    <span class="dot"></span>
+    <span id="api-strip-text">Checking for a local API at http://127.0.0.1:8000 …</span>
+  </div>
+
+  <!-- ============================ 3D ============================ -->
+  <section class="view" id="scene-view">
+
+    <aside class="left">
+      <div class="count">
+        <div><span class="big" id="shown-count">—</span> <span class="of">of <span id="sample-total">—</span> sampled events shown</span></div>
+        <div class="of" id="population-line">—</div>
+      </div>
+
+      <h2>Filters</h2>
+      <div class="control">
+        <label for="f-source">Source answer key</label>
+        <select id="f-source">
+          <option value="all">Both files</option>
+          <option value="TRACSS_SPHERICAL">Spherical (10 km, HBR 0.5 m)</option>
+          <option value="TRACSS_SFSH">SFSH (per-object volumes)</option>
+        </select>
+      </div>
+
+      <div class="control">
+        <label for="f-altitude">Altitude band (object 1)</label>
+        <select id="f-altitude">
+          <option value="all">All altitudes</option>
+          <option value="leo">LEO (&lt; 2,000 km)</option>
+          <option value="meo">MEO (2,000–35,000 km)</option>
+          <option value="geo">GEO and beyond (≥ 35,000 km)</option>
+        </select>
+      </div>
+
+      <div class="control">
+        <label for="f-dilution">Covariance quality (dilution)</label>
+        <select id="f-dilution">
+          <option value="all">Robust and diluted</option>
+          <option value="robust">Robust only (dilution = 0)</option>
+          <option value="diluted">Diluted only (dilution = 1)</option>
+        </select>
+      </div>
+
+      <div class="control">
+        <label for="f-pc">Minimum uncensored P<sub>c</sub>: <span class="rangeval" id="f-pc-val">any</span></label>
+        <input type="range" id="f-pc" min="-11" max="-3" step="0.5" value="-11">
+      </div>
+      <div class="checkrow">
+        <input type="checkbox" id="f-censored" checked>
+        <label for="f-censored" style="margin:0">Include censored events</label>
+      </div>
+      <div class="checkrow">
+        <input type="checkbox" id="f-null" checked>
+        <label for="f-null" style="margin:0">Include events with no P<sub>c</sub></label>
+      </div>
+
+      <div class="control" style="margin-top:11px">
+        <label for="f-miss">Max miss distance: <span class="rangeval" id="f-miss-val">70 km</span></label>
+        <input type="range" id="f-miss" min="0" max="70" step="0.5" value="70">
+      </div>
+
+      <button class="reset" id="reset">Reset all filters</button>
+
+      <h2>Legend</h2>
+      <div style="font-size:11.5px;color:var(--ink-dim);margin-bottom:3px">Object colour — P<sub>c</sub> magnitude</div>
+      <div class="gradient"></div>
+      <div class="gradient-labels"><span>1e-10</span><span>1e-7</span><span>≥1e-4</span></div>
+      <div class="legend-item" style="margin-top:8px">
+        <span class="swatch" style="background:var(--censored)"></span>
+        <span><strong>Censored</strong> — P<sub>c</sub> at the 1e-10 floor. A bound, not a value, so it is deliberately off the colour scale.</span>
+      </div>
+      <div class="legend-item">
+        <span class="swatch" style="background:var(--null)"></span>
+        <span><strong>No P<sub>c</sub></strong> — not computable (non-positive-definite covariance).</span>
+      </div>
+      <div class="legend-item">
+        <span class="swatch ring"></span>
+        <span><strong>Ring</strong> — dilution = 1, covariance diluted, P<sub>c</sub> unreliable.</span>
+      </div>
+      <div class="legend-item">
+        <span class="swatch line" style="border-color:#4a5madd"></span>
+        <span>Line joins the two objects of one conjunction.</span>
+      </div>
+    </aside>
+
+    <div id="canvas-wrap">
+      <canvas id="c"></canvas>
+      <div id="hud">—</div>
+      <div id="hint">drag to rotate · scroll to zoom · right-drag to pan · click an object</div>
+      <div id="loading">Loading benchmark sample…</div>
+    </div>
+
+    <aside class="right" id="detail">
+      <h2>Event detail</h2>
+      <p class="empty">Click any object or conjunction line to inspect it.</p>
+
+      <h2>About this data</h2>
+      <div class="notice">
+        Real catalogued objects from the <strong>TraCSS Conjunction Assessment IV&amp;V dataset</strong>
+        (The Aerospace Corporation for the US Office of Space Commerce, <strong>CC0-1.0</strong>).
+        Positions are <strong>at time of closest approach</strong> — this is not a live feed and nothing is propagated.
+      </div>
+      <div class="notice">
+        The <strong>1e-10 P<sub>c</sub> floor is inferred from the data</strong>, not documented.
+        The Users Guide states only that P<sub>c</sub> may be NULL when covariance is non-positive-definite.
+      </div>
+      <div class="notice">
+        This dataset <strong>validates screening geometry; it is not a P<sub>c</sub> benchmark</strong>.
+        The guide states directly that "direct comparison of Pc values requires the same method of
+        Pc computation and is therefore not a key metric of this dataset."
+      </div>
+      <div class="notice hard">
+        <strong>Not for operational use.</strong> Public orbital data must never be used for
+        operational collision avoidance.
+      </div>
+    </aside>
+  </section>
+
+  <!-- ========================== CHARTS ========================== -->
+  <section class="view" id="charts-view" hidden>
+    <div class="notice" style="max-width:1100px">
+      Every chart is labelled <span class="scope population">population</span> when it is drawn from all
+      <strong id="pop-n">—</strong> ingested events, or <span class="scope sample">sample</span> when it is drawn
+      from the <strong id="samp-n">—</strong>-event stratified sample. The sample deliberately
+      <strong>over-represents rare high-probability events</strong> so they are visible at all — never read a
+      dataset proportion off a sample chart.
+    </div>
+    <div class="charts-grid" id="charts"></div>
+  </section>
+
+
+  <!-- ======================= Pc CALCULATOR ======================= -->
+  <section class="view panel-view" id="pc-view" hidden>
+    <h2 class="section">Probability of collision</h2>
+    <p class="lede">
+      Alfano (2004), computed live by <code>POST /pc</code>. The same code reproduces the
+      TraCSS <code>prob</code> column to a median ratio of <strong>0.999994</strong> over
+      20,000 events — which is a reproduction of their published method, not evidence that
+      P<sub>c</sub> is right about the world. No collision occurs anywhere in this dataset.
+    </p>
+
+    <div class="split">
+      <form id="pc-form">
+        <fieldset>
+          <legend>Object 1</legend>
+          <div class="field">
+            <label for="o1-pos">Position <span class="unit">km, J2000/ECI — x, y, z</span></label>
+            <input type="text" id="o1-pos" value="7000, 0, 0">
+          </div>
+          <div class="field">
+            <label for="o1-vel">Velocity <span class="unit">km/s, J2000/ECI — vx, vy, vz</span></label>
+            <input type="text" id="o1-vel" value="0, 7.5, 0">
+          </div>
+          <div class="field">
+            <label for="o1-cov">Covariance diagonal <span class="unit">km², in the frame below</span></label>
+            <input type="text" id="o1-cov" value="0.17, 433.5, 0.42">
+          </div>
+          <div style="font-size:10.5px;color:var(--ink-faint);margin:-4px 0 8px">
+            Loaded with the magnitudes of a real SFSH event &mdash; in-track uncertainty
+            dominates by three orders of magnitude, which is typical.
+          </div>
+          <div class="field">
+            <label for="o1-hbr">Hard-body radius <span class="unit">metres</span></label>
+            <input type="number" id="o1-hbr" value="5" step="any" min="0">
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Object 2</legend>
+          <div class="field">
+            <label for="o2-pos">Position <span class="unit">km, J2000/ECI — x, y, z</span></label>
+            <input type="text" id="o2-pos" value="7000.2, 0.1, 0.35">
+          </div>
+          <div class="field">
+            <label for="o2-vel">Velocity <span class="unit">km/s, J2000/ECI — vx, vy, vz</span></label>
+            <input type="text" id="o2-vel" value="2.0, 3.0, 6.5">
+          </div>
+          <div class="field">
+            <label for="o2-cov">Covariance diagonal <span class="unit">km², in the frame below</span></label>
+            <input type="text" id="o2-cov" value="0.19, 487.5, 0.43">
+          </div>
+          <div class="field">
+            <label for="o2-hbr">Hard-body radius <span class="unit">metres</span></label>
+            <input type="number" id="o2-hbr" value="3" step="any" min="0">
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Covariance frame</legend>
+          <div class="field">
+            <select id="pc-frame">
+              <option value="uvw">UVW — each in its own object's local frame (how TraCSS publishes them)</option>
+              <option value="eci">ECI — both already inertial</option>
+            </select>
+          </div>
+          <div class="notice" style="margin-bottom:0">
+            This is the one input with no safe default. Two covariances published in
+            <strong>different</strong> local frames cannot be summed until each is rotated to
+            ECI, and choosing wrong raises no error anywhere &mdash; it just returns a
+            different number. Switch this control and recompute: with the values loaded here
+            the answer moves by a factor of about <strong>6</strong>, and for
+            in-track-dominated covariances in dissimilar orbital planes it can move by
+            <strong>six orders of magnitude</strong>.
+          </div>
+        </fieldset>
+
+        <button type="submit" class="action" id="pc-submit">Compute P<sub>c</sub></button>
+        <button type="button" class="ghost" id="pc-example">Load a real benchmark event</button>
+      </form>
+
+      <div id="pc-output">
+        <div class="result-card">
+          <h3>Result</h3>
+          <p class="spinner">Fill the form and compute, or load a real event from the
+             benchmark to see values in the ranges that actually occur.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================== TRIAGE =========================== -->
+  <section class="view panel-view" id="triage-view" hidden>
+    <h2 class="section">Reasoning agent</h2>
+
+    <div class="headline-box">
+      <div class="big">The agent lost.</div>
+      <p style="margin:6px 0 0;font-size:12.5px;color:var(--ink-dim);max-width:820px">
+        On the held-out test set it scored <strong>L&nbsp;=&nbsp;1.6606</strong> against the
+        latest-CDM baseline's <strong>L&nbsp;=&nbsp;0.6940</strong> — 2.4× worse on the
+        official Kelvins metric, where lower is better. In a 10,000-resample paired bootstrap
+        it was ahead in <strong>0.0%</strong> of resamples. This panel exists so you can watch
+        it reason and compare it against the one-line baseline, not because it is the better
+        estimator. Both numbers are shown for every event, side by side.
+      </p>
+    </div>
+
+    <div class="split">
+      <form id="triage-form">
+        <fieldset>
+          <legend>Kelvins series</legend>
+          <div class="field">
+            <label for="triage-ids">Series ids <span class="unit">comma-separated, up to 10 — each is a billed LLM call</span></label>
+            <textarea id="triage-ids" rows="3">test:100, test:1001</textarea>
+          </div>
+          <div class="field">
+            <label for="triage-split">Split</label>
+            <select id="triage-split">
+              <option value="test">test — the held-out split Phase 7 scored</option>
+              <option value="train">train</option>
+            </select>
+          </div>
+          <button type="submit" class="action" id="triage-submit">Run the agent</button>
+        </fieldset>
+        <div class="notice">
+          The agent is a <strong>corrector on an alert queue</strong>: it is invoked only when
+          the latest visible risk is at or above <strong>−7.0</strong>. Below that the event
+          falls through to the baseline with no call made. That is the protocol Phase 6
+          pre-registered and Phase 7 scored, unchanged.
+        </div>
+        <div class="notice">
+          Kelvins events are <strong>anonymised and time-shifted</strong>. They carry no TCA
+          and no catalogue identity, so nothing here can be joined to a real object — and
+          nothing here is a live warning.
+        </div>
+      </form>
+
+      <div id="triage-output">
+        <div class="result-card">
+          <h3>Verdicts</h3>
+          <p class="spinner">Enter series ids and run. Needs the API and an LLM key.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================== RESULTS ========================== -->
+  <section class="view panel-view" id="results-view" hidden>
+    <h2 class="section">Phase 7 — the single held-out evaluation</h2>
+    <p class="lede">
+      Read verbatim from the frozen evaluation artefact. Nothing on this page is recomputed,
+      and the test set was scored exactly once, after the artefact manifest was committed.
+    </p>
+    <div id="results-output">
+      <p class="spinner">Loading…</p>
+    </div>
+  </section>
+
+</div>
+
+<script type="importmap">
+{ "imports": { "three": "./lib/three.module.min.js" } }
+</script>
+<script type="module" src="./app.js"></script>
+<script type="module" src="./live.js"></script>
+</body>
+</html>

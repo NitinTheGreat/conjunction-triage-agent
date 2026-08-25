@@ -1,0 +1,300 @@
+{
+ "generated_from": "processed/profile.json (full population) + the Phase 2 sample",
+ "population": {
+  "by_source": {
+   "spherical": {
+    "events": 913292,
+    "censored": 682442,
+    "uncensored": 230830,
+    "pc_null": 20,
+    "uncensored_decades": {
+     "1e-10..1e-09": 35051,
+     "1e-09..1e-08": 61098,
+     "1e-08..1e-07": 123286,
+     "1e-07..1e-06": 11311,
+     "1e-06..1e-05": 84
+    },
+    "uncensored_max": 3.6775636e-06,
+    "above_action_threshold": 0,
+    "dilution_values": {
+     "0.0": 214623,
+     "1.0": 698649,
+     "NULL": 20
+    },
+    "miss_distance_km": {
+     "count": 913292,
+     "min": 0.008683728875,
+     "q1": 5.24014348725,
+     "median": 7.288560156,
+     "q3": 8.69898411625,
+     "max": 9.999990512,
+     "mean": 6.77255010929125
+    },
+    "relative_speed_kms": {
+     "count": 913292,
+     "min": 1.80290920459e-05,
+     "q1": 7.355752325809858,
+     "median": 11.50016418189789,
+     "q3": 14.190364668958296,
+     "max": 23.587155933193003,
+     "mean": 10.408034784638666
+    },
+    "mahalanobis_distance": {
+     "count": 913272,
+     "min": 8.1849472e-09,
+     "q1": 3.6711156750000002,
+     "median": 8.832682049999999,
+     "q3": 13.87123975,
+     "max": 164.84182,
+     "mean": 9.311144791734185
+    },
+    "altitude_bands": {
+     "<200 km (decaying)": 24,
+     "200-500 km": 252879,
+     "500-800 km": 1217236,
+     "800-1200 km": 310811,
+     "1200-2000 km": 44385,
+     "2000-35000 km (MEO)": 405,
+     ">=35000 km (GEO+)": 844
+    },
+    "covariance_trace_decades": {
+     "1e-03..1e-02": 3,
+     "1e-02..1e-01": 37,
+     "1e-01..1e+00": 17996,
+     "1e+00..1e+01": 86290,
+     "1e+01..1e+02": 533155,
+     "1e+02..1e+03": 1105623,
+     "1e+03..1e+04": 73783,
+     "1e+04..1e+05": 1637,
+     "1e+05..1e+06": 1167,
+     "1e+06..1e+07": 1710,
+     "1e+07..1e+08": 1711,
+     "1e+08..1e+09": 1299,
+     "1e+09..1e+10": 849,
+     "1e+10..1e+11": 481,
+     "1e+11..1e+12": 329,
+     "1e+12..1e+13": 118,
+     "1e+13..1e+14": 27,
+     "1e+14..1e+15": 21,
+     "1e+15..1e+16": 4,
+     "1e+16..1e+17": 3,
+     "1e+17..1e+18": 8,
+     "1e+18..1e+19": 29,
+     "1e+19..1e+20": 82,
+     "1e+20..1e+21": 74,
+     "1e+21..1e+22": 140,
+     "1e+22..1e+23": 7,
+     "1e+27..1e+28": 1
+    },
+    "pc_by_dilution": {
+     "robust": {
+      "events": 214623,
+      "above_action_threshold": 0
+     },
+     "diluted": {
+      "events": 698649,
+      "above_action_threshold": 0
+     }
+    }
+   },
+   "sfsh": {
+    "events": 283568,
+    "censored": 41679,
+    "uncensored": 241876,
+    "pc_null": 13,
+    "uncensored_decades": {
+     "1e-10..1e-09": 13087,
+     "1e-09..1e-08": 16622,
+     "1e-08..1e-07": 15195,
+     "1e-07..1e-06": 32486,
+     "1e-06..1e-05": 123721,
+     "1e-05..1e-04": 40460,
+     "1e-04..1e-03": 305
+    },
+    "uncensored_max": 0.00093538554,
+    "above_action_threshold": 305,
+    "dilution_values": {
+     "0.0": 113580,
+     "1.0": 169975,
+     "NULL": 13
+    },
+    "miss_distance_km": {
+     "count": 283568,
+     "min": 0.008683728875,
+     "q1": 9.34846318025,
+     "median": 18.05954009,
+     "q3": 25.937415362499998,
+     "max": 67.1956189,
+     "mean": 19.728250463862054
+    },
+    "relative_speed_kms": {
+     "count": 283568,
+     "min": 1.80290920459e-05,
+     "q1": 4.674204777742014,
+     "median": 8.185577947363178,
+     "q3": 11.837623460570635,
+     "max": 23.587155933193003,
+     "mean": 8.448853148262023
+    },
+    "mahalanobis_distance": {
+     "count": 283555,
+     "min": 8.1849472e-09,
+     "q1": 0.7190063250000001,
+     "median": 1.3379858,
+     "q3": 2.83690205,
+     "max": 335.51532,
+     "mean": 2.71045490156504
+    },
+    "altitude_bands": {
+     "<200 km (decaying)": 19,
+     "200-500 km": 165615,
+     "500-800 km": 359646,
+     "800-1200 km": 35227,
+     "1200-2000 km": 4162,
+     "2000-35000 km (MEO)": 755,
+     ">=35000 km (GEO+)": 1712
+    },
+    "covariance_trace_decades": {
+     "1e-02..1e-01": 8,
+     "1e-01..1e+00": 1410,
+     "1e+00..1e+01": 12180,
+     "1e+01..1e+02": 131532,
+     "1e+02..1e+03": 384344,
+     "1e+03..1e+04": 33774,
+     "1e+04..1e+05": 631,
+     "1e+05..1e+06": 497,
+     "1e+06..1e+07": 711,
+     "1e+07..1e+08": 729,
+     "1e+08..1e+09": 544,
+     "1e+09..1e+10": 313,
+     "1e+10..1e+11": 153,
+     "1e+11..1e+12": 104,
+     "1e+12..1e+13": 96,
+     "1e+13..1e+14": 15,
+     "1e+14..1e+15": 2,
+     "1e+15..1e+16": 1,
+     "1e+16..1e+17": 4,
+     "1e+18..1e+19": 4,
+     "1e+19..1e+20": 25,
+     "1e+20..1e+21": 9,
+     "1e+21..1e+22": 43,
+     "1e+22..1e+23": 5,
+     "1e+27..1e+28": 1,
+     "1e+31..1e+32": 1
+    },
+    "pc_by_dilution": {
+     "robust": {
+      "events": 113580,
+      "above_action_threshold": 1
+     },
+     "diluted": {
+      "events": 169975,
+      "above_action_threshold": 304
+     }
+    }
+   }
+  },
+  "events": 1196860,
+  "censored": 724121,
+  "uncensored": 472706,
+  "pc_null": 33,
+  "above_action_threshold": 305
+ },
+ "sample": {
+  "events": 2000,
+  "censored": 377,
+  "uncensored": 1623,
+  "diluted": 1163,
+  "robust": 804,
+  "unknown_dilution": 33,
+  "seed": 20260819,
+  "strata_counts": {
+   "sfsh|action|diluted|500-800": 86,
+   "sfsh|action|diluted|800-2000": 8,
+   "sfsh|action|diluted|<500": 86,
+   "sfsh|action|robust|800-2000": 1,
+   "sfsh|censored|diluted|500-800": 24,
+   "sfsh|censored|diluted|800-2000": 24,
+   "sfsh|censored|diluted|<500": 24,
+   "sfsh|censored|diluted|>=2000": 24,
+   "sfsh|censored|robust|500-800": 24,
+   "sfsh|censored|robust|800-2000": 24,
+   "sfsh|censored|robust|<500": 24,
+   "sfsh|censored|robust|>=2000": 24,
+   "sfsh|low|diluted|500-800": 24,
+   "sfsh|low|diluted|800-2000": 24,
+   "sfsh|low|diluted|<500": 24,
+   "sfsh|low|diluted|>=2000": 24,
+   "sfsh|low|robust|500-800": 24,
+   "sfsh|low|robust|800-2000": 24,
+   "sfsh|low|robust|<500": 24,
+   "sfsh|low|robust|>=2000": 24,
+   "sfsh|moderate|diluted|500-800": 24,
+   "sfsh|moderate|diluted|800-2000": 24,
+   "sfsh|moderate|diluted|<500": 24,
+   "sfsh|moderate|diluted|>=2000": 24,
+   "sfsh|moderate|robust|500-800": 24,
+   "sfsh|moderate|robust|800-2000": 24,
+   "sfsh|moderate|robust|<500": 24,
+   "sfsh|moderate|robust|>=2000": 24,
+   "sfsh|near_threshold|diluted|500-800": 86,
+   "sfsh|near_threshold|diluted|800-2000": 86,
+   "sfsh|near_threshold|diluted|<500": 86,
+   "sfsh|near_threshold|diluted|>=2000": 73,
+   "sfsh|near_threshold|robust|500-800": 86,
+   "sfsh|near_threshold|robust|800-2000": 86,
+   "sfsh|near_threshold|robust|<500": 86,
+   "sfsh|near_threshold|robust|>=2000": 2,
+   "sfsh|null|unknown|500-800": 4,
+   "sfsh|null|unknown|800-2000": 1,
+   "sfsh|null|unknown|<500": 8,
+   "spherical|censored|diluted|500-800": 24,
+   "spherical|censored|diluted|800-2000": 24,
+   "spherical|censored|diluted|<500": 24,
+   "spherical|censored|diluted|>=2000": 24,
+   "spherical|censored|robust|500-800": 24,
+   "spherical|censored|robust|800-2000": 23,
+   "spherical|censored|robust|<500": 23,
+   "spherical|censored|robust|>=2000": 19,
+   "spherical|low|diluted|500-800": 23,
+   "spherical|low|diluted|800-2000": 23,
+   "spherical|low|diluted|<500": 23,
+   "spherical|low|diluted|>=2000": 23,
+   "spherical|low|robust|500-800": 23,
+   "spherical|low|robust|800-2000": 23,
+   "spherical|low|robust|<500": 23,
+   "spherical|low|robust|>=2000": 23,
+   "spherical|moderate|diluted|500-800": 23,
+   "spherical|moderate|diluted|800-2000": 23,
+   "spherical|moderate|diluted|<500": 23,
+   "spherical|moderate|diluted|>=2000": 23,
+   "spherical|moderate|robust|500-800": 23,
+   "spherical|moderate|robust|800-2000": 23,
+   "spherical|moderate|robust|<500": 23,
+   "spherical|moderate|robust|>=2000": 5,
+   "spherical|near_threshold|diluted|500-800": 29,
+   "spherical|near_threshold|diluted|800-2000": 49,
+   "spherical|near_threshold|diluted|<500": 6,
+   "spherical|null|unknown|500-800": 4,
+   "spherical|null|unknown|800-2000": 6,
+   "spherical|null|unknown|<500": 10
+  },
+  "selection_rule": "ranked by miss_distance_km then event_id, bucketed into `quota` equal buckets, first row of each bucket kept",
+  "warning": "This sample is deliberately NOT representative. It over-samples rare high-probability events so the visualisation shows them at all. Use the population block for any statistic about the dataset.",
+  "excluded_unrenderable": {
+   "non_finite_position": 0
+  }
+ },
+ "constants": {
+  "earth_radius_km": 6378.137,
+  "pc_floor": 1e-10,
+  "pc_floor_is_documented": false,
+  "action_threshold_pc": 0.0001
+ },
+ "provenance": {
+  "dataset": "TraCSS Conjunction Assessment IV&V dataset",
+  "producer": "The Aerospace Corporation for the US Office of Space Commerce",
+  "licence": "CC0-1.0 (public domain)",
+  "screening_window_utc": "2025-01-01T12:00:00Z to 2025-01-08T12:00:00Z"
+ }
+}

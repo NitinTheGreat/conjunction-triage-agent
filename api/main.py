@@ -44,6 +44,7 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 from fastapi import FastAPI, Query, Request, status  # noqa: E402
 from fastapi.exceptions import RequestValidationError  # noqa: E402
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from fastapi.responses import JSONResponse  # noqa: E402
 
 from api.models import (  # noqa: E402
@@ -86,6 +87,23 @@ app = FastAPI(
     version=code_version(),
     contact={"name": "ConjunctionTriage Agent"},
     license_info={"name": "See repository"},
+)
+
+#: Origins the browser frontend is served from. Deliberately an explicit localhost list
+#: rather than "*": this server reads a local dataset and can spend money on LLM calls, so a
+#: page on any origin being able to drive it is not a trade worth making for convenience.
+LOCAL_ORIGINS = [
+    f"http://{host}:{port}"
+    for host in ("localhost", "127.0.0.1")
+    for port in (8001, 8080, 5173, 3000)
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=LOCAL_ORIGINS,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type"],
 )
 
 

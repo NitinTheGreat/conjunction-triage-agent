@@ -1,0 +1,114 @@
+{
+  "headline": "The LLM reasoning agent did not beat the latest-CDM baseline. It scored 2.4x worse.",
+  "metric": "Official Kelvins metric L = MSE_HR / F2 on the held-out test set. Lower is better.",
+  "arms": [
+    {
+      "key": "B1_latest_cdm",
+      "label": "B1 \u2014 latest CDM",
+      "description": "Predict the most recent visible CDM's risk.",
+      "L": 0.6939612611815034,
+      "mse_hr": 0.5128891069143503,
+      "f2": 0.7390745501285348,
+      "precision": 0.6460674157303371,
+      "recall": 0.7666666666666667,
+      "is_baseline": true,
+      "is_agent": false
+    },
+    {
+      "key": "B2b_constant_minus5",
+      "label": "B2b \u2014 constant \u22125",
+      "description": "Predict \u22125 for every event.",
+      "L": 2.504139934848712,
+      "mse_hr": 0.6787513375990365,
+      "f2": 0.2710516805204192,
+      "precision": 0.0692201199815413,
+      "recall": 1.0,
+      "is_baseline": false,
+      "is_agent": false
+    },
+    {
+      "key": "B3_linear_extrapolation",
+      "label": "B3 \u2014 linear extrapolation",
+      "description": "Fit a line through the visible risk sequence and extend it to TCA.",
+      "L": 4.221746299422207,
+      "mse_hr": 2.9419834839179138,
+      "f2": 0.6968641114982578,
+      "precision": 0.45977011494252873,
+      "recall": 0.8,
+      "is_baseline": false,
+      "is_agent": false
+    },
+    {
+      "key": "B4_gbm_regressor",
+      "label": "B4 \u2014 gradient boosting",
+      "description": "Gradient-boosted regressor on 56 engineered features.",
+      "L": 36.87836068732736,
+      "mse_hr": 1.8196559549668105,
+      "f2": 0.049342105263157895,
+      "precision": 0.75,
+      "recall": 0.04,
+      "is_baseline": false,
+      "is_agent": false
+    },
+    {
+      "key": "B5_two_stage_gbm",
+      "label": "B5 \u2014 two-stage GBM",
+      "description": "Classify high-risk, then regress within the predicted class.",
+      "L": 0.8978152784986071,
+      "mse_hr": 0.5341432669548674,
+      "f2": 0.5949367088607593,
+      "precision": 0.24102564102564103,
+      "recall": 0.94,
+      "is_baseline": false,
+      "is_agent": false
+    },
+    {
+      "key": "agent",
+      "label": "Agent \u2014 LLM corrector",
+      "description": "LangGraph agent, prompt v1, invoked when the latest risk is at or above \u22127.0.",
+      "L": 1.6606049431442929,
+      "mse_hr": 0.8491729822896952,
+      "f2": 0.5113636363636364,
+      "precision": 0.6923076923076923,
+      "recall": 0.48,
+      "is_baseline": false,
+      "is_agent": true
+    }
+  ],
+  "agent_vs_b1": {
+    "median_difference": 0.9461800444378619,
+    "ci_low": 0.5119000218884603,
+    "ci_high": 1.6151712118243067,
+    "resamples": 10000,
+    "fraction_favouring_agent": 0.0,
+    "note": "Paired bootstrap over the test set. This measures sampling uncertainty within this one test set -- not split-to-split variance, and not the agent's own run-to-run spread."
+  },
+  "published_leaderboard": {
+    "CRP_baseline_constant_minus5": {
+      "L": 2.5,
+      "mse_hr": null,
+      "f2": null
+    },
+    "LRP_baseline_latest_risk": {
+      "L": 0.694,
+      "mse_hr": 0.513,
+      "f2": 0.739
+    },
+    "winner_sesc": {
+      "L": 0.556,
+      "mse_hr": 0.407,
+      "f2": 0.733
+    },
+    "tenth_spacemeister": {
+      "L": 0.649,
+      "mse_hr": 0.479,
+      "f2": 0.738
+    }
+  },
+  "published_source": "arXiv:2008.03069 (Uriot et al. 2020), Table 3",
+  "test_events": 2167,
+  "test_high_risk": 150,
+  "test_high_risk_pct": 6.922,
+  "frozen_manifest_head": "24abb2cd4731d40e579cace5eb44de99f8072d6d",
+  "provenance": "Read verbatim from processed/test_results.json, the output of the single frozen Phase 7 evaluation. Nothing on this page is recomputed."
+}
