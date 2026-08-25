@@ -129,6 +129,7 @@ class PcResult:
     mahalanobis_distance_3d: float
     projected_covariance: np.ndarray
     conditioning: ConditioningReport
+    conditioning_3d: ConditioningReport
     method: str = "Alfano 2004, 2D short-encounter"
 
     def as_dict(self) -> dict[str, object]:
@@ -144,6 +145,7 @@ class PcResult:
             "mahalanobis_distance_3d": self.mahalanobis_distance_3d,
             "projected_covariance_km2": self.projected_covariance.tolist(),
             "conditioning": self.conditioning.as_dict(),
+            "conditioning_3d": self.conditioning_3d.as_dict(),
             "method": self.method,
         }
 
@@ -338,8 +340,18 @@ def pc_from_states(
     relative_speed = float(np.linalg.norm(relative_velocity))
 
     basis = encounter_plane_basis(relative_velocity, relative_position)
+
+    # Condition the combined 3x3 *before* projecting, not only the 2x2 afterwards.
+    #
+    # A non-positive-definite 3x3 can project to a perfectly healthy-looking 2x2: the bad
+    # direction simply falls outside the encounter plane. Checking only after the projection
+    # therefore misses it, and the resulting Pc looks unconditioned when it is not. On the
+    # 33 TraCSS rows where their own Pc is NULL -- every one of which has at least one
+    # non-PSD covariance -- the post-projection check flagged 1 of 13 in the SFSH file while
+    # the input was bad in all 13.
     combined_eci = c1 + c2
-    projected = project_covariance_to_plane(combined_eci, basis)
+    combined_conditioned, report_3d = condition_covariance(combined_eci)
+    projected = project_covariance_to_plane(combined_conditioned, basis)
     conditioned, report = condition_covariance(projected)
 
     miss_in_plane = basis @ relative_position
@@ -356,9 +368,10 @@ def pc_from_states(
     mahalanobis = float(
         np.sqrt(miss_in_plane @ np.linalg.solve(conditioned, miss_in_plane))
     )
-    conditioned_3d, _ = condition_covariance(combined_eci)
     mahalanobis_3d = float(
-        np.sqrt(relative_position @ np.linalg.solve(conditioned_3d, relative_position))
+        np.sqrt(
+            relative_position @ np.linalg.solve(combined_conditioned, relative_position)
+        )
     )
 
     return PcResult(
@@ -370,4 +383,5 @@ def pc_from_states(
         mahalanobis_distance_3d=mahalanobis_3d,
         projected_covariance=conditioned,
         conditioning=report,
+        conditioning_3d=report_3d,
     )
