@@ -31,3 +31,10 @@ scipy==1.17.1            # Wilcoxon signed-rank for the paired comparison
 
 # --- test harness ---
 pytest==9.1.1
+
+# --- Phase 9: physics, API, MCP ---
+sgp4==2.25              # SGP4 propagation (orbital/propagate.py); also ships the
+                        # Vallado tcppver.out the reference case is checked against
+fastapi==0.138.0        # HTTP API (api/main.py)
+uvicorn==0.49.0         # ASGI server for api.main:app
+httpx==0.28.1           # fastapi.testclient depends on it (tests/test_api.py)
