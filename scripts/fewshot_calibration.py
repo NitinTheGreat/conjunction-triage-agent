@@ -284,8 +284,22 @@ def run(
 
 def measure(frame: pd.DataFrame, minimum_precision: float) -> dict[str, Any]:
     """Revision rate, downgrade precision, and whether the disposition moved."""
+    if frame.empty:
+        raise RuntimeError(
+            "no successful responses at all -- every call failed. The raw frame and the "
+            "failure list have already been written; inspect them before re-running."
+        )
     counts = frame.groupby("series_id")["run"].nunique()
     common = sorted(counts[counts == SELF_CONSISTENCY_RUNS].index)
+    if not common:
+        # A bare KeyError here cost a paid run once. Say what actually happened.
+        histogram = counts.value_counts().sort_index().to_dict()
+        raise RuntimeError(
+            f"no event completed all {SELF_CONSISTENCY_RUNS} runs, so nothing can be "
+            f"compared across runs. Events by number of successful runs: {histogram}. "
+            f"{len(frame)} successful responses over {frame['series_id'].nunique()} "
+            "events. Re-run: the successes are cached and cost nothing to replay."
+        )
     wide = frame[frame["series_id"].isin(common)].set_index(["run", "series_id"]).sort_index()
 
     per_run = []
@@ -407,6 +421,25 @@ def main() -> int:
     frame, client, failures = run(
         subsample, cdms, preamble, examples, args.provider, args.model, args.concurrency
     )
+
+    # Persist BEFORE measuring. These responses were paid for; a bug in the analysis must
+    # never be able to discard them. An earlier version measured first and lost a run to a
+    # KeyError -- the calls were cached, but nothing said so at the time.
+    raw_path = settings.PROCESSED_DIR / "EXPLORATORY_fewshot_runs.parquet"
+    if not frame.empty:
+        frame.to_parquet(raw_path)
+    (settings.PROCESSED_DIR / "EXPLORATORY_fewshot_failures.json").write_text(
+        json.dumps(failures, indent=2), encoding="utf-8"
+    )
+    print(f"\n  {len(frame)} responses saved to {raw_path.name}, "
+          f"{len(failures)} failures saved alongside")
+    if failures:
+        from collections import Counter
+
+        reasons = Counter(f["error"][:70] for f in failures)
+        for reason, count in reasons.most_common(4):
+            print(f"    {count:4d}x {reason}")
+
     result = measure(frame, minimum)
     usage = client.usage_summary()
     spend = actual_spend(args.model, usage)
@@ -452,7 +485,6 @@ def main() -> int:
         "elapsed_seconds": round(time.perf_counter() - started, 1),
         "peak_memory_mb": round(_peak_memory_mb(), 1),
     }
-    frame.to_parquet(settings.PROCESSED_DIR / "EXPLORATORY_fewshot_runs.parquet")
     destination = settings.PROCESSED_DIR / "EXPLORATORY_fewshot_calibration.json"
     destination.write_text(json.dumps(report, indent=2, default=float), encoding="utf-8")
     print(f"\nspent ${spend:.2f} against a ${projection['usd']:.2f} projection -> {destination}")
