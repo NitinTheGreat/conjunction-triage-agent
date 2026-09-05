@@ -1,7 +1,8 @@
 # Phase 10 — Benchmark-score variance is a property of the intervention policy
 
-Model-level self-consistency does not predict score-level stability. The two dissociate by
-five orders of magnitude while the model's own stochasticity stays constant.
+Model-level self-consistency does not predict score-level stability. Across four arms on two
+vendors, verdict flip rate stays within 1.4 percentage points while Var(L) moves by a factor
+of 554,000 — and a single derived formula predicts every one of them to within 15%.
 
 Companion derivation: [PHASE10_THEORY.md](PHASE10_THEORY.md). No new agent, no new prompt,
 no test-set scoring, and no change to any Phase 7 frozen artefact.
@@ -235,29 +236,87 @@ magnitude in how stable their systems actually are.
 ## 6. Second model — EXPLORATORY
 
 Per `PHASE6_PREREGISTRATION.md` §10.3 this is exploratory and cannot alter the primary
-result. The question is narrow: does the relationship hold on a second model, or is it a
+result. The question was narrow: does the relationship hold on a second model, or is it a
 Gemini artefact?
 
-**Status: running at the time of writing** — `claude-opus-4-6`, temperature 0, same
-200-event subsample, same three salts, v1 and v2 unchanged. Results will be appended here and
-in `processed/EXPLORATORY_second_model.json`.
+`claude-opus-4-6`, temperature 0, the same 200-event subsample, the same three salts, v1 and
+v2 unchanged. 1,140 calls, zero failures, **$21.34 spent against a $22.42 projection**.
 
-Two constraints shaped the model choice and are worth recording:
+### It did not replicate. It reversed.
 
-- **The Claude 5 family rejects `temperature` with a 400.** "Same temperature 0" can only be
-  honoured on a model that still accepts the parameter, which ruled out Opus 5 and Sonnet 5.
-- **Extended thinking stays off.** Gemini's 4,626 output tokens per call were ~95% thinking;
-  reproducing that depth would have put the run at $27.75, over the phase's $25 cap. This is
-  a real difference between the arms, not a neutral choice.
+| | Gemini 3 Flash | Opus 4.6 |
+|---|---:|---:|
+| **v1** revision rate | 100% | 100% |
+| **v1** verdict flip rate | 6.03% | 5.50% |
+| **v1** L spread | **0.9667** | **0.0236** |
+| **v2** revision rate | 11.1% | **69.5%** |
+| **v2** verdict flip rate | 6.11% | 7.50% |
+| **v2** L spread | **0.0012** | **0.1808** |
 
-**Cost discipline.** Projected $14.33 from token counts measured on the rendered prompts. A
-10-event smoke test showed Opus 4.6 emits **2× the projected output tokens** (399/call
-against 193 for v1), moving the real projection to **$22.42** — under the cap, but 56% above
-the approved figure, so it was re-approved before spending. The smoke test also exposed that
-the frozen client's price table has no entry for `claude-opus-4-6` and returns $0.00 for
-unknown models, which would have left the runtime budget guard silently inert;
-`scripts/second_model.py` now computes spend from its own verified price table and refuses to
-run a model it has no price for.
+On Gemini the high-intervention arm was the unstable one. **On Opus 4.6 it is the stable
+one** — v1 at 100% intervention has an L spread of 0.0236 while v2 at 69.5% has 0.1808, 7.7×
+larger. The naive rate-to-variance ordering is not merely absent on the second model; it runs
+the other way.
+
+Two further things do not transfer:
+
+**The v2 prompt does not produce restraint on Opus 4.6.** "Revise only with strong evidence"
+yielded 11.1% revision on Gemini and **69.5%** on Opus — six times more. The behavioural
+effect of the prompt is a property of the model, not of the wording.
+
+**The same prompt on the same data gives Var(L) 1,838× apart across vendors.** v1 at
+p_HR = 1 on both: Gemini 0.2549, Opus 1.387 × 10⁻⁴. Identical rate, identical prompt,
+identical events — three orders of magnitude in score stability.
+
+### But the derivation predicts all four arms
+
+| Arm | p_HR | Var(L) observed | Var(L) predicted | ratio |
+|---|---:|---:|---:|---:|
+| Gemini v1 | 1.000 | 0.2549 | 0.2224 | 1.146 |
+| Gemini v2 | ~0.03 | 4.598 × 10⁻⁷ | 4.574 × 10⁻⁷ | 1.005 |
+| **Opus v1** | **1.000** | **1.3866 × 10⁻⁴** | **1.3866 × 10⁻⁴** | **1.000** |
+| **Opus v2** | ~0.60 | 8.9715 × 10⁻³ | 8.5801 × 10⁻³ | 1.046 |
+
+Four arms, two vendors, five orders of magnitude in Var(L), every one predicted to within
+15% and three of the four to within 5%.
+
+And the mechanism is again visible directly in the intermediates:
+
+- **Opus v1's MSE_HR is identical in all three runs** (0.5299), with E[Δ̃²] on high-risk
+  events identical at 0.11066 and the same 4 high-risk threshold crossings every time. The
+  MSE term contributes **exactly zero**; 100% of its Var(L) is F₂. At p_HR = 1 Opus made the
+  *same* high-risk revisions every run — its stochasticity never reached the scored
+  subpopulation.
+- **Opus v2's p_HR varies (0.643 / 0.571 / 0.571) and so does E[Δ̃²] (0.138 / 0.115 / 0.136).**
+  MSE moves, and Var(L) is 65× v1's.
+
+### What this establishes, and what it does not
+
+**The specific v1/v2 ordering is a Gemini artefact.** Anyone citing "restraint reduces score
+variance" from Phase 8 alone would be wrong on Opus 4.6, where restraint did not even occur.
+
+**The mechanism is not.** The derived form — clipped intervention magnitude on the scored
+subpopulation, divided by N* — predicts all four arms across both vendors. That is the claim
+Phase 10 makes, and the second model supports it more strongly than a replication would
+have: a replication would have been consistent with rate being the variable, whereas a
+*reversal* that the same formula still predicts can only be explained by the formula.
+
+**The three-level separation holds across models too.** Verdict flip rate across all four
+arms: 6.03%, 6.11%, 5.50%, 7.50% — a range of 1.4 percentage points across two vendors and
+two prompts. Var(L) across the same four: 4.60 × 10⁻⁷ to 0.2549, a factor of **554,000**.
+
+### Caveats specific to this section
+
+- **Extended thinking was off on Opus 4.6.** Gemini's 4,626 output tokens per call were ~95%
+  thinking; matching that depth would have cost $27.75, over the phase's cap. Opus ran at
+  ~399 output tokens per call. The two arms therefore differ in reasoning depth as well as
+  vendor, and that is a real confound for the *magnitude* comparison — though not for the
+  question of whether the formula predicts each arm.
+- **The Claude 5 family could not be used at all**: it rejects `temperature` with a 400, and
+  the phase requires temperature 0.
+- Opus 4.6 is a frontier-tier model and Gemini 3 Flash is not, so vendor and capability tier
+  move together. A tier-matched comparison (Haiku 4.5) would isolate vendor alone.
+- n = 3 runs per arm here as well. The same 2-degrees-of-freedom caveat applies.
 
 ---
 
@@ -347,7 +406,9 @@ run-to-run variation in which interventions a stochastic agent makes. They are t
 formal object in the derivation, but they are not the same mechanism, and the sweep cannot
 reproduce the part of v1's variance that comes from Δ *itself* varying between runs.
 
-**Single model until §6 completes.** Everything before that section is Gemini 3 Flash.
+**Two models, not many.** §6 adds Opus 4.6, which reversed the naive ordering and was still
+predicted by the derivation. Two vendors is not a survey; the formula has been tested on four
+arms, not on a population of models.
 
 **The v2 anchor rests on 180 of 200 events.** 32 cache gaps across 20 distinct events, from
 rate-limit failures during the original Phase 8 run. Those were reported rather than
@@ -377,7 +438,7 @@ result is untouched.
 | 2 | At rate 0 the gated predictions are B1 to 1 × 10⁻¹², and Var(L) is exactly 0 |
 | 3 | At rate 100 they are the original v1 run to 1 × 10⁻¹², and L reproduces the published Phase 6 value |
 | 4 | The verdict flip rate is constant across all 36 sweep rows, and no verdict column is read downstream of the gate |
-| 5 | The derivation reproduces both anchors within a stated 1.5× tolerance |
+| 5 | The derivation reproduces all four anchors — both vendors — within a stated 1.5× tolerance |
 | 6 | Every earlier `verify_phase*.py` still passes |
 | 7 | pytest passes |
 

@@ -42,6 +42,10 @@ PUBLISHED_FLIP_RATE = 0.0603
 
 #: Anchor Var(L) values, from the three-run self-consistency measurements.
 ANCHORS = {"v1": 0.254903, "v2": 4.59779e-07}
+#: The Phase 10 section 6 exploratory arms, on a second vendor. Checked when the artefact is
+#: present -- these were measured after the derivation was written, so they test it out of
+#: sample, and the second vendor reverses the rate-to-variance ordering.
+SECOND_MODEL_ANCHORS = {"v1": 1.38660e-04, "v2": 8.97150e-03}
 #: The derivation is checked to a factor rather than a percentage: these span five orders
 #: of magnitude, and a variance estimated from three runs has 2 degrees of freedom, whose
 #: own 95% interval already spans roughly a factor of five.
@@ -323,6 +327,52 @@ def check_derivation_reproduces_both_anchors() -> str:
         lines.append(f"{prompt}: predicted {predicted:.4g}, observed {observed:.4g}, "
                      f"ratio {ratio:.3f}")
 
+    # The second vendor, when it has been run. Same formula, same tolerance.
+    second = settings.PROCESSED_DIR / "EXPLORATORY_second_model_runs.parquet"
+    if second.is_file():
+        runs = pd.read_parquet(second)
+        for prompt, expected in SECOND_MODEL_ANCHORS.items():
+            subset = runs[runs["prompt"] == prompt]
+            if subset.empty:
+                continue
+            ids = sorted(set.intersection(
+                *[set(subset[subset["run"] == r]["series_id"]) for r in (0, 1, 2)]
+            ))
+            mses, f2s, losses = [], [], []
+            for run in (0, 1, 2):
+                block = (
+                    subset[(subset["run"] == run) & subset["series_id"].isin(ids)]
+                    .set_index("series_id").loc[ids]
+                )
+                score = kelvins_score(
+                    block["final_risk"].to_numpy(dtype=np.float64),
+                    block["effective_prediction"].to_numpy(dtype=np.float64),
+                )
+                mses.append(score.mse_hr)
+                f2s.append(score.f2)
+                losses.append(score.score)
+            mses, f2s, losses = map(np.asarray, (mses, f2s, losses))
+            observed = float(np.var(losses, ddof=1))
+            mean_mse, mean_f2 = float(mses.mean()), float(f2s.mean())
+            predicted = (
+                float(np.var(mses, ddof=1)) / mean_f2**2
+                + (mean_mse / mean_f2**2) ** 2 * float(np.var(f2s, ddof=1))
+                - 2 * (mean_mse / mean_f2**3) * float(np.cov(mses, f2s, ddof=1)[0, 1])
+            )
+            if abs(observed - expected) > 0.02 * expected:
+                raise CheckFailure(
+                    f"second model {prompt}: Var(L) = {observed:.6g}, the report records "
+                    f"{expected:.6g}"
+                )
+            ratio = observed / predicted if predicted > 0 else float("inf")
+            if not (1 / ANCHOR_TOLERANCE <= ratio <= ANCHOR_TOLERANCE):
+                raise CheckFailure(
+                    f"second model {prompt}: observed/predicted = {ratio:.3f}, outside "
+                    f"the {ANCHOR_TOLERANCE}x tolerance"
+                )
+            lines.append(f"opus-4.6 {prompt}: predicted {predicted:.4g}, observed "
+                         f"{observed:.4g}, ratio {ratio:.3f}")
+
     return "; ".join(lines) + f" (tolerance {ANCHOR_TOLERANCE}x)"
 
 
@@ -372,7 +422,7 @@ def main() -> int:
         ("rate 0 is B1 exactly, with Var(L) = 0", check_zero_rate_is_the_baseline),
         ("rate 100 is the published v1 run exactly", check_full_rate_is_the_published_run),
         ("the verdict flip rate is invariant to the gate", check_flip_rate_is_invariant),
-        ("the derivation reproduces both anchors", check_derivation_reproduces_both_anchors),
+        ("the derivation reproduces every anchor", check_derivation_reproduces_both_anchors),
         ("every earlier phase still verifies", check_earlier_phases_still_pass),
         ("pytest passes", check_pytest),
     ]

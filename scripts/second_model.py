@@ -33,7 +33,9 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Optional
 
@@ -49,19 +51,55 @@ from agent.llm import LLMClient, LLMError  # noqa: E402
 from agent.triage_agent import PROMPT_VERSION, SCOPE_THRESHOLD, TriageAgent  # noqa: E402
 from core.config import MissingCredentialError, settings  # noqa: E402
 from core.features import build_dataset  # noqa: E402
-from core.kelvins_metric import kelvins_score  # noqa: E402
+from core.kelvins_metric import MetricError, kelvins_score  # noqa: E402
 from core.kelvins_store import load_visible_cdms  # noqa: E402
 from replay_runs import SALTS, SELF_CONSISTENCY_EVENTS, SELF_CONSISTENCY_RUNS  # noqa: E402
 
 #: The phase's hard budget. The run aborts above this rather than asking forgiveness.
 COST_CAP_USD = 25.0
 
-#: Measured on this exact subsample by counting the rendered prompts and the cached
-#: answers, not guessed: see the Phase 10 report. Tokens, per call.
-MEASURED_TOKENS = {
-    "v1": {"input": 1160, "output": 193},
-    "v2": {"input": 1527, "output": 225},
+#: Tokens per call, measured rather than guessed -- but measured **per model**, because
+#: tokenizers differ and output length is a property of the model, not of the prompt.
+#:
+#: The fallback row was derived from the rendered prompts and the Gemini answers, and a
+#: 10-event smoke test on claude-opus-4-6 showed its OUTPUT estimate was 2x too low (193
+#: projected against 399 actual for v1). Cross-model extrapolation of output length does
+#: not work; the smoke test exists to catch exactly that before the full run.
+MEASURED_TOKENS: dict[str, dict[str, dict[str, int]]] = {
+    "claude-opus-4-6": {                      # measured, 30 cached calls per prompt
+        "v1": {"input": 1383, "output": 399},
+        "v2": {"input": 1704, "output": 478},
+    },
+    "_fallback": {                            # rendered prompts + Gemini answer lengths
+        "v1": {"input": 1160, "output": 193},
+        "v2": {"input": 1527, "output": 225},
+    },
 }
+
+
+def token_rates(model: str) -> tuple[dict[str, dict[str, int]], bool]:
+    """Per-call token rates for a model, and whether they were measured on it."""
+    if model in MEASURED_TOKENS:
+        return MEASURED_TOKENS[model], True
+    return MEASURED_TOKENS["_fallback"], False
+
+
+def actual_spend(model: str, usage: dict[str, Any]) -> Optional[float]:
+    """Cost from exact token counts and this file's verified price table.
+
+    Not taken from the client's own ``estimated_cost_usd``: that table has no entry for
+    every model and returns 0.0 when it misses, which would leave the runtime budget guard
+    silently inert. ``agent/llm.py`` is on the Phase 7 frozen manifest and cannot be
+    changed, so the caller does the arithmetic. Returns None when the price is unknown --
+    never zero, which would read as "free".
+    """
+    price = PRICES.get(model)
+    if price is None:
+        return None
+    return (
+        (usage.get("input_tokens") or 0) / 1e6 * price["input"]
+        + (usage.get("output_tokens") or 0) / 1e6 * price["output"]
+    )
 
 #: USD per million tokens. Only models that accept `temperature` can be used here, because
 #: the phase requires temperature 0 and the Claude 5 family rejects the parameter outright.
@@ -83,14 +121,11 @@ TEMPERATURE_REJECTING = (
 def project_cost(model: str, events: int, safety: float = 1.5) -> dict[str, Any]:
     """What the run should cost, before any of it is spent."""
     price = PRICES.get(model)
-    calls = events * SELF_CONSISTENCY_RUNS * len(MEASURED_TOKENS)
+    rates, measured_on_this_model = token_rates(model)
+    calls = events * SELF_CONSISTENCY_RUNS * len(rates)
     totals = {
-        "input": sum(
-            events * SELF_CONSISTENCY_RUNS * t["input"] for t in MEASURED_TOKENS.values()
-        ),
-        "output": sum(
-            events * SELF_CONSISTENCY_RUNS * t["output"] for t in MEASURED_TOKENS.values()
-        ),
+        "input": sum(events * SELF_CONSISTENCY_RUNS * t["input"] for t in rates.values()),
+        "output": sum(events * SELF_CONSISTENCY_RUNS * t["output"] for t in rates.values()),
     }
     if price is None:
         return {
@@ -109,16 +144,16 @@ def project_cost(model: str, events: int, safety: float = 1.5) -> dict[str, Any]
         "usd": round(usd, 2),
         "usd_with_safety_margin": round(usd * safety, 2),
         "safety_margin": safety,
+        "rates_measured_on_this_model": measured_on_this_model,
         "basis": (
-            "per-call token counts measured on this exact subsample by rendering every "
-            "prompt and reading the cached answers; not extrapolated from another model"
+            f"per-call token rates {'measured on this model' if measured_on_this_model else 'ESTIMATED from another model -- run a smoke test first, output length does not transfer'}"
         ),
     }
 
 
 def run_prompt(
     prompt: str, subsample: pd.DataFrame, cdms: dict[str, pd.DataFrame],
-    provider: Optional[str], model: Optional[str],
+    provider: Optional[str], model: Optional[str], concurrency: int = 4,
 ) -> tuple[pd.DataFrame, LLMClient, list[dict[str, Any]]]:
     """Three runs of one prompt. Returns rows, the client (for usage), and failures."""
     if prompt == "v1":
@@ -130,28 +165,30 @@ def run_prompt(
 
     records: list[dict[str, Any]] = []
     failures: list[dict[str, Any]] = []
-    for run, salt in enumerate(SALTS):
-        print(f"    run {run + 1}/{SELF_CONSISTENCY_RUNS} ...", end="", flush=True)
-        for _, row in subsample.iterrows():
-            series_id = str(row["series_id"])
-            frame = cdms.get(series_id)
-            if frame is None or frame.empty:
-                continue
-            try:
-                verdict, _ = agent.analyse(series_id, frame, row, salt=salt)
-            except (LLMError, ValueError, KeyError) as exc:
+    lock = threading.Lock()
+
+    def analyse_one(run: int, salt: str, row: pd.Series) -> None:
+        series_id = str(row["series_id"])
+        frame = cdms.get(series_id)
+        if frame is None or frame.empty:
+            return
+        try:
+            verdict, _ = agent.analyse(series_id, frame, row, salt=salt)
+        except (LLMError, ValueError, KeyError) as exc:
+            with lock:
                 failures.append({"run": run, "series_id": series_id, "error": str(exc)[:200]})
-                continue
+            return
 
-            baseline = float(row["latest_risk"])
-            if prompt == "v1":
-                revised, agent_risk = True, float(verdict.predicted_final_risk)
-                decision = bool(verdict.will_collapse)
-            else:
-                revised = bool(verdict.revise)
-                agent_risk = float(verdict.predicted_final_risk) if revised else None
-                decision = revised
+        baseline = float(row["latest_risk"])
+        if prompt == "v1":
+            revised, agent_risk = True, float(verdict.predicted_final_risk)
+            decision = bool(verdict.will_collapse)
+        else:
+            revised = bool(verdict.revise)
+            agent_risk = float(verdict.predicted_final_risk) if revised else None
+            decision = revised
 
+        with lock:
             records.append({
                 "prompt": prompt, "run": run, "series_id": series_id,
                 "baseline_risk": baseline, "final_risk": float(row["final_risk"]),
@@ -160,8 +197,26 @@ def run_prompt(
                 "effective_prediction": agent_risk if agent_risk is not None else baseline,
                 "revised": revised, "decision": decision,
             })
+
+    # Concurrency affects wall time only. Every call is independent, temperature is 0, and
+    # the cache key does not depend on ordering, so the result is identical to a serial
+    # run; records are sorted below so the file is deterministic regardless of completion
+    # order.
+    for run, salt in enumerate(SALTS):
+        print(f"    run {run + 1}/{SELF_CONSISTENCY_RUNS} ...", end="", flush=True)
+        with ThreadPoolExecutor(max_workers=concurrency) as pool:
+            futures = [
+                pool.submit(analyse_one, run, salt, row)
+                for _, row in subsample.iterrows()
+            ]
+            for future in as_completed(futures):
+                future.result()
         print(f" done ({client.calls_made} calls so far)", flush=True)
-    return pd.DataFrame(records), client, failures
+
+    frame = pd.DataFrame(records)
+    if not frame.empty:
+        frame = frame.sort_values(["run", "series_id"]).reset_index(drop=True)
+    return frame, client, failures
 
 
 def measure(frame: pd.DataFrame) -> dict[str, Any]:
@@ -188,20 +243,36 @@ def measure(frame: pd.DataFrame) -> dict[str, Any]:
     baseline = wide.loc[0, "baseline_risk"].reindex(common).to_numpy(dtype=float)
 
     flipped = decisions.sum(axis=0) % SELF_CONSISTENCY_RUNS != 0
-    losses = np.array([
-        kelvins_score(truth, predictions[run]).score for run in range(SELF_CONSISTENCY_RUNS)
-    ])
-    return {
+    result: dict[str, Any] = {
         "events": len(common),
+        "n_high_risk": int(wide.loc[0, "is_high_risk"].reindex(common).sum()),
         "revision_rate_per_run": [round(float(r.mean()), 4) for r in revised],
         "mean_revision_rate": round(float(revised.mean()), 4),
         "verdict_flip_rate": round(float(flipped.mean()), 4),
         "n_flipped": int(flipped.sum()),
-        "L_per_run": [round(float(v), 4) for v in losses],
-        "L_spread": round(float(losses.max() - losses.min()), 4),
-        "L_variance": float(np.var(losses, ddof=1)),
-        "L_b1_same_subsample": round(float(kelvins_score(truth, baseline).score), 4),
     }
+
+    # A subsample with no true high-risk event leaves MSE_HR undefined, and the frozen
+    # metric says so rather than returning 0. That is a legitimate configuration for a
+    # smoke test, so it is recorded rather than crashed on -- but it is never papered over
+    # with a substituted number.
+    try:
+        losses = np.array([
+            kelvins_score(truth, predictions[run]).score
+            for run in range(SELF_CONSISTENCY_RUNS)
+        ])
+        result.update({
+            "L_per_run": [round(float(v), 4) for v in losses],
+            "L_spread": round(float(losses.max() - losses.min()), 4),
+            "L_variance": float(np.var(losses, ddof=1)),
+            "L_b1_same_subsample": round(float(kelvins_score(truth, baseline).score), 4),
+        })
+    except MetricError as exc:
+        result.update({
+            "L_per_run": None, "L_spread": None, "L_variance": None,
+            "L_undefined_reason": str(exc),
+        })
+    return result
 
 
 def main() -> int:
@@ -212,6 +283,8 @@ def main() -> int:
     parser.add_argument("--project-only", action="store_true",
                         help="print the cost projection and stop, spending nothing")
     parser.add_argument("--cap", type=float, default=COST_CAP_USD)
+    parser.add_argument("--concurrency", type=int, default=4,
+                        help="in-flight requests; affects wall time only")
     args = parser.parse_args()
 
     print("EXPLORATORY -- this cannot alter the primary result "
@@ -236,6 +309,9 @@ def main() -> int:
         return 2
     print(f"  price          : ${projection['price_per_mtok']['input']}/"
           f"${projection['price_per_mtok']['output']} per MTok")
+    if not projection["rates_measured_on_this_model"]:
+        print("  WARNING        : token rates are estimated from a different model. "
+              "Smoke-test first -- output length does not transfer across models.")
     print(f"  projected      : ${projection['usd']:.2f}  "
           f"(${projection['usd_with_safety_margin']:.2f} at a "
           f"{projection['safety_margin']}x safety margin)")
@@ -298,7 +374,7 @@ def main() -> int:
     for prompt in ("v1", "v2"):
         print(f"  -- {prompt} --", flush=True)
         frame, client, failures = run_prompt(
-            prompt, subsample, cdms, args.provider, args.model
+            prompt, subsample, cdms, args.provider, args.model, args.concurrency
         )
         frames.append(frame)
         result = measure(frame)
@@ -308,7 +384,14 @@ def main() -> int:
 
         # Runtime guard on ACTUAL spend, not a projection. Aborts before the next prompt
         # rather than discovering the overrun afterwards.
-        spent_so_far += float(result["usage"].get("estimated_cost_usd") or 0.0)
+        cost = actual_spend(args.model, result["usage"])
+        if cost is None:
+            raise RuntimeError(
+                f"no verified price for {args.model!r}, so spend cannot be tracked and "
+                "the budget guard would be inert. Add it to PRICES."
+            )
+        result["actual_cost_usd"] = round(cost, 4)
+        spent_so_far += cost
         if spent_so_far > args.cap:
             report["aborted"] = (
                 f"actual spend ${spent_so_far:.2f} reached the ${args.cap:.2f} cap after "
@@ -318,7 +401,12 @@ def main() -> int:
             break
         print(f"    revision rate {result['mean_revision_rate']:.4f}  "
               f"flip rate {result['verdict_flip_rate']:.4f}  "
-              f"L {result['L_per_run']}  spread {result['L_spread']}")
+              f"L {result['L_per_run']}  spread {result['L_spread']}  "
+              f"({result['n_high_risk']} high-risk events)")
+        usage = result["usage"]
+        print(f"    usage: {usage['api_calls']} calls, {usage['input_tokens']:,} in, "
+              f"{usage['output_tokens']:,} out, ${result['actual_cost_usd']:.2f} "
+              f"(running total ${spent_so_far:.2f})")
 
     # The comparison the question is actually about.
     gemini = json.loads(
@@ -349,8 +437,7 @@ def main() -> int:
     destination.write_text(json.dumps(report, indent=2), encoding="utf-8")
 
     spent = sum(
-        report[p]["usage"].get("estimated_cost_usd", 0.0) or 0.0
-        for p in ("v1", "v2") if p in report
+        report[p].get("actual_cost_usd", 0.0) for p in ("v1", "v2") if p in report
     )
     print(f"\nestimated spend ${spent:.2f} against a ${projection['usd']:.2f} projection")
     print(f"-> {destination}")

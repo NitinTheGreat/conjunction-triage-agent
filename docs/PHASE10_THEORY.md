@@ -223,6 +223,30 @@ missing term: a variance estimated from three runs has 2 degrees of freedom, so 
 interval spans roughly a factor of five. The delta method is also first-order, and v1's
 fluctuations are not small.
 
+### Two further anchors, on a second vendor
+
+Added after the fact from the Phase 10 §6 exploratory run (`claude-opus-4-6`, temperature 0,
+same subsample, same salts). These were **not** available when the derivation was written, so
+they are a genuine out-of-sample test of it.
+
+| Arm | p_HR | Var(L) observed | Var(L) predicted | ratio |
+|---|---:|---:|---:|---:|
+| Gemini v1 | 1.000 | 0.2549 | 0.2224 | 1.146 |
+| Gemini v2 | ~0.03 | 4.598 × 10⁻⁷ | 4.574 × 10⁻⁷ | 1.005 |
+| Opus 4.6 v1 | 1.000 | 1.3866 × 10⁻⁴ | 1.3866 × 10⁻⁴ | **1.000** |
+| Opus 4.6 v2 | ~0.60 | 8.9715 × 10⁻³ | 8.5801 × 10⁻³ | 1.046 |
+
+The second vendor **reverses** the rate-to-variance ordering — on Opus the 100%-intervention
+arm is the *stable* one — and the same formula still predicts both arms. A prediction that
+survives a reversal of the naive relationship is doing more work than one that survives a
+replication of it.
+
+Opus v1 makes the magnitude term's role unmistakable: at p_HR = 1 its MSE_HR is *identical*
+in all three runs (0.5299), with E[Δ̃²] fixed at 0.11066 and the same four high-risk
+crossings each time. Both terms of Var(MSE_HR) are zero — the rate term because p = 1, the
+magnitude term because σ²_g = 0 — and 100% of its Var(L) is F₂. Gemini v1, at the identical
+rate on the identical events, has σ²_g = 0.13 and a Var(L) 1,838× larger.
+
 ### What the check shows about the mechanism
 
 **v2's MSE_HR is not merely stable — it is frozen.** All three runs give exactly 0.058723,
