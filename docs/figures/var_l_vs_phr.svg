@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 360" width="560" height="360" font-family="ui-sans-serif, system-ui, sans-serif">
+<rect width="560" height="360" fill="#10141f"/>
+<text x="74" y="24" fill="#e6e9f2" font-size="14" font-weight="650">Var(L) against the high-risk intervention rate</text>
+<text x="74" y="41" fill="#98a0b8" font-size="11">Closer, because MSE_HR only sees high-risk events — but still not a function.</text>
+<line x1="74" y1="306.0" x2="542" y2="306.0" stroke="#232a3d" stroke-width="1"/>
+<text x="66" y="310.0" fill="#6a7288" font-size="10" text-anchor="end">0.00</text>
+<line x1="74" y1="242.5" x2="542" y2="242.5" stroke="#232a3d" stroke-width="1"/>
+<text x="66" y="246.5" fill="#6a7288" font-size="10" text-anchor="end">0.15</text>
+<line x1="74" y1="179.0" x2="542" y2="179.0" stroke="#232a3d" stroke-width="1"/>
+<text x="66" y="183.0" fill="#6a7288" font-size="10" text-anchor="end">0.30</text>
+<line x1="74" y1="115.5" x2="542" y2="115.5" stroke="#232a3d" stroke-width="1"/>
+<text x="66" y="119.5" fill="#6a7288" font-size="10" text-anchor="end">0.45</text>
+<line x1="74" y1="52.0" x2="542" y2="52.0" stroke="#232a3d" stroke-width="1"/>
+<text x="66" y="56.0" fill="#6a7288" font-size="10" text-anchor="end">0.60</text>
+<text x="74.0" y="324" fill="#6a7288" font-size="10" text-anchor="middle">0</text>
+<text x="191.0" y="324" fill="#6a7288" font-size="10" text-anchor="middle">0.216</text>
+<text x="308.0" y="324" fill="#6a7288" font-size="10" text-anchor="middle">0.432</text>
+<text x="425.0" y="324" fill="#6a7288" font-size="10" text-anchor="middle">0.648</text>
+<text x="542.0" y="324" fill="#6a7288" font-size="10" text-anchor="middle">0.864</text>
+<text x="308" y="338" fill="#98a0b8" font-size="11" text-anchor="middle">p_HR — intervention rate on true high-risk events</text>
+<text x="16" y="179" fill="#98a0b8" font-size="11" text-anchor="middle" transform="rotate(-90 16 179)">Var(L)</text>
+<polyline points="74.0,306.0 97.5,302.5 121.8,300.9 168.7,295.5 218.5,293.5 265.9,292.4 313.2,295.1 361.3,296.9 412.2,303.2 457.7,198.8 498.7,65.3 542.0,306.0" fill="none" stroke="#35d0a5" stroke-width="1.6" opacity="0.75"/>
+<circle cx="74.0" cy="306.0" r="3.4" fill="#35d0a5"/>
+<circle cx="97.5" cy="302.5" r="3.4" fill="#35d0a5"/>
+<circle cx="121.8" cy="300.9" r="3.4" fill="#35d0a5"/>
+<circle cx="168.7" cy="295.5" r="3.4" fill="#35d0a5"/>
+<circle cx="218.5" cy="293.5" r="3.4" fill="#35d0a5"/>
+<circle cx="265.9" cy="292.4" r="3.4" fill="#35d0a5"/>
+<circle cx="313.2" cy="295.1" r="3.4" fill="#35d0a5"/>
+<circle cx="361.3" cy="296.9" r="3.4" fill="#35d0a5"/>
+<circle cx="412.2" cy="303.2" r="3.4" fill="#35d0a5"/>
+<circle cx="457.7" cy="198.8" r="3.4" fill="#35d0a5"/>
+<circle cx="498.7" cy="65.3" r="3.4" fill="#35d0a5"/>
+<circle cx="542.0" cy="306.0" r="3.4" fill="#35d0a5"/>
+<rect x="434" y="51" width="9" height="9" fill="#35d0a5"/><text x="448" y="60" fill="#98a0b8" font-size="10.5">CONFIDENCE</text>
+<polyline points="74.0,306.0 111.3,253.6 148.2,210.0 222.8,140.2 294.2,96.9 371.3,76.5 441.8,306.0 462.3,306.0 481.8,306.0 501.7,306.0 522.8,306.0 542.0,306.0" fill="none" stroke="#ffb638" stroke-width="1.6" opacity="0.75"/>
+<circle cx="74.0" cy="306.0" r="3.4" fill="#ffb638"/>
+<circle cx="111.3" cy="253.6" r="3.4" fill="#ffb638"/>
+<circle cx="148.2" cy="210.0" r="3.4" fill="#ffb638"/>
+<circle cx="222.8" cy="140.2" r="3.4" fill="#ffb638"/>
+<circle cx="294.2" cy="96.9" r="3.4" fill="#ffb638"/>
+<circle cx="371.3" cy="76.5" r="3.4" fill="#ffb638"/>
+<circle cx="441.8" cy="306.0" r="3.4" fill="#ffb638"/>
+<circle cx="462.3" cy="306.0" r="3.4" fill="#ffb638"/>
+<circle cx="481.8" cy="306.0" r="3.4" fill="#ffb638"/>
+<circle cx="501.7" cy="306.0" r="3.4" fill="#ffb638"/>
+<circle cx="522.8" cy="306.0" r="3.4" fill="#ffb638"/>
+<circle cx="542.0" cy="306.0" r="3.4" fill="#ffb638"/>
+<rect x="434" y="66" width="9" height="9" fill="#ffb638"/><text x="448" y="75" fill="#98a0b8" font-size="10.5">MAGNITUDE</text>
+<polyline points="74.0,306.0 98.1,283.7 119.4,252.5 164.2,223.3 216.2,173.7 263.6,147.0 311.5,107.5 354.8,104.5 403.3,52.0 448.7,71.8 494.8,156.7 542.0,306.0" fill="none" stroke="#5eb0ff" stroke-width="1.6" opacity="0.75"/>
+<circle cx="74.0" cy="306.0" r="3.4" fill="#5eb0ff"/>
+<circle cx="98.1" cy="283.7" r="3.4" fill="#5eb0ff"/>
+<circle cx="119.4" cy="252.5" r="3.4" fill="#5eb0ff"/>
+<circle cx="164.2" cy="223.3" r="3.4" fill="#5eb0ff"/>
+<circle cx="216.2" cy="173.7" r="3.4" fill="#5eb0ff"/>
+<circle cx="263.6" cy="147.0" r="3.4" fill="#5eb0ff"/>
+<circle cx="311.5" cy="107.5" r="3.4" fill="#5eb0ff"/>
+<circle cx="354.8" cy="104.5" r="3.4" fill="#5eb0ff"/>
+<circle cx="403.3" cy="52.0" r="3.4" fill="#5eb0ff"/>
+<circle cx="448.7" cy="71.8" r="3.4" fill="#5eb0ff"/>
+<circle cx="494.8" cy="156.7" r="3.4" fill="#5eb0ff"/>
+<circle cx="542.0" cy="306.0" r="3.4" fill="#5eb0ff"/>
+<rect x="434" y="81" width="9" height="9" fill="#5eb0ff"/><text x="448" y="90" fill="#98a0b8" font-size="10.5">RANDOM</text>
+</svg>
