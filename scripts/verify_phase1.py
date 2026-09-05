@@ -291,10 +291,27 @@ def check_pytest() -> str:
 # --------------------------------------------------------------------------------------
 
 def _iter_python_files() -> Iterable[Path]:
-    for path in REPO_ROOT.rglob("*.py"):
+    """Python files git tracks, which is what "the repository's code" means.
+
+    Scanning the whole working tree instead swept in untracked scratch -- a report
+    renderer someone had left under docs/research/ pulled pymupdf and reportlab into the
+    check and failed it, though neither is a dependency of anything in the repository.
+    requirements.txt has to cover what is committed, not whatever happens to be sitting on
+    disk. Falls back to a tree walk outside a git checkout.
+    """
+    listing = subprocess.run(
+        ["git", "ls-files", "*.py"], cwd=REPO_ROOT, capture_output=True, text=True
+    )
+    if listing.returncode == 0 and listing.stdout.strip():
+        candidates = [REPO_ROOT / line for line in listing.stdout.strip().splitlines()]
+    else:
+        candidates = list(REPO_ROOT.rglob("*.py"))
+
+    for path in candidates:
         if any(part in EXCLUDED_DIRS for part in path.parts):
             continue
-        yield path
+        if path.is_file():
+            yield path
 
 
 def _top_level_imports(path: Path) -> set[str]:
