@@ -171,8 +171,10 @@ def test_a_large_revision_below_the_threshold_has_zero_clipped_delta(sweep_fixtu
     ]
     assert len(both_low) > 0, "no such interventions; this test is not exercising anything"
     assert np.allclose(both_low["delta_clipped"].to_numpy(dtype=float), 0.0)
-    # And they are not small revisions being trivially zero.
-    assert both_low["delta_raw"].abs().max() > 10.0
+    # And they are not small revisions being trivially zero: the typical one spans more
+    # than 20 dex. Asserted on the median rather than the max -- a single large revision
+    # would satisfy a max test while leaving the claim false of the population.
+    assert both_low["delta_raw"].abs().median() > 20.0
 
 
 @needs_inputs
