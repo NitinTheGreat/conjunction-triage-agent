@@ -1,0 +1,71 @@
+# Runs the API and the two static viewers as separate services. Serving frontend/ and
+# viz/ from dedicated nginx containers (rather than the `python -m http.server` one-liner
+# in the Dockerfile's header comment) is closer to how a deployed instance would actually
+# look; the plain `docker run` workflow documented in the Dockerfile still works unchanged
+# for local one-offs.
+#
+# No `mcp` service here on purpose: mcp_server/server.py speaks MCP over stdio, not a
+# network port, so it doesn't fit the long-running-service model docker-compose is for.
+# Run it directly instead, e.g. as the `command` a client like Claude Desktop launches:
+#
+#   docker run -i --rm --env-file .env \
+#     -v "$PWD/dataset:/app/dataset:ro" -v conjunction-triage-processed:/app/processed \
+#     conjunction-triage python -m mcp_server.server
+#
+# Usage:
+#   cp .env.example .env               # fill in the LLM credential the /triage path needs
+#   mkdir -p dataset                    # place the TraCSS/Kelvins data here yourself - see dataset/MANIFEST.md
+#   docker compose up --build
+#   docker compose run --rm api python scripts/reproduce.py   # one-off: reproduce the headline table
+#   docker compose run --rm api python -m pytest -q           # one-off: the offline test suite
+
+services:
+  api:
+    build:
+      context: .
+      target: app
+    image: conjunction-triage-api:local
+    command: ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ./dataset:/app/dataset:ro
+      - processed:/app/processed
+      - cache:/app/cache
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      target: frontend-web
+    image: conjunction-triage-frontend:local
+    ports:
+      - "8001:80"
+    restart: unless-stopped
+    # Not `depends_on: api` - per README the frontend degrades cleanly with no API
+    # running (static exports still render), so it shouldn't fail to start without it.
+
+  viz:
+    build:
+      context: .
+      target: viz-web
+    image: conjunction-triage-viz:local
+    ports:
+      - "8002:80"
+    restart: unless-stopped
+
+volumes:
+  # Named (not bind-mounted): derived artefacts and LLM response cache don't need to be
+  # human-browsable on the host, and a named volume preserves the appuser ownership the
+  # Dockerfile chowns processed/ and cache/ to on first creation.
+  processed:
+  cache:

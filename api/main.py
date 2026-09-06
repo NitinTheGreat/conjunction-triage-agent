@@ -62,6 +62,7 @@ from api.models import (  # noqa: E402
 )
 from api.provenance import code_version, provenance  # noqa: E402
 from core.config import MissingCredentialError, settings  # noqa: E402
+from core.kelvins_store import KelvinsStoreError  # noqa: E402
 from core.store import SOURCES, StoreError, store  # noqa: E402
 from orbital.frames import FrameError  # noqa: E402
 from orbital.pc import PcError, pc_from_states  # noqa: E402
@@ -156,6 +157,14 @@ async def _store_error(request: Request, exc: StoreError) -> JSONResponse:
     return _error(
         "dataset_unavailable", str(exc), status.HTTP_503_SERVICE_UNAVAILABLE,
         hint="Run scripts/ingest.py to build the ingested store.",
+    )
+
+
+@app.exception_handler(KelvinsStoreError)
+async def _kelvins_store_error(request: Request, exc: KelvinsStoreError) -> JSONResponse:
+    return _error(
+        "dataset_unavailable", str(exc), status.HTTP_503_SERVICE_UNAVAILABLE,
+        hint="Run scripts/ingest_kelvins.py to build the ingested Kelvins store.",
     )
 
 
