@@ -35,6 +35,7 @@ import pandas as pd
 
 from core.config import settings
 from core.evaluation import TASK, TaskConfig
+from core.kelvins_store import KelvinsStoreError
 
 __all__ = [
     "OBJECT_TYPES",
@@ -56,14 +57,14 @@ def _sql(path: Path) -> str:
 def _cdm_path(split: str) -> Path:
     path = settings.PROCESSED_DIR / KELVINS_DIR / f"cdms_{split}.parquet"
     if not path.is_file():
-        raise FileNotFoundError(f"{path}; run scripts/ingest_kelvins.py first")
+        raise KelvinsStoreError(f"{path} is missing; run scripts/ingest_kelvins.py first")
     return path
 
 
 def _series_path(split: str) -> Path:
     path = settings.PROCESSED_DIR / KELVINS_DIR / f"series_{split}.parquet"
     if not path.is_file():
-        raise FileNotFoundError(f"{path}; run scripts/ingest_kelvins.py first")
+        raise KelvinsStoreError(f"{path} is missing; run scripts/ingest_kelvins.py first")
     return path
 
 

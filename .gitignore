@@ -34,3 +34,10 @@ Thumbs.db
 # Derived artefacts (regenerated; see core.config)
 processed/
 cache/
+
+# graphify knowledge-graph output — local analysis artefact, machine-specific paths inside
+graphify-out/
+
+# Local run logs / pid files
+*.log
+*.pid.txt
