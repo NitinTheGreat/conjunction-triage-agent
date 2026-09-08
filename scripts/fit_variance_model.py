@@ -1,4 +1,23 @@
-"""Fit the derived variance model to the sweep, and see which variable actually predicts.
+"""Decompose the sweep's measured variance -- DESCRIPTIVELY, and given the labels.
+
+WHAT THIS IS NOT
+----------------
+Corrected after the September 2026 audit. This is **not** a prospective predictor and must
+not be described as one. The "derived_form" column is computed from the ground-truth
+per-event intervention errors ``g`` and from the observed mean F2 of the very runs it is
+compared against, and its scale and intercept are then fitted to those same runs. Nothing
+here forecasts the variance of an agent whose labels are unknown; given the labels, it
+decomposes variance that has already been observed.
+
+That distinction changes what the R-squared means. A high R-squared here says the
+decomposition accounts for the variance it was given, not that the quantity would have
+predicted it in advance. The claim the Phase 10 report is entitled to is that intervention
+rate is a poor descriptor and clipped magnitude on the scored subpopulation is a good one --
+not that either predicts an unseen agent.
+
+The original headline of this file follows.
+
+Fit the derived variance model to the sweep, and see which variable actually describes it.
 
 Four candidate predictors of Var(L), fitted by ordinary least squares against the sweep's
 measured variance and compared by R²:
@@ -120,7 +139,11 @@ def derived_variance(
 # ------------------------------------------------------------------------------------
 
 def r_squared(x: np.ndarray, y: np.ndarray) -> dict[str, float]:
-    """OLS of y on x with an intercept. Returns R-squared, slope and intercept."""
+    """OLS of y on x with an intercept. Returns R-squared, slope and intercept.
+
+    Descriptive. The slope and intercept are fitted to the same runs whose variance is
+    being explained, so this quantifies fit, not forecasting skill.
+    """
     finite = np.isfinite(x) & np.isfinite(y)
     x, y = x[finite], y[finite]
     if x.size < 3 or np.allclose(x, x[0]):

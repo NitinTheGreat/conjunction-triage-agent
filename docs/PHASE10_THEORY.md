@@ -1,5 +1,22 @@
 # Phase 10 — Variance decomposition for a corrector agent under the Kelvins metric
 
+> **ERRATUM (Phase 11, September 2026).** Three statements in this report were corrected
+> after an external audit; see [PHASE11_ERRATUM.md](PHASE11_ERRATUM.md) §6.
+>
+> 1. The n = 3 confidence interval was stated as spanning "roughly a factor of five". The
+>    chi-square 95% interval for a variance on 2 degrees of freedom spans **145.7×**. Every
+>    anchor agreement below is therefore **"not inconsistent with"**, not "reproduces".
+> 2. The variance model is a **descriptive decomposition given the labels**, not a
+>    prospective predictor. It uses ground-truth intervention errors and the observed mean
+>    F₂, and fits scale and intercept to the same runs.
+> 3. The 50 splits are **overlapping random draws from one 8,293-event pool**, not 50
+>    independent datasets.
+>
+> **The three-level dissociation is NOT affected and is not retracted.** It is a direct
+> measurement with no fitted parameters: Level 1 and Level 2 stay flat while Level 3 moves
+> by 5 × 10⁵, on four arms across two vendors. It survives all three corrections.
+
+
 Where benchmark-score variance comes from when an agent sits on top of a baseline, and why
 the intervention rate alone does not explain it.
 
@@ -219,8 +236,10 @@ published numbers exactly (flip rates 6.03% / 6.11%, L per run to four decimal p
 
 **The derivation reproduces both anchors** — v1 within 15%, v2 within 0.5% — across five
 orders of magnitude in Var(L). The v1 residual is unsurprising and is not evidence of a
-missing term: a variance estimated from three runs has 2 degrees of freedom, so its own 95%
-interval spans roughly a factor of five. The delta method is also first-order, and v1's
+missing term: a variance estimated from three runs has 2 degrees of freedom, and the
+chi-square 95% interval for such a variance spans **145.7×** — the observed 0.2549 carries
+an interval of [0.0691, 10.07]. Every anchor below is **not inconsistent with** the
+derivation; none of them 'reproduces' it in any stronger sense. The delta method is also first-order, and v1's
 fluctuations are not small.
 
 ### Two further anchors, on a second vendor
