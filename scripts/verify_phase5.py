@@ -135,8 +135,44 @@ def check_degenerate_behaviour() -> str:
 
 # -- 3 ---------------------------------------------------------------------------------
 
+def check_counterfactual_invariance() -> str:
+    """Post-cutoff data must not move a model input. Run the actual invariance test.
+
+    Added in Phase 11 after an external audit. ``check_no_leakage`` below checks the
+    *timing* of the latest visible CDM and the *names* of the label columns, and both were
+    satisfied while ``n_cdms_total`` and ``last_cdm_days`` were aggregating over the entire
+    sequence and being returned as features. Neither a timing check nor a name check can
+    see that; only mutating the future and watching the inputs can.
+
+    Delegates to ``tests/test_causal_features.py`` rather than reimplementing it, so the
+    guard and the test cannot drift apart.
+    """
+    completed = subprocess.run(
+        [sys.executable, "-m", "pytest", "-q", "tests/test_causal_features.py"],
+        cwd=REPO_ROOT, capture_output=True, text=True,
+    )
+    lines = (completed.stdout or completed.stderr).strip().splitlines()
+    summary = lines[-1] if lines else "(no output)"
+    if completed.returncode != 0:
+        raise CheckFailure(f"the counterfactual invariance test failed: {summary}")
+    match = re.search(r"(\d+) passed", summary)
+    if not match or int(match.group(1)) < 8:
+        raise CheckFailure(
+            f"only {match.group(1) if match else 0} invariance tests ran; expected the "
+            "full both-directions suite"
+        )
+    return (
+        f"{match.group(1)} counterfactual invariance tests pass: the test fires on "
+        "core/features.py and is silent on core/features_causal.py"
+    )
+
+
 def check_no_leakage() -> str:
-    """No feature is computed from a CDM inside the 2-day cutoff."""
+    """No feature is computed from a CDM inside the 2-day cutoff.
+
+    Kept exactly as Phase 5 wrote it. It is necessary and was never sufficient: see
+    ``check_counterfactual_invariance``, which catches what this cannot.
+    """
     cutoff = TASK.input_cutoff_days
     parts = []
     for split in ("train", "test"):
@@ -369,6 +405,7 @@ def main() -> int:
         ("official metric reproduces a hand-computed value", check_official_metric),
         ("metrics behave on degenerate inputs", check_degenerate_behaviour),
         ("no feature comes from inside the 2-day cutoff", check_no_leakage),
+        ("post-cutoff data cannot move a model input", check_counterfactual_invariance),
         ("train/validation splits are disjoint", check_splits_disjoint),
         ("the test set is not read by training code", check_test_untouched),
         ("single-CDM events carry a missing indicator", check_single_cdm_indicator),
