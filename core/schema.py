@@ -33,6 +33,7 @@ from typing import Any, Mapping, Optional, Sequence
 import numpy as np
 
 __all__ = [
+    "HBR_SEMANTICS_BY_SOURCE",
     "PC_FLOOR",
     "KELVINS_PC_FLOOR",
     "SOURCE_PC_FLOOR",
@@ -199,6 +200,29 @@ def _is_positive_semidefinite(matrix: np.ndarray, tol: float = 1e-10) -> bool:
 # --------------------------------------------------------------------------------------
 # per-object state
 # --------------------------------------------------------------------------------------
+
+#: What ``ObjectState.hbr_m`` actually means, per source. Machine-readable rather than a
+#: comment, because the discrepancy survived three phases as a comment.
+#:
+#: Recorded after the September 2026 audit: the field is named for a radius, and the
+#: Kelvins value is a span. Nothing is silently halved -- halving a quantity whose
+#: definition is uncertain would invent precision that is not there -- so the value is
+#: carried as published and the ambiguity is documented where a reader will meet it.
+HBR_SEMANTICS_BY_SOURCE: dict[str, str] = {
+    "TRACSS_SPHERICAL": (
+        "hard-body RADIUS in metres; the Users Guide's constant 0.5 m default"
+    ),
+    "TRACSS_SFSH": (
+        "hard-body RADIUS in metres, per object, from AerospaceIVVDataset ScreeningVolumes"
+    ),
+    "KELVINS": (
+        "x_span: a DIAMETER-LIKE SPAN in metres, carried unhalved. The data dictionary "
+        "defines it as the 'size used by the collision risk computation algorithm, "
+        "minimum 2 m diameter assumed for the chaser'. 93% of chaser values sit exactly "
+        "at that 2 m floor, so for most chasers it is an assumption rather than a "
+        "measurement. NOT a radius."
+    ),
+}
 
 @dataclass(eq=False)
 class ObjectState:
