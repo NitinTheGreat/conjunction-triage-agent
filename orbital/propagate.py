@@ -26,6 +26,10 @@ import numpy as np
 
 __all__ = [
     "PropagationError",
+    "swept_separation_lower_bound",
+    "max_relative_speed_over_interval",
+    "candidate_intervals",
+    "candidate_indices",
     "StateVector",
     "CloseApproach",
     "propagate_tle",
@@ -238,11 +242,14 @@ def screen_pair(
     if ranges.size < 3:
         raise PropagationError("window too short to identify a local minimum")
 
-    # Interior local minima, plus endpoints if they are minima of their neighbourhood.
-    interior = np.flatnonzero(
-        (ranges[1:-1] <= ranges[:-2]) & (ranges[1:-1] <= ranges[2:])
-    ) + 1
-    candidates = [i for i in interior if ranges[i] < threshold_km * 5]
+    speeds = np.array([
+        np.linalg.norm(a.velocity - b.velocity) for a, b in zip(coarse1, coarse2)
+    ])
+    radii = np.array([
+        min(np.linalg.norm(a.position), np.linalg.norm(b.position))
+        for a, b in zip(coarse1, coarse2)
+    ])
+    candidates = candidate_indices(ranges, speeds, radii, coarse_step_seconds, threshold_km)
 
     approaches: list[CloseApproach] = []
     for index in candidates:
@@ -272,6 +279,83 @@ def screen_pair(
 
     approaches.sort(key=lambda a: a.miss_distance_km)
     return approaches
+
+
+#: Earth's gravitational parameter, km^3/s^2. Used only to bound relative acceleration.
+MU_EARTH_KM3_S2 = 398600.4418
+
+
+def swept_separation_lower_bound(
+    range_a_km: float, range_b_km: float, max_relative_speed_kms: float,
+    step_seconds: float,
+) -> float:
+    """A rigorous lower bound on separation *between* two samples.
+
+    Separation is 1-Lipschitz in relative displacement, so over an interval of length
+    ``dt`` with relative speed bounded by ``v``:
+
+        r(t) >= r_a - v (t - t_a)      and      r(t) >= r_b - v (t_b - t)
+
+    The tighter of the two is minimised where they cross, giving
+
+        r_min >= max(0, (r_a + r_b - v dt) / 2)
+
+    Nothing about the trajectory shape is assumed, so a pair rejected on this bound
+    genuinely cannot approach within the threshold in the interval.
+    """
+    return max(0.0, 0.5 * (range_a_km + range_b_km - max_relative_speed_kms * step_seconds))
+
+
+def max_relative_speed_over_interval(
+    speed_a_kms: float, speed_b_kms: float, min_radius_km: float, step_seconds: float
+) -> float:
+    """Bound the relative speed across an interval from its endpoints.
+
+    Relative speed can only change by the relative acceleration, and in Earth orbit each
+    body's acceleration is at most ``mu / r^2``. Taking both bodies and the smaller radius
+    seen at either endpoint gives a conservative envelope.
+    """
+    acceleration = 2.0 * MU_EARTH_KM3_S2 / max(min_radius_km, 1.0) ** 2
+    return max(speed_a_kms, speed_b_kms) + acceleration * step_seconds
+
+
+def candidate_intervals(
+    ranges: np.ndarray, speeds: np.ndarray, radii: np.ndarray,
+    step_seconds: float, threshold_km: float,
+) -> list[int]:
+    """Intervals ``[i, i+1]`` that could contain an approach within the threshold.
+
+    Replaces a prefilter that rejected candidates on *sampled* distance. That was unsound:
+    at 60 s spacing and 14 km/s a crossing can sit at zero separation between two samples
+    that both read hundreds of kilometres, and a 5x cutoff on a 10 km screen discarded it.
+    The sampled minimum is not a bound on the true minimum; this is.
+    """
+    keep = []
+    for index in range(len(ranges) - 1):
+        speed = max_relative_speed_over_interval(
+            float(speeds[index]), float(speeds[index + 1]),
+            float(min(radii[index], radii[index + 1])), step_seconds,
+        )
+        bound = swept_separation_lower_bound(
+            float(ranges[index]), float(ranges[index + 1]), speed, step_seconds
+        )
+        if bound <= threshold_km:
+            keep.append(index)
+    return keep
+
+
+def candidate_indices(
+    ranges: np.ndarray, speeds: np.ndarray, radii: np.ndarray,
+    step_seconds: float, threshold_km: float,
+) -> list[int]:
+    """Sample indices whose neighbourhood must be refined.
+
+    Each surviving interval contributes its left endpoint; the refinement window in
+    :func:`screen_pair` spans one coarse step either side, so an approach anywhere inside
+    the interval is covered.
+    """
+    intervals = candidate_intervals(ranges, speeds, radii, step_seconds, threshold_km)
+    return sorted({index for interval in intervals for index in (interval, interval + 1)})
 
 
 def verify_reference_case() -> dict[str, object]:
