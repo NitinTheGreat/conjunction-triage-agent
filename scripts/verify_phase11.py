@@ -1,12 +1,15 @@
-"""End-to-end verification of Phase 11 — the diagnosis and the hybrid.
+"""End-to-end verification of Phase 11 (rewritten) — the audit corrections.
 
 Prints one pass/fail line per check and exits non-zero if any fails. Every check treats a
-*vacuous* pass as a failure: a missing arm, an empty ablation and an unrun control all raise
-rather than passing quietly.
+*vacuous* pass as a failure.
 
-Check 1 is the one that makes the rest worth reading. A pre-registration written after the
-result is not a pre-registration, so its commit is compared against the first commit of
-``agent/hybrid.py`` by git timestamp and by ancestry.
+Check 1 is the load-bearing one, and it is deliberately two-sided. A leakage test that has
+only ever been seen to pass has not been shown to detect anything, so it is required to
+**fail** on the frozen module and **pass** on the corrected one.
+
+Check 4 is the one that decides how much of the project survives. The Phase 7 primary
+compared B1 against the v1 agent; if either had consumed the leaking features, the headline
+result would fall with them. That is proven here rather than assumed.
 
     python scripts/verify_phase11.py
 """
@@ -14,11 +17,14 @@ result is not a pre-registration, so its commit is compared against the first co
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import logging
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Callable
 
@@ -28,14 +34,14 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
+sys.path.insert(0, str(REPO_ROOT / "tests"))
 
 from core.config import settings  # noqa: E402
 from verify_phase1 import CheckFailure  # noqa: E402
 
 logging.disable(logging.INFO)
 
-PREREGISTRATION = "docs/PHASE11_PREREGISTRATION.md"
-HYBRID_MODULE = "agent/hybrid.py"
+FROZEN_MANIFEST = REPO_ROOT / "docs" / "PHASE7_FROZEN_MANIFEST.md"
 
 
 def _git(*arguments: str) -> str:
@@ -47,218 +53,262 @@ def _git(*arguments: str) -> str:
     return result.stdout.strip()
 
 
-def _results() -> dict:
-    path = settings.PROCESSED_DIR / "hybrid_results.json"
-    if not path.is_file():
-        raise CheckFailure(f"{path} is missing; run scripts/run_hybrid.py")
-    report = json.loads(path.read_text(encoding="utf-8"))
-    if not report.get("arms"):
-        raise CheckFailure("the ablation recorded no arms (trivial pass guard)")
-    return report
-
-
 # -- 1 ---------------------------------------------------------------------------------
 
-def check_preregistration_came_first() -> str:
-    """The pre-registration must predate the hybrid, by timestamp and by ancestry."""
-    prereg_commit = _git("log", "--format=%H", "--diff-filter=A", "--", PREREGISTRATION)
-    hybrid_commit = _git("log", "--format=%H", "--diff-filter=A", "--", HYBRID_MODULE)
-    if not prereg_commit:
-        raise CheckFailure(f"{PREREGISTRATION} has never been committed")
-    if not hybrid_commit:
-        raise CheckFailure(f"{HYBRID_MODULE} has never been committed")
-    prereg_commit = prereg_commit.splitlines()[-1]
-    hybrid_commit = hybrid_commit.splitlines()[-1]
-
-    prereg_time = int(_git("show", "-s", "--format=%ct", prereg_commit))
-    hybrid_time = int(_git("show", "-s", "--format=%ct", hybrid_commit))
-    if prereg_time >= hybrid_time:
-        raise CheckFailure(
-            f"the pre-registration ({prereg_commit[:12]}) is not older than the hybrid "
-            f"({hybrid_commit[:12]})"
-        )
-
-    # Ancestry, because timestamps can be forged and a rebase can reorder them.
-    ancestor = subprocess.run(
-        ["git", "merge-base", "--is-ancestor", prereg_commit, hybrid_commit],
+def check_invariance_test_is_two_sided() -> str:
+    """The invariance test must fire on the frozen module and be silent on the corrected one."""
+    completed = subprocess.run(
+        # -v without -q: the per-test names are what distinguishes the firing half of the
+        # suite from the passing half, and -q suppresses them.
+        [sys.executable, "-m", "pytest", "-v", "--no-header", "tests/test_causal_features.py"],
         cwd=REPO_ROOT, capture_output=True, text=True,
     )
-    if ancestor.returncode != 0:
-        raise CheckFailure(
-            f"{prereg_commit[:12]} is not an ancestor of {hybrid_commit[:12]}"
-        )
+    if completed.returncode != 0:
+        tail = (completed.stdout or completed.stderr).strip().splitlines()[-3:]
+        raise CheckFailure("the invariance suite failed: " + " | ".join(tail))
 
-    # And it must not have been edited after the fact.
-    revisions = _git("log", "--format=%H", "--", PREREGISTRATION).splitlines()
-    if len(revisions) > 1:
+    output = completed.stdout
+    fires = [line for line in output.splitlines() if "test_the_frozen_module_leaks" in line]
+    silent = [
+        line for line in output.splitlines()
+        if "test_the_causal_module_is_invariant" in line
+    ]
+    if not fires:
         raise CheckFailure(
-            f"the pre-registration has {len(revisions)} commits; it is declared immutable"
+            "no test asserts the invariance check FIRES on core/features.py; a leakage "
+            "test never seen to fail has not been shown to detect anything"
         )
+    if not silent:
+        raise CheckFailure("no test asserts the corrected module is invariant")
+    passed = re.search(r"(\d+) passed", output)
+    if not passed or int(passed.group(1)) < 8:
+        raise CheckFailure(f"only {passed.group(1) if passed else 0} invariance tests ran")
 
     return (
-        f"pre-registration {prereg_commit[:12]} precedes the hybrid {hybrid_commit[:12]} "
-        f"by {hybrid_time - prereg_time}s, is its ancestor, and has never been amended"
+        f"{passed.group(1)} tests: {len(fires)} assert the check fires on "
+        f"core/features.py, {len(silent)} assert core/features_causal.py is invariant"
     )
 
 
 # -- 2 ---------------------------------------------------------------------------------
 
-def check_action_space_is_binary() -> str:
-    """Every hybrid output is B1's exact value or exactly -6.001. Nothing else."""
-    from agent.hybrid import CLIP_FLOOR, ActionSpaceError, enforce_action_space
+def check_corrected_module_reads_nothing_inside_the_cutoff() -> str:
+    """No corrected feature is computed from a CDM at time_to_tca < 2.
 
-    baseline = np.array([-5.0, -4.2, -6.5, -3.0], dtype=np.float64)
-    enforce_action_space(baseline.copy(), baseline)
-    enforce_action_space(np.full_like(baseline, CLIP_FLOOR), baseline)
-    mixed = np.array([-5.0, CLIP_FLOOR, -6.5, CLIP_FLOOR])
-    enforce_action_space(mixed, baseline)
+    Checked two ways: statically, that every aggregate in the corrected query sources from
+    the visible CTE; and empirically, that the built features carry no evidence of the
+    excluded rows.
+    """
+    from core.evaluation import TASK
+    from core.features_causal import (
+        FEATURE_COLUMNS_CAUSAL,
+        LEAKING_COLUMNS,
+        build_dataset_causal,
+    )
 
-    for illegal in ([-5.0, -4.9, -6.5, -3.0], [-5.0, -6.0, -6.5, -3.0],
-                    [-5.0, np.nan, -6.5, -3.0]):
-        try:
-            enforce_action_space(np.array(illegal, dtype=np.float64), baseline)
-        except ActionSpaceError:
-            continue
-        raise CheckFailure(f"a third value {illegal} was accepted")
+    cutoff = TASK.input_cutoff_days
+    source = (REPO_ROOT / "core" / "features_causal.py").read_text(encoding="utf-8")
+    # The one place `cdm` may be read directly is the eligibility selector, which defines
+    # the cohort and never becomes a feature.
+    if "from cdm c join elig" not in source:
+        raise CheckFailure("the corrected query no longer restricts features to the vis CTE")
+    if "from vis" not in source and "from ranked" not in source:
+        raise CheckFailure("the corrected query does not aggregate over the visible CTE")
 
-    # And on the arms as actually run: re-fit one split and inspect every prediction.
-    from run_hybrid import ARMS, BASE_SEED, VALIDATION_FRACTION, load_joined
-    from agent.hybrid import HybridConfig, fit_hybrid
-    from run_baselines import stratified_split
+    for column in LEAKING_COLUMNS:
+        if column in FEATURE_COLUMNS_CAUSAL:
+            raise CheckFailure(f"{column} survived into the corrected feature list")
 
-    joined = load_joined()
-    fit, validation = stratified_split(joined, BASE_SEED, VALIDATION_FRACTION)
-    checked = 0
-    for name, config in ARMS.items():
-        result = fit_hybrid(
-            HybridConfig(**{**config.__dict__, "classifier": "gbm"}), fit, validation, BASE_SEED
-        )
-        values = result.predictions
-        reference = validation["latest_risk"].to_numpy(dtype=np.float64)
-        legal = (np.abs(values - reference) <= 1e-12) | (np.abs(values - CLIP_FLOOR) <= 1e-12)
-        if not legal.all():
-            raise CheckFailure(f"{name} emitted {int((~legal).sum())} illegal values")
-        checked += len(values)
+    parts = []
+    for split in ("train", "test"):
+        frame = build_dataset_causal(split)
+        if frame.empty:
+            raise CheckFailure(f"{split}: no events built")
+        worst = float(frame["latest_time_to_tca"].min())
+        if worst < cutoff:
+            raise CheckFailure(
+                f"{split}: a visible CDM sits at {worst:.4f} days, inside the {cutoff}-day cutoff"
+            )
+        earliest = float(frame["last_visible_days"].min())
+        if earliest < cutoff:
+            raise CheckFailure(
+                f"{split}: last_visible_days reaches {earliest:.4f}, inside the cutoff"
+            )
+        parts.append(f"{split} {len(frame):,} events, min visible ttc {worst:.4f} d")
 
     return (
-        f"{checked:,} live predictions across {len(ARMS)} arms are all either B1's exact "
-        "value or -6.001; three classes of third value are rejected, including NaN"
+        f"{len(FEATURE_COLUMNS_CAUSAL)} corrected features, none from inside the "
+        f"{cutoff}-day cutoff; " + "; ".join(parts)
     )
 
 
 # -- 3 ---------------------------------------------------------------------------------
 
-def check_threshold_saw_no_test_label() -> str:
-    """No test label reached the fitting, the calibration or the threshold."""
-    report = _results()
-    if report["protocol"].get("test_set_read") is not False:
-        raise CheckFailure("the ablation report does not declare test_set_read = False")
-
-    for name in ("run_hybrid.py",):
-        source = (REPO_ROOT / "scripts" / name).read_text(encoding="utf-8")
-        for marker in ('build_dataset("test")', "build_dataset('test')",
-                       "agent_predictions_test", "_test.parquet"):
-            if marker in source:
-                raise CheckFailure(f"{name} references the test split via {marker!r}")
-
-    module = (REPO_ROOT / HYBRID_MODULE).read_text(encoding="utf-8")
-    for marker in ('build_dataset("test")', "agent_predictions_test", "_test.parquet"):
-        if marker in module:
-            raise CheckFailure(f"{HYBRID_MODULE} references the test split via {marker!r}")
-
-    # The diagnosis DID read test labels, so nothing it produced may reach the hybrid. The
-    # check is on the *import graph*, parsed, not on the text: hybrid.py cites the
-    # diagnosis in its docstring as motivation, and a substring search flags that as an
-    # import. It is not one.
-    import ast
-
-    tree = ast.parse(module)
-    imported: set[str] = set()
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            imported.update(alias.name for alias in node.names)
-        elif isinstance(node, ast.ImportFrom) and node.module:
-            imported.add(node.module)
-    forbidden = {name for name in imported if "diagnose_failure" in name}
-    if forbidden:
-        raise CheckFailure(
-            f"{HYBRID_MODULE} imports {sorted(forbidden)}, which read test labels"
-        )
-
-    diagnosis = settings.PROCESSED_DIR / "failure_diagnosis.json"
-    if diagnosis.is_file():
-        declared = json.loads(diagnosis.read_text(encoding="utf-8")).get("test_labels_used")
-        if not declared:
-            raise CheckFailure("the diagnosis does not declare its use of test labels")
-
-    return (
-        f"neither the hybrid nor its runner references the test split; hybrid.py imports "
-        f"{len(imported)} modules, none from the diagnosis, which declares its own "
-        "test-label use"
+def check_frozen_artefacts_untouched() -> str:
+    """Every Phase 7 frozen artefact still hashes to its manifest blob."""
+    if not FROZEN_MANIFEST.is_file():
+        raise CheckFailure(f"{FROZEN_MANIFEST} is missing")
+    rows = re.findall(
+        r"^\|\s*`([^`]+)`\s*\|\s*`([0-9a-f]+)`\s*\|\s*`([0-9a-f]+)`\s*\|",
+        FROZEN_MANIFEST.read_text(encoding="utf-8"), re.MULTILINE,
     )
+    if not rows:
+        raise CheckFailure("the manifest lists no artefacts (trivial pass guard)")
+
+    drifted = []
+    for path, _last_commit, blob in rows:
+        target = REPO_ROOT / path
+        if not target.is_file():
+            drifted.append(f"{path}: missing from the tree")
+            continue
+        current = _git("hash-object", path)
+        if not current.startswith(blob):
+            drifted.append(f"{path}: blob {current[:12]}, manifest says {blob}")
+    if drifted:
+        raise CheckFailure(
+            "frozen artefacts have drifted, so the published Phase 7 result is no longer "
+            "reproducible byte-for-byte: " + "; ".join(drifted)
+        )
+    return f"{len(rows)} frozen artefacts match their manifest blob hashes exactly"
 
 
 # -- 4 ---------------------------------------------------------------------------------
 
-def check_controls_ran() -> str:
-    """H2 (no-LLM) and H4 (permutation) both ran and are reported."""
-    report = _results()
-    arms = report["arms"]
+def check_b1_and_agent_are_independent_of_the_leak() -> str:
+    """The Phase 7 primary compared B1 against v1. Neither may touch a leaking feature.
 
-    h2 = [key for key in arms if key.startswith("H2_calibrated_no_llm")]
-    h3 = [key for key in arms if key.startswith("H3_calibrated_with_llm")]
-    if not h2:
-        raise CheckFailure("H2, the no-LLM control, is not in the report")
-    if not h3:
-        raise CheckFailure("H3, the full hybrid, is not in the report")
+    Proven three ways, because this decides how much of the project survives:
 
-    headline = [key for key in report.get("comparisons", {}) if key.startswith("H3_vs_H2")]
-    if not headline:
-        raise CheckFailure("the H3-vs-H2 headline comparison is not reported")
+    1. **Statically**, that no leaking column name appears in the agent's prompt
+       construction or in B1's definition.
+    2. **By mutation**, that ``latest_risk`` -- which *is* B1 -- does not move when
+       post-cutoff data changes.
+    3. **Structurally**, that the agent's evidence comes from a CDM loader which applies
+       the 2-day cutoff and offers no way to disable it.
+    """
+    from core.features_causal import LEAKING_COLUMNS
+    from core.kelvins_store import VISIBILITY_CUTOFF_DAYS, load_visible_cdms
 
-    permutation = report.get("H4_permutation_control")
-    if not permutation:
-        raise CheckFailure("H4, the permutation control, is not in the report")
-    if permutation.get("permutations", 0) < 20:
+    # 1 -- static
+    offenders = []
+    for relative in ("agent/triage_agent.py", "core/kelvins_store.py"):
+        source = (REPO_ROOT / relative).read_text(encoding="utf-8")
+        for column in LEAKING_COLUMNS:
+            if column in source:
+                offenders.append(f"{relative} mentions {column}")
+    if offenders:
+        raise CheckFailure("; ".join(offenders))
+
+    # 2 -- by mutation: B1 is latest_risk, and it must be invariant.
+    from test_causal_features import MUTATIONS, NOISE_TOLERANCE, _build, _reading_from
+    from core.features import build_dataset
+
+    root = Path(tempfile.mkdtemp(prefix="phase11-check4-"))
+    try:
+        base = root / "base"
+        (base / "kelvins").mkdir(parents=True)
+        for name in ("cdms_train.parquet", "series_train.parquet"):
+            shutil.copy(settings.PROCESSED_DIR / "kelvins" / name, base / "kelvins" / name)
+        with _reading_from(base):
+            cohort = build_dataset("train", eligible_only=True)["series_id"].astype(str).tolist()[:300]
+        cdms = pd.read_parquet(base / "kelvins" / "cdms_train.parquet")
+
+        for label, mutation in MUTATIONS.items():
+            directory = root / f"m_{label}"
+            (directory / "kelvins").mkdir(parents=True)
+            mutation(cdms).to_parquet(directory / "kelvins" / "cdms_train.parquet")
+            shutil.copy(
+                base / "kelvins" / "series_train.parquet",
+                directory / "kelvins" / "series_train.parquet",
+            )
+            before = _build("frozen", base, cohort, ["latest_risk"])
+            after = _build("frozen", directory, cohort, ["latest_risk"])
+            left = before["latest_risk"].to_numpy(dtype=np.float64)
+            right = after["latest_risk"].to_numpy(dtype=np.float64)
+            if not np.allclose(left, right, rtol=NOISE_TOLERANCE, atol=0.0, equal_nan=True):
+                raise CheckFailure(
+                    f"B1's prediction (latest_risk) moved under mutation {label!r}; the "
+                    "Phase 7 primary would fall with the leak"
+                )
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+    # 3 -- structural: the agent's evidence loader enforces the cutoff and cannot be told not to.
+    loader_source = (REPO_ROOT / "core" / "kelvins_store.py").read_text(encoding="utf-8")
+    tree = ast.parse(loader_source)
+    signature = next(
+        node for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name == "load_visible_cdms"
+    )
+    argument_names = [a.arg for a in signature.args.args]
+    if any("cutoff" in name for name in argument_names):
         raise CheckFailure(
-            f"H4 ran {permutation.get('permutations')} permutations; the pre-registration "
-            "fixed 20"
+            "load_visible_cdms takes a cutoff argument; a caller could read the label"
         )
-    if "permutation_p_value" not in permutation:
-        raise CheckFailure("H4 reports no permutation p-value")
+    sample = load_visible_cdms(cohort[:20], "train")
+    if not sample:
+        raise CheckFailure("the CDM loader returned nothing (trivial pass guard)")
+    for series_id, frame in sample.items():
+        if float(frame["time_to_tca_days"].min()) < VISIBILITY_CUTOFF_DAYS:
+            raise CheckFailure(f"{series_id}: the loader returned a post-cutoff CDM")
 
     return (
-        f"H2 ({len(h2)} classifier(s)), H3 ({len(h3)}), {len(headline)} H3-vs-H2 "
-        f"comparison(s), and H4 over {permutation['permutations']} permutations "
-        f"(p = {permutation['permutation_p_value']:.4f})"
+        f"no leaking column appears in the agent or the CDM loader; B1's latest_risk is "
+        f"invariant under all {len(MUTATIONS)} mutations; the loader enforces the "
+        f"{VISIBILITY_CUTOFF_DAYS}-day cutoff with no parameter to disable it"
     )
 
 
 # -- 5 ---------------------------------------------------------------------------------
 
-def check_no_new_api_calls() -> str:
-    """The primary arms replay the cache and cannot call a model."""
-    for name in ("run_hybrid.py",):
-        source = (REPO_ROOT / "scripts" / name).read_text(encoding="utf-8")
-        for marker in ("LLMClient", "import anthropic", "from google", "import openai"):
-            if marker in source:
-                raise CheckFailure(f"{name} references {marker}")
-    module = (REPO_ROOT / HYBRID_MODULE).read_text(encoding="utf-8")
-    for marker in ("LLMClient", "import anthropic", "from google", "import openai"):
-        if marker in module:
-            raise CheckFailure(f"{HYBRID_MODULE} references {marker}")
+def check_screener_catches_the_counterexample() -> str:
+    """The corrected screener keeps an interval the old prefilter discarded."""
+    from orbital.propagate import (
+        candidate_indices,
+        max_relative_speed_over_interval,
+        swept_separation_lower_bound,
+    )
 
-    predictions = settings.PROCESSED_DIR / "agent_predictions.parquet"
-    if not predictions.is_file():
-        raise CheckFailure(f"{predictions} is missing")
-    frame = pd.read_parquet(predictions)
-    analysed = int(frame["agent_analysed"].sum())
-    if analysed == 0:
-        raise CheckFailure("the cached predictions contain no analysed events")
+    ranges = np.array([1200.0, 420.0, 420.0, 1200.0])
+    speeds = np.full(4, 14.0)
+    radii = np.full(4, 7000.0)
 
+    interior = np.flatnonzero(
+        (ranges[1:-1] <= ranges[:-2]) & (ranges[1:-1] <= ranges[2:])
+    ) + 1
+    old_keeps = [int(i) for i in interior if ranges[i] < 10.0 * 5]
+    if old_keeps:
+        raise CheckFailure(
+            "the old prefilter no longer discards the counterexample; the regression this "
+            "guards has changed shape"
+        )
+
+    kept = candidate_indices(ranges, speeds, radii, 60.0, 10.0)
+    if not kept:
+        raise CheckFailure("the corrected screener also discards the counterexample")
+
+    # And the bound must be a genuine lower bound, or rejecting on it is unsound.
+    rng = np.random.default_rng(3)
+    worst = 0.0
+    for _ in range(2000):
+        speed, step = rng.uniform(0.5, 16.0), rng.uniform(1.0, 300.0)
+        closest_at, miss = rng.uniform(-1.0, 1.0) * step, rng.uniform(0.0, 50.0)
+        times = np.linspace(0.0, step, 1001)
+        truth = float(np.min(np.hypot(miss, speed * (times - closest_at))))
+        bound = swept_separation_lower_bound(
+            float(np.hypot(miss, speed * -closest_at)),
+            float(np.hypot(miss, speed * (step - closest_at))), speed, step,
+        )
+        worst = max(worst, bound - truth)
+    if worst > 1e-9:
+        raise CheckFailure(f"the bound exceeded the true minimum by {worst:.3e} km")
+
+    speed = max_relative_speed_over_interval(14.0, 14.0, 7000.0, 60.0)
+    bound = swept_separation_lower_bound(420.0, 420.0, speed, 60.0)
     return (
-        f"neither the hybrid nor its runner can construct an LLM client; all {analysed} "
-        "LLM outputs come from the Phase 6 cache"
+        f"the old 5x prefilter keeps nothing; the swept bound keeps {kept} "
+        f"(bound {bound:.1f} km <= 10 km) and never exceeds the true minimum over 2,000 "
+        "random crossings"
     )
 
 
@@ -277,7 +327,7 @@ def check_earlier_phases_still_pass() -> str:
             tail = (completed.stdout or completed.stderr).strip().splitlines()[-2:]
             raise CheckFailure(f"verify_phase{phase} failed: {' | '.join(tail)}")
         match = re.search(r"(\d+)/(\d+) checks passed", completed.stdout)
-        passed.append(f"phase{phase} {match.group(0).split()[0]}" if match else f"phase{phase}")
+        passed.append(f"phase{phase} {match.group(1)}/{match.group(2)}" if match else f"phase{phase}")
     if len(passed) < 9:
         raise CheckFailure(f"only {len(passed)} earlier phases ran (trivial pass guard)")
     return "; ".join(passed)
@@ -303,11 +353,16 @@ def main() -> int:
     argparse.ArgumentParser(description=__doc__).parse_args()
 
     checks: list[tuple[str, Callable[[], str]]] = [
-        ("the pre-registration predates the hybrid", check_preregistration_came_first),
-        ("every hybrid output is B1 or -6.001", check_action_space_is_binary),
-        ("the threshold saw no test label", check_threshold_saw_no_test_label),
-        ("the H2 and H4 controls ran and are reported", check_controls_ran),
-        ("the primary arms made zero new API calls", check_no_new_api_calls),
+        ("the invariance test fires on the frozen module and passes on the corrected one",
+         check_invariance_test_is_two_sided),
+        ("no corrected feature reads inside the 2-day cutoff",
+         check_corrected_module_reads_nothing_inside_the_cutoff),
+        ("the Phase 7 frozen artefacts are byte-identical to the manifest",
+         check_frozen_artefacts_untouched),
+        ("B1 and the v1 agent are provably independent of the leaking features",
+         check_b1_and_agent_are_independent_of_the_leak),
+        ("the corrected screener catches the counterexample",
+         check_screener_catches_the_counterexample),
         ("every earlier phase still verifies", check_earlier_phases_still_pass),
         ("pytest passes", check_pytest),
     ]
