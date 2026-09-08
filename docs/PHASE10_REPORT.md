@@ -19,7 +19,10 @@
 
 Model-level self-consistency does not predict score-level stability. Across four arms on two
 vendors, verdict flip rate stays within 1.4 percentage points while Var(L) moves by a factor
-of 554,000 — and a single derived formula predicts every one of them to within 15%.
+of 554,000 — and a single derived decomposition accounts for every one of them to within 15%.
+
+*(Corrected: "accounts for", not "predicts" — the decomposition is computed given the
+labels. See the erratum note above.)*
 
 Companion derivation: [PHASE10_THEORY.md](PHASE10_THEORY.md). No new agent, no new prompt,
 no test-set scoring, and no change to any Phase 7 frozen artefact.
@@ -172,7 +175,11 @@ OLS of measured Var(L) on each candidate, pooled over all three families:
 | p_HR | 0.0194 |
 | **Overall intervention rate** | **0.0191** |
 
-**Overall rate explains 1.9% of the variation in Var(L). The derived form explains 87.4%.**
+**Overall rate accounts for 1.9% of the variation in Var(L). The derived form accounts for 87.4%.**
+Both are *descriptive* fits computed given the labels; see the erratum note at the top.
+The supported claim is that intervention rate is a poor descriptor of score variance and
+clipped magnitude on the scored subpopulation is a good one — not that either forecasts
+an unseen agent.
 Per family the derived form still wins everywhere (RANDOM 0.746, MAGNITUDE 0.889,
 CONFIDENCE 0.962) against 0.19–0.25 for rate alone.
 
@@ -442,6 +449,11 @@ and coupling terms rather than modelling them. A complete closed form for Var(F�
 gate is not derived here.
 
 **Train split only.** No test-set scoring anywhere in this phase, by design. The Phase 7
+
+**The 50 splits are not 50 independent datasets.** They are overlapping 25% draws from
+one 8,293-event pool, so per-split results are correlated and the effective sample size
+is below 50. The paired design controls the split-to-split variance common to both arms,
+which is what it was chosen for, but it does not make the splits independent.
 result is untouched.
 
 ---
