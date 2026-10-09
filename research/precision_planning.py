@@ -96,7 +96,7 @@ def describe(values: pd.Series) -> dict:
     sd = float(x.std(ddof=1))
     return {'scenarios': len(x), 'mean': float(x.mean()), 'sd': sd, 'se': sd / math.sqrt(len(x)),
             'q01': float(np.quantile(x, .01)), 'q99': float(np.quantile(x, .99)),
-            'exact_zero_fraction': float(np.mean(np.abs(x) < 1e-12)), 'skewness': float(stats.skew(x)) if sd > 0 else 0.0}
+            'exact_zero_fraction': float(np.mean(np.abs(x) < 1e-12)), 'skewness': float(stats.skew(x)) if sd > 1e-12 else 0.0}
 
 
 def n_for_half_width(sd: float, half_width: float, alpha: float = ALPHA) -> int:
