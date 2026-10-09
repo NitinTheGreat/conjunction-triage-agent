@@ -60,3 +60,29 @@ def test_exact_miss_summaries_handle_zero_discordance_and_no_positives():
     assert ta.reuse_miss_summary(1, 0, 0) == {'status': 'undefined_no_positives'}
     with pytest.raises(ValueError):
         ta.clopper_pearson(3, 2)
+
+
+def test_bank_combined_interval_reduces_to_scenario_bootstrap_and_widens_with_bank_spread():
+    rng = np.random.default_rng(21)
+    scenario = rng.exponential(.07, size=1500)
+    same = np.column_stack([scenario] * 4)
+    r = ta.bank_combined_interval(same, 999, 3)
+    single = ta.studentized_bootstrap(scenario, 999, 3)
+    assert r['bank_se'] == 0 and r['lower'] == pytest.approx(single['lower']) and r['upper'] == pytest.approx(single['upper'])
+    spread = same + np.array([-.01, 0., .005, .01])
+    wide = ta.bank_combined_interval(spread, 999, 3)
+    assert wide['lower'] < r['lower'] + .00125 and wide['upper'] - wide['lower'] > r['upper'] - r['lower']
+    with pytest.raises(ValueError):
+        ta.bank_combined_interval(scenario[:, None], 99, 1)
+
+
+def test_combined_p_values_cross_alpha_at_the_interval_bounds():
+    rng = np.random.default_rng(22)
+    d = rng.exponential(.07, size=(1200, 1)) + rng.normal(0, .004, size=(1, 5)) + rng.normal(0, .02, size=(1200, 5))
+    r = ta.bank_combined_interval(d, 1999, 4)
+    assert ta.combined_one_sided_p(r, r['lower'] - 1e-6, 'greater') <= .025 + 1e-4
+    assert ta.combined_one_sided_p(r, r['lower'] + 1e-4, 'greater') > .025
+    assert ta.combined_one_sided_p(r, r['upper'] + 1e-6, 'less') <= .025 + 1e-4
+    assert ta.combined_one_sided_p(r, r['mean'] + 1, 'greater') == 1.0
+    with pytest.raises(ValueError):
+        ta.combined_one_sided_p(r, 0., 'both')

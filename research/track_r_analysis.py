@@ -54,6 +54,56 @@ def one_sided_p(result: dict, null_value: float, alternative: str) -> float:
     return (1 + extreme) / (1 + len(t_star))
 
 
+def bank_combined_interval(matrix, resamples: int, seed: int, alpha: float = ALPHA) -> dict:
+    """Interval for the mean over K independent training banks sharing n scenarios.
+
+    Rows are scenarios, columns training banks. The scenario component is the
+    studentized bootstrap of bank-averaged per-scenario contrasts (keeps skew
+    asymmetry). The bank component is t(K-1) times the SD of bank means over sqrt(K).
+    The two half-widths are combined in quadrature on each side. The bank-mean SD
+    also carries a small scenario-interaction term, so the bank part is mildly
+    conservative.
+    """
+    d = np.asarray(matrix, dtype=float)
+    if d.ndim != 2 or d.shape[1] < 2 or not np.isfinite(d).all():
+        raise ValueError('Expected a finite scenarios x banks matrix with at least two banks')
+    k = d.shape[1]
+    scenario = studentized_bootstrap(d.mean(axis=1), resamples, seed, alpha)
+    bank_se = float(d.mean(axis=0).std(ddof=1) / math.sqrt(k))
+    result = {**scenario, 'banks': k, 'bank_se': bank_se, 'scenario_lower': scenario['lower'],
+              'scenario_upper': scenario['upper']}
+    result['lower'], result['upper'] = _combined_bounds(result, alpha)
+    result['combined_se'] = math.sqrt(scenario['se'] ** 2 + bank_se ** 2)
+    return result
+
+
+def _combined_bounds(result: dict, alpha: float) -> tuple[float, float]:
+    mean, se, k = result['mean'], result['se'], result['banks']
+    upper_q, lower_q = np.quantile(result['t_star'], [1 - alpha / 2, alpha / 2])
+    bank = stats.t.ppf(1 - alpha / 2, k - 1) * result['bank_se']
+    return (mean - math.hypot(float(upper_q) * se, bank), mean + math.hypot(-float(lower_q) * se, bank))
+
+
+def combined_one_sided_p(result: dict, null_value: float, alternative: str, tolerance: float = 1e-6) -> float:
+    """Smallest one-sided level at which the combined interval excludes null_value."""
+    if alternative not in ('greater', 'less'):
+        raise ValueError(alternative)
+    floor = 1 / (1 + len(result['t_star']))
+
+    def excludes(level: float) -> bool:
+        lower, upper = _combined_bounds(result, 2 * level)
+        return lower > null_value if alternative == 'greater' else upper < null_value
+    if excludes(floor):
+        return floor
+    if not excludes(.4999):
+        return 1.0 if (result['mean'] <= null_value if alternative == 'greater' else result['mean'] >= null_value) else .5
+    low, high = floor, .4999
+    while high - low > tolerance:
+        middle = (low + high) / 2
+        low, high = (low, middle) if excludes(middle) else (middle, high)
+    return high
+
+
 def primary_decision(result: dict, margin: float) -> str:
     """Report 2 / primary-contrast rule on the two-sided 95% interval."""
     if result['lower'] > margin:
