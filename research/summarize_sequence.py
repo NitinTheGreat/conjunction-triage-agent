@@ -71,6 +71,9 @@ def reconstruct_selection(source, selection, frame, events, splits, grid):
     seed, regime, arm = (selection[k] for k in ('seed', 'regime', 'arm'))
     prefix = f'seed{seed}_{regime}_{arm}'
     validate_splits(frame, events, splits)
+    assert selection['training_scenarios'] == frame.series_id.nunique()
+    assert selection['training_variant_rows'] == len(frame)
+    assert selection['objective_weight_sum'] == float(frame.event_weight.sum())
     candidates = read_table(source/f'candidates_{prefix}.parquet')
     scores, records = [], []
     # Refit preprocessing only, using the audited fitting rows, never labels.
@@ -104,8 +107,7 @@ def reconstruct_selection(source, selection, frame, events, splits, grid):
         score = float(np.average(loss(frame.y.to_numpy(), reconstructed), weights=frame.event_weight))
         scores.append({'hidden': hidden, 'epochs': epochs, 'log_loss': score})
     assert len(candidates) == len(frame)*len(grid)
-    for expected, actual in zip(selection['inner_scores'], scores):
-        assert expected == actual
+    assert selection['inner_scores'] == scores
     chosen = min(scores, key=lambda s: (s['log_loss'], s['hidden'], s['epochs']))
     assert (selection['hidden'], selection['epochs']) == (chosen['hidden'], chosen['epochs'])
     oof = candidates[(candidates.hidden == chosen['hidden']) & (candidates.epochs == chosen['epochs'])].raw_oof.to_numpy()
@@ -118,6 +120,9 @@ def reconstruct_selection(source, selection, frame, events, splits, grid):
     assert model.transformer.state() == SequenceTransform().fit(events).state()
     refit = json.loads((source/selection['checkpoint'].replace('model_', 'fit_', 1).replace('.pt', '.json')).read_text(encoding='utf-8'))
     assert refit['status'] == 'complete' and refit['fitting_rows'] == len(frame) and refit['validation_rows'] == 0
+    assert refit['fitting_scenarios'] == frame.series_id.nunique() and refit['validation_scenarios'] == 0
+    assert refit['initialization_seed'] == seed and refit['minibatch_seed'] == seed+1000000
+    assert (refit['hidden'], refit['epochs'], refit['arm']) == (model.hidden, model.epochs, arm)
     assert model.fit_record == {key: refit[key] for key in model.fit_record}
     assert len(refit['epoch_training_loss']) == chosen['epochs']
     assert selection['completed_training_fits'] == len(records)+1
