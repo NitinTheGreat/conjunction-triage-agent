@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "date": "2026-10-10",
+  "status": "draft",
+  "purpose": [
+    "Plan section 3: estimate variation across independently generated training banks relative to evaluation precision for P1 and secondary contrasts.",
+    "Plan section 4: check whether development conclusions persist across noise anisotropy, noise scale and shared bias, and measure runtime for V03 sizing."
+  ],
+  "scientific_reservation": "seed 20261012 and IDs scientific:00000..04999 are refused by the generator and are not generated",
+  "excluded_candidate_scientific_configuration": {
+    "eigenvalues": [0.144, 0.036],
+    "rotation_degrees": 30.0,
+    "note": "Not generated here, so it remains an unseen configuration; anisotropy ratios 2 and 8 bracket its ratio of 4. Only a label-free numerical-integration accuracy check was run on its noise covariance."
+  },
+  "configurations": {
+    "iso": {"eigenvalues": [0.09, 0.09], "rotation_degrees": 0.0, "shared_bias_variance": 0.0, "training_banks": 6},
+    "aniso2": {"eigenvalues": [0.12, 0.06], "rotation_degrees": 60.0, "shared_bias_variance": 0.0, "training_banks": 2},
+    "aniso8": {"eigenvalues": [0.16, 0.02], "rotation_degrees": 60.0, "shared_bias_variance": 0.0, "training_banks": 2},
+    "noise2": {"eigenvalues": [0.18, 0.18], "rotation_degrees": 0.0, "shared_bias_variance": 0.0, "training_banks": 2},
+    "bias": {"eigenvalues": [0.09, 0.09], "rotation_degrees": 0.0, "shared_bias_variance": 0.01, "training_banks": 2}
+  },
+  "transfer_source": "iso",
+  "training_scenarios": 1000,
+  "evaluation_scenarios": 2000,
+  "seed_base": 20261100,
+  "seed_rule": "evaluation seed = seed_base + 10 * configuration_index; training bank k (1..K) seed = evaluation seed + k; the inner-fold seed equals the training-bank seed",
+  "integration_seed_base": 20261190,
+  "preflight_seed_base": 20261180,
+  "arms": ["singleton", "latest_metadata", "grouped", "oracle_lineage_weight"],
+  "regime": "matched_mixture",
+  "conditions": ["no_reuse", "overlap_50", "overlap_90", "solution_reissue", "new_information", "burst_reissue"],
+  "evaluation_conditions": "all seven, including exact_replay",
+  "C": [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0],
+  "inner_folds": 3,
+  "max_iter": 10000,
+  "selection_and_calibration": "Unchanged V02 rules: minimum weighted inner-OOF clipped log loss with ties to smaller C; monotone Platt on selected OOF; nominal 95% training-recall threshold; refit on the full training bank.",
+  "evaluation": "Each model is evaluated on its own configuration's evaluation bank. Iso-trained models are also evaluated on every other configuration's evaluation bank.",
+  "planned_selected_models": 56,
+  "planned_training_fits": 1064,
+  "planned_prediction_rows": 2128000,
+  "failure_policy": "Any convergence warning, nonfinite value, failed integration check, failed exact-replay or latest-message invariance, or plan/output mismatch stops the run. Partial records are retained, no candidate or bank is dropped, and a retry gets a new run ID.",
+  "prespecified_summaries": [
+    "P1, S1, S2, S3, S5 and S6 per configuration and training bank on the configuration's evaluation bank; S4 is P1 under the bias configuration.",
+    "Iso variance decomposition: between-bank SD of the six bank-level contrasts versus the scenario-level SE of the bank-averaged contrast.",
+    "Persistence: sign and position relative to the 0.02-nat margin per configuration; descriptive only.",
+    "Transfer: iso-trained contrasts on each other configuration's evaluation bank."
+  ],
+  "interpretation": "Exposed development evidence for design decisions only; no confirmation, operational or orbital-validity claim.",
+  "runtime_estimate": "to be filled from the preflight before fixing"
+}
