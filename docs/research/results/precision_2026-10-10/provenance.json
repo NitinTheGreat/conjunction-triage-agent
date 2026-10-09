@@ -1,0 +1,20 @@
+{
+  "artifacts": {
+    "audit.json": "05739f5b9fcde8896444d45b0a87056d3267c30ea16bbf25dbcc12a91d1d25b2",
+    "candidate_precision.csv": "f2eda4f8211a7ee46c8c49e3448231c86908c94e3d14a228c09c2ac544ebf5d1",
+    "miss_precision.csv": "dcdab2cf4b1994bc96c7bdf59f003ecc3d6c85bab9fbd25ca7de8ec92dac0ff7",
+    "planning_table.csv": "a437466f29b3e860a250707224148b044fa007d5ad6214c6fddda449d4981126",
+    "reconciliation.csv": "d00fbba0d678129a44549642754390b40e52ba7305a2be525885b02c0403501c",
+    "report.md": "886dafa3e108361308fc24b47746ff0e63be7969cddb193d3a2cd030d3cdb5ec",
+    "resampling_checks.csv": "ad7beed9872b5e86f5a4f6e27ee557af9a544c04a90b3da7a07ca0d801e2c57d",
+    "trial_spread.csv": "02384427f88353d947902a3029374e18b42245c29cf7d9427712b3d04c9d5659"
+  },
+  "manifest_sha256": "b0283e6c87095cdc1dc079101647b7d6f9dcce22de42e8a00c1d5de754aaaf11",
+  "run_id": "precision_planning_20261010_v2",
+  "source_runs": [
+    "tuning_20261009_v1",
+    "covariance_20261009_v1",
+    "sequence_20261010_v1",
+    "components_20261010_v1"
+  ]
+}

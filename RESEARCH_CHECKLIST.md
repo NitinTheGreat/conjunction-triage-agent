@@ -10,19 +10,19 @@ This is the live execution record. Update it as work happens. Checked preparatio
 
 | Field | Current checkpoint — replace after each work session |
 |---|---|
-| NOW | Tuning-adequacy §1 COMPLETE: no-fit inventory tuning_adequacy_20261010_v2 and dated [decision](docs/research/execution/tuning_decision.md): RESTRICT to declared bounded implementations, with regime-specific claim boundaries. Components milestone also complete. |
-| NEXT | §2 of the [tuning and precision plan](docs/research/execution/tuning_precision_plan.md): fix one primary paired contrast (logistic, matched training) with its adverse outcome, then build the scenario-paired planning table and precision sensitivity. |
-| Active task / owner | V02 IN PROGRESS. Remaining: primary contrast, precision/power (§2), uncertainty design (§3), exposed simulator sensitivity (§4). |
+| NOW | Plan §1-§2 COMPLETE: tuning decision (restrict) and [primary contrast](docs/research/execution/primary_contrast.md) P1 with margin 0.02 nats and provisional n = 5,000 (precision_planning_20261010_v2). §3 uncertainty/analysis design is next. |
+| NEXT | §3 of the [tuning and precision plan](docs/research/execution/tuning_precision_plan.md): training-versus-evaluation uncertainty design, selection/calibration/threshold separation, primary/secondary/multiplicity and interval specification. Then §4 exposed simulator sensitivity. |
+| Active task / owner | V02 IN PROGRESS. Remaining: §3 analysis specification, §4 exposed simulator sensitivity (anisotropic candidate), then V02 acceptance and V03 freeze preparation. |
 | Selected direction | **Track R, narrowed:** controlled robustness/measurement benchmark. Grouping remains a candidate and may be discarded if simpler controls explain results. |
 | Conditional extension | **Track E:** independent real-data efficacy, only after access and statistical requirements pass. |
 | Research blockers | None preventing V01/V02 preparation. Full methods for some close papers and independent operational data remain unavailable; no novelty or real efficacy claim is established. |
 | Current machine | Windows, PowerShell; repository at `F:\conjunction-triage`; Python environment at `.venv\Scripts\python.exe`. Paths elsewhere in this file are relative to the repository root. |
 | HEAD when this checklist was created | `89d7f2efb8bf135e02fa51760e0ed3bb33a105c9`; working tree contains pre-existing modifications and untracked files. |
 | Latest validation | Full suite 442 passed / 1 skipped (58.53s) on committed `12706f3`. 8 bundles / 78 artifacts pass checksums; 12 raw, 45 historical and 8 frozen files unchanged. |
-| New scientific runs | Completed development/analysis runs tuning_adequacy_20261010_v2 (evidence of record; v1 superseded), components_20261010_v1 and components_summary_20261010_v1, plus earlier runs. No frozen scientific evaluation. |
+| New scientific runs | Completed development/analysis runs precision_planning_20261010_v2 and tuning_adequacy_20261010_v2 (both v1 superseded), components_20261010_v1 and components_summary_20261010_v1, plus earlier runs. No frozen scientific evaluation. |
 | Scientific holdout status | Seed 20261012 / scientific:00000..04999 reserved **but not generated**. Candidate anisotropic configuration and sample size still need V03 freeze. Kelvins and all pilot banks are exposed. |
 | Running jobs / processes | None for this project. Python processes running `F:\Agentic BSN\scripts\phase6_0_baseline.py` belong to a different project; leave them alone. |
-| Next executable command | `.\.venv\Scripts\python.exe -m research.verify_exports --root docs/research/results` (passes). No precision/power CLI exists yet; implement §2 after checking the paired-contrast export schemas. |
+| Next executable command | `.\.venv\Scripts\python.exe -m research.verify_exports --root docs/research/results` (passes). No §3/§4 CLI exists yet; design before implementing. |
 
 ### Copy this into the next assistant
 
@@ -735,3 +735,33 @@ planning table: per-contrast paired mean and SD are already in each bundle's
 are not independent replications). Miss/review discordance counts are not
 exported; derive them from the source runs' `predictions.parquet` files. No
 precision CLI exists yet. Scientific seed 20261012 remains ungenerated.
+
+### V02 primary-contrast and precision milestone - 10 October 2026
+
+- [x] Recompute 2,560 matched-training paired contrasts with case-ID hashes and review/miss discordance; reconcile 1,280 export rows (`research/precision_planning.py`, commits `00462a8`, `a98236c`; 6 tests).
+- [x] Normal-approximation sizes, resampled t-interval checks and exact miss bounds; infeasible targets retained.
+- [x] Record the proposed primary contrast, margin, decision rule and provisional size ([primary contrast](docs/research/execution/primary_contrast.md)).
+- [ ] §3 analysis specification and §4 simulator sensitivity; V02 remains open; nothing is frozen.
+
+Evidence: [report](docs/research/results/precision_2026-10-10/report.md), run
+`precision_planning_20261010_v2` (22:57:51-22:58:15 UTC, PID 17924, code `a98236c`).
+`precision_planning_20261010_v1` (code `00462a8`) is byte-identical apart from the
+added case-ID columns; it is retained locally and superseded.
+
+P1 = degradation of singleton versus latest_metadata at 90% overlap, correctly
+specified noise, matched training. Development effect 0.069578-0.074915; planning
+SD 0.363. Margin 0.02 nats: confirm if L > 0.02, "not material" if U < 0.02,
+otherwise inconclusive. Provisional n = 5,000 (the full reservation). Recompute
+before generation if §4 finds SD > 0.40 or effect < 0.035. Secondary candidates
+S1-S6 cover the absolute crossover under solution reissue, grouping, oracle
+weighting and an exploratory shared-bias bank. Reports 1-3 and the manuscript
+will be updated at the end of §3/§4 rather than per substep; the decision files
+here are current.
+
+**Exact next step (§3):** write the analysis specification. Quantify training
+versus evaluation variance: for S2/S3, between-trial SD is about three times the
+n = 5,000 evaluation SE. Decide between conditional-on-one-fit inference and
+independent training banks, with seeds and runtime fixed before generating them.
+Fix selection/calibration/threshold roles; choose and validate the interval
+method under right skew; fix the confirmatory secondary family and Holm
+multiplicity; and set the failure policy.

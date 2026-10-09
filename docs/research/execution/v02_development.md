@@ -460,3 +460,38 @@ No fitting, paid inference or scientific-bank access occurred.
 Next: §2 of the [plan](tuning_precision_plan.md). Choose the primary paired
 contrast and its adverse outcome, then compute the scenario-paired planning table
 and precision sensitivity. No precision CLI exists yet.
+
+## Primary contrast and precision planning - 10 October 2026
+
+`research/precision_planning.py` recomputes 2,560 matched-training contrasts from
+the audited per-scenario predictions of the four class-forecast runs. Each
+contrast covers trial x bank x condition x arm pair x estimand (absolute or
+degradation). Rows include case-ID hashes and review/miss discordance, and all
+1,280 overlapping committed export rows reconcile within 5e-16. The module also
+gives normal-approximation sample sizes, resampled t-interval checks (4,000
+resamples, seed 20261040) and exact Clopper-Pearson miss bounds. It fits nothing.
+Six focused tests cover contrast/discordance definitions, label and completeness
+checks, sample-size and exact-bound formulas, exact location-shift resampling,
+reconciliation failure and case identities.
+
+Run `precision_planning_20261010_v2` (code `a98236c`) is the evidence of record:
+[report](../results/precision_2026-10-10/report.md) and
+[primary-contrast decision](primary_contrast.md). The earlier
+`precision_planning_20261010_v1` (code `00462a8`) is byte-identical apart from the
+added case-ID columns; it is retained locally and superseded. Its uncommitted
+export copy was replaced before any commit.
+
+```powershell
+$env:OMP_NUM_THREADS='2'; $env:MKL_NUM_THREADS='2'; $env:LOKY_MAX_CPU_COUNT='2'
+.\.venv\Scripts\python.exe -m research.precision_planning --run-id precision_planning_20261010_v2 --export docs/research/results/precision_2026-10-10
+```
+
+Proposed primary contrast P1: degradation of singleton versus latest_metadata at
+90% overlap, correctly specified noise, matched training, clipped log loss.
+Development effect 0.069578 (trials 0.069578 to 0.074915); planning SD 0.363.
+Margin 0.02 nats, about a quarter of the history model's no-reuse advantage.
+Provisional n = 5,000 gives a median half-width of 0.0094 and P(L > 0.02) of 0.884
+at half the development effect. Secondary candidates S1-S6 are recorded with
+their roles. Issues for §3: training variation is comparable to or larger than
+evaluation precision (S2/S3 about three times), and right skew makes one t bound
+anti-conservative. Not frozen; §3 and §4 follow.

@@ -66,7 +66,7 @@ weighting is a diagnostic and cannot be the deployable primary method.
 
 ## 2. Specify the scientific question before calculating its sample size
 
-- [ ] Choose one primary paired contrast, evaluation distribution and estimand,
+- [x] Choose one primary paired contrast, evaluation distribution and estimand,
   based openly on development evidence. State whether it concerns absolute
   forecast loss or a difference in degradation relative to no reuse. Keep both
   visible in secondary reporting. Fix the reuse condition, training regime,
@@ -74,14 +74,21 @@ weighting is a diagnostic and cannot be the deployable primary method.
   **Expected:** a proposed claim with an explicit null/adverse outcome that
   would lead to narrowing or stopping; no outcome-dependent rule to switch the
   primary contrast after opening the scientific bank.
-- [ ] Inventory scenario-paired endpoint differences from audited predictions.
+  **Evidence:** [primary contrast](primary_contrast.md): P1 is the degradation of
+  singleton versus latest_metadata at 90% overlap, correctly specified noise,
+  matched training; margin 0.02 nats; confirm, not-material and inconclusive
+  rules fixed; provisional n = 5,000.
+- [x] Inventory scenario-paired endpoint differences from audited predictions.
   Record case IDs, sample size, mean, standard deviation, positive count and
   paired review/miss discordance counts. Recompute these from per-scenario data
   and reconcile with the component/sequence contrast exports.
   **Expected:** a reproducible planning input table. Repeated conditions, model
   predictions and the three overlapping training subsets do not enlarge the
   number of independent evaluation scenarios.
-- [ ] Calculate sample-size/precision sensitivity for the chosen loss contrast
+  **Evidence:** run `precision_planning_20261010_v2`, `planning_table.csv`
+  (2,560 rows with case-ID hashes and review/miss discordance), reconciled with
+  1,280 export rows in `reconciliation.csv`.
+- [x] Calculate sample-size/precision sensitivity for the chosen loss contrast
   across several practical targets. Treat miss differences separately using
   positive cases and paired discordance; a nominal training recall threshold
   is not a scientific miss guarantee. Verify statistical methods against primary
@@ -89,6 +96,12 @@ weighting is a diagnostic and cannot be the deployable primary method.
   alternatives when sparse discordance makes an asymptotic approximation poor.
   **Expected:** a quantitative planning report, assumptions and reproducible
   calculations, with infeasible targets retained rather than silently relaxed.
+  **Evidence:** [precision report](../results/precision_2026-10-10/report.md):
+  normal-approximation sizes, 4,000-resample t-interval checks (coverage
+  0.937-0.956, boundary false-confirmation at most 0.0375), and exact
+  Clopper-Pearson miss bounds. Infeasible targets are retained: S4 needs 77,370
+  scenarios for a 0.01 half-width, and S1 needs 22,268 for 90% power at half its
+  effect.
 
 The earlier 20% review-reduction and one-percentage-point miss-difference targets
 belong to conditional Track E. They are not automatic requirements or established
@@ -160,7 +173,13 @@ path for any rerun; both `tuning_adequacy_20261010_v1` and `_v2` exist):
 .\.venv\Scripts\python.exe -m research.tuning_adequacy --run-id <new_id> --export docs/research/results/<new_bundle>
 ```
 
-No precision or sensitivity CLI exists yet (§2-§4). Implement one only after
+Precision planning (§2) has also run:
+
+```powershell
+.\.venv\Scripts\python.exe -m research.precision_planning --run-id <new_id> --export docs/research/results/<new_bundle>
+```
+
+No uncertainty-design or sensitivity CLI exists yet (§3-§4). Implement one only after
 checking the exported schemas and fixing its calculations; do not invent a
 command in a handoff. For another machine, transfer the ignored
 source run directories and input data as described in the root checklist.
