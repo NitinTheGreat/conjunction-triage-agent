@@ -1,0 +1,15 @@
+{
+  "artifacts": {
+    "audit.json": "07850b84829bdf04ac948f7c4681f9fd8571594a309d4b4beb08f0c3af3475bd",
+    "interval_validation.csv": "3e7f40e78d96dd0fb83ae5332f7f4187dfa0e999223359ad63e659d71c6b4c7a",
+    "report.md": "949fa63c292033646007841ed5a2b661378445393484cd3a95053aed8c55f269"
+  },
+  "manifest_sha256": "463d74f692f6e21c050c91e2572788637958931488f1e882883d8dc5f1c8687e",
+  "run_id": "interval_validation_20261010_v2",
+  "source_runs": [
+    "tuning_20261009_v1",
+    "covariance_20261009_v1",
+    "sequence_20261010_v1",
+    "components_20261010_v1"
+  ]
+}

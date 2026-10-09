@@ -1,0 +1,35 @@
+{
+  "fitting_performed": false,
+  "rows": 3,
+  "scientific_bank_opened": false,
+  "source_runs": [
+    {
+      "archived_sources_verified": 77,
+      "artifacts_verified": 306,
+      "inputs_verified": 10,
+      "run_id": "tuning_20261009_v1",
+      "status": "complete"
+    },
+    {
+      "archived_sources_verified": 81,
+      "artifacts_verified": 83,
+      "inputs_verified": 29,
+      "run_id": "covariance_20261009_v1",
+      "status": "complete"
+    },
+    {
+      "archived_sources_verified": 88,
+      "artifacts_verified": 959,
+      "inputs_verified": 27,
+      "run_id": "sequence_20261010_v1",
+      "status": "complete"
+    },
+    {
+      "archived_sources_verified": 91,
+      "artifacts_verified": 1905,
+      "inputs_verified": 27,
+      "run_id": "components_20261010_v1",
+      "status": "complete"
+    }
+  ]
+}
