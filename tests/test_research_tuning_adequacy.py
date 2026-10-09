@@ -5,7 +5,8 @@ import pandas as pd
 import pytest
 
 from research.metrics import loss
-from research.tuning_adequacy import (FIT_NAME, load_run, logistic_profile, lstm_profile, paired_step,
+from research.tuning_adequacy import (FIT_NAME, fold_membership, fold_scores, folds_favoring_larger, load_run,
+    logistic_profile, lstm_profile, paired_step,
     profile_groups, scenario_losses, trace_summary)
 
 GRID = (0.01, 0.1, 1., 10., 100., 1000.)
@@ -110,3 +111,19 @@ def test_fit_record_names_supply_trial_seed_and_regime_and_must_match_contents(t
     (tmp_path / 'fit_seed7_no_reuse_only_singleton_c1000_fold1.json').write_text(json.dumps(record), encoding='utf-8')
     with pytest.raises(ValueError, match='Unexpected fit record'):
         load_run(tmp_path)
+
+
+def test_fold_scores_keep_scenarios_whole_and_count_folds_favoring_the_larger_budget():
+    membership = pd.DataFrame({'series_id': ['a', 'a', 'b', 'b', 'c', 'c', 'd', 'd'],
+                               'condition': ['x', 'y'] * 4, 'inner_fold': [0, 0, 1, 1, 2, 2, 2, 2]})
+    folds = fold_membership(membership)
+    assert folds.to_dict() == {'a': 0, 'b': 1, 'c': 2, 'd': 2}
+    smaller = pd.Series([.4, .3, .2, .6], index=['a', 'b', 'c', 'd'])
+    larger = pd.Series([.3, .35, .1, .5], index=['a', 'b', 'c', 'd'])
+    scores = fold_scores(smaller, folds)
+    assert scores.scenarios.tolist() == [1, 1, 2] and scores.loss.tolist() == pytest.approx([.4, .3, .4])
+    assert folds_favoring_larger(smaller, larger, folds) == 2
+    with pytest.raises(ValueError, match='whole'):
+        fold_membership(membership.assign(inner_fold=[0, 1, 1, 1, 2, 2, 2, 2]))
+    with pytest.raises(ValueError, match='disagree'):
+        fold_scores(smaller.rename(index={'d': 'e'}), folds)

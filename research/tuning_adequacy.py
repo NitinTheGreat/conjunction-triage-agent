@@ -106,6 +106,26 @@ def paired_step(worse_candidate: pd.Series, better_candidate: pd.Series) -> dict
             'paired_z': float(gain.mean() / se) if se > 0 else math.nan, 'paired_scenarios': len(gain)}
 
 
+def fold_membership(membership: pd.DataFrame) -> pd.Series:
+    """Map each scenario to its inner fold; every variant must share that fold."""
+    folds = membership.groupby('series_id', sort=True).inner_fold
+    if (folds.nunique() != 1).any() or (membership.inner_fold < 0).any():
+        raise ValueError('Inner folds must keep each scenario whole')
+    return folds.first()
+
+
+def fold_scores(per_scenario: pd.Series, folds: pd.Series) -> pd.DataFrame:
+    if not per_scenario.index.equals(folds.index):
+        raise ValueError('Scenario losses and fold membership disagree')
+    return (per_scenario.groupby(folds).agg(['size', 'mean']).rename(columns={'size': 'scenarios', 'mean': 'loss'})
+            .rename_axis('fold').reset_index())
+
+
+def folds_favoring_larger(smaller_budget: pd.Series, larger_budget: pd.Series, folds: pd.Series) -> int:
+    gain = fold_scores(smaller_budget, folds).loss - fold_scores(larger_budget, folds).loss
+    return int((gain > 0).sum())
+
+
 def trace_summary(losses) -> dict:
     trace = np.asarray(losses, dtype=float)
     if trace.ndim != 1 or len(trace) < 11 or not np.isfinite(trace).all():
@@ -147,7 +167,7 @@ def load_run(path: Path):
 
 
 def analyse(runs: dict[str, Path], bundles: Path | None = None):
-    profiles, selections, steps, traces, fit_rows, inventory, checks = [], [], [], [], [], [], []
+    profiles, selections, steps, traces, fit_rows, inventory, checks, fold_rows = [], [], [], [], [], [], [], []
     for run_id, path in runs.items():
         manifest, chosen, completion, fits = load_run(path)
         neural = run_id.startswith('sequence')
@@ -176,26 +196,46 @@ def analyse(runs: dict[str, Path], bundles: Path | None = None):
             selections.append({**key, **result, 'seconds': s['seconds'],
                                'maximum_observed_iterations': s.get('maximum_observed_iterations', math.nan),
                                'training_scenarios': s['training_scenarios'], 'training_variant_rows': s['training_variant_rows']})
+            membership = read_table(path / f"training_seed{s['seed']}_{s['regime']}.parquet")
+            folds, rows = fold_membership(membership), membership[['series_id', 'condition']].to_numpy()
+            recorded = dict(candidates)
             frame_path = path / f"candidates_seed{s['seed']}_{s['regime']}_{s['arm']}.parquet"
             if frame_path.exists():
                 frame = read_table(frame_path)
                 frame['candidate'] = frame.apply(candidate_key, axis=1)
-                per = {c: scenario_losses(g) for c, g in frame.groupby('candidate')}
-                recorded = dict(candidates)
+                per = {}
+                for c, g in frame.groupby('candidate', sort=False):
+                    if not np.array_equal(g[['series_id', 'condition']].to_numpy(), rows):
+                        raise ValueError('Candidate rows disagree with saved fold membership')
+                    per[c] = scenario_losses(g)
                 if set(per) != set(recorded):
                     raise ValueError('Candidate file and selection disagree')
-                worst = max(abs(per[c].mean() - recorded[c]) for c in per)
-                if worst > SCORE_ATOL:
-                    raise ValueError(f'Saved candidate scores do not reconstruct: {worst}')
-                checks.append({'run_id': run_id, 'seed': s['seed'], 'regime': s['regime'], 'arm': s['arm'],
-                               'candidates': len(per), 'max_abs_score_difference': float(worst)})
+                scope = 'all_candidates'
+            else:
+                # Older runs saved selected-candidate OOF only; reconcile that one.
+                frame = read_table(path / f"oof_seed{s['seed']}_{s['regime']}_{s['arm']}.parquet")
+                if not np.array_equal(frame[['series_id', 'condition', 'inner_fold']].to_numpy(),
+                                      membership[['series_id', 'condition', 'inner_fold']].to_numpy()):
+                    raise ValueError('Selected OOF rows disagree with saved fold membership')
+                per, scope = {result['setting']: scenario_losses(frame)}, 'selected_only'
+            worst = max(abs(per[c].mean() - recorded[c]) for c in per)
+            if worst > SCORE_ATOL:
+                raise ValueError(f'Saved candidate scores do not reconstruct: {worst}')
+            checks.append({'run_id': run_id, 'seed': s['seed'], 'regime': s['regime'], 'arm': s['arm'], 'scope': scope,
+                           'candidates': len(per), 'max_abs_score_difference': float(worst)})
+            for c, values in per.items():
+                fold_rows.extend({**key, 'candidate': c, 'selected': c == result['setting'], 'availability': scope, **r}
+                                 for r in fold_scores(values, folds).to_dict('records'))
+            selections[-1]['selected_fold_loss_range'] = float(np.ptp(fold_scores(per[result['setting']], folds).loss))
+            if scope == 'all_candidates':
                 if neural:
                     h, e = s['hidden'], s['epochs']
                     pairs = {'epoch_step': (f'h={h},e=20', f'h={h},e=60'), 'width_step': (f'h=16,e={e}', f'h=32,e={e}')}
                 else:
                     pairs = {'upper_C_step': ('C=100', 'C=1000')}
                 for name, (a, b) in pairs.items():
-                    steps.append({**key, 'step': name, 'from': a, 'to': b, **paired_step(per[a], per[b])})
+                    steps.append({**key, 'step': name, 'from': a, 'to': b, **paired_step(per[a], per[b]),
+                                  'folds_favoring_larger': folds_favoring_larger(per[a], per[b], folds)})
         grid = (f"hidden {manifest['config']['hidden_widths']} x epochs {manifest['config']['epochs']}" if neural
                 else f"C {manifest['config']['C']}")
         for arm in sorted({s['arm'] for s in chosen}):
@@ -218,6 +258,9 @@ def analyse(runs: dict[str, Path], bundles: Path | None = None):
                               'selections': len(mine), 'total_fits': per_selection * len(mine),
                               'selected_settings': '; '.join(f'{k}: {v}' for k, v in sorted(settings.value_counts().items())),
                               'failed_fits': sum(f['status'] != 'complete' for f in arm_fits),
+                              'maximum_observed_iterations': max(s.get('maximum_observed_iterations', math.nan) for s in mine),
+                              'fold_scores': ('all candidates' if (path / f"candidates_seed{mine[0]['seed']}_{mine[0]['regime']}_{arm}.parquet").exists()
+                                              else 'selected candidate only'),
                               'selection_seconds_total': float(sum(s['seconds'] for s in mine))})
         checks.append({'run_id': run_id, 'completion': completion})
     profiles, selections = pd.DataFrame(profiles), pd.DataFrame(selections)
@@ -234,7 +277,8 @@ def analyse(runs: dict[str, Path], bundles: Path | None = None):
             if not (merged.selected_x == merged.selected_y).all():
                 raise ValueError('Committed export selection flags disagree')
     return {'profiles': profiles, 'selections': selections, 'steps': pd.DataFrame(steps), 'traces': pd.DataFrame(traces),
-            'fits': pd.DataFrame(fit_rows), 'inventory': pd.DataFrame(inventory), 'checks': checks}
+            'fits': pd.DataFrame(fit_rows), 'inventory': pd.DataFrame(inventory), 'checks': checks,
+            'folds': pd.DataFrame(fold_rows)}
 
 
 def summaries(result: dict) -> dict:
@@ -251,7 +295,8 @@ def summaries(result: dict) -> dict:
                      'upper_step_gain_median_all': float(g.upper_step_gain.median()),
                      'upper_step_gain_max_all': float(g.upper_step_gain.max()),
                      'upper_step_gain_median_at_edge': float(edge.upper_step_gain.median()) if len(edge) else math.nan,
-                     'adjacent_gap_median': float(g.adjacent_gap.median())})
+                     'adjacent_gap_median': float(g.adjacent_gap.median()),
+                     'selected_fold_loss_range_median': float(g.selected_fold_loss_range.median())})
         for tol in TOLERANCES:
             tolerance.append({'family': family, 'regime': regime, 'tolerance': tol, 'selections': len(g),
                               'edge_step_gain_above_tolerance': int((g.at_upper_budget & (g.upper_step_gain > tol)).sum()),
@@ -260,7 +305,9 @@ def summaries(result: dict) -> dict:
     steps = result['steps']
     paired = (steps.groupby(['run_id', 'regime', 'step']).agg(models=('paired_gain', 'size'), gain_median=('paired_gain', 'median'),
               gain_min=('paired_gain', 'min'), gain_max=('paired_gain', 'max'), se_median=('paired_se', 'median'),
-              z_min=('paired_z', 'min'), z_max=('paired_z', 'max'), positive_gains=('paired_gain', lambda v: int((v > 0).sum())))
+              z_min=('paired_z', 'min'), z_max=('paired_z', 'max'), positive_gains=('paired_gain', lambda v: int((v > 0).sum())),
+              larger_better_all_folds=('folds_favoring_larger', lambda v: int((v == 3).sum())),
+              larger_better_no_fold=('folds_favoring_larger', lambda v: int((v == 0).sum())))
               .reset_index())
     trace = (result['traces'].groupby(['regime', 'arm', 'hidden', 'epochs'])
              .agg(fits=('fold', 'size'), steps_per_epoch_median=('steps_per_epoch', 'median'),
@@ -295,15 +342,19 @@ def main():
         extra['tolerance'].to_csv(out / 'tolerance_counts.csv', index=False)
         extra['paired_summary'].to_csv(out / 'paired_summary.csv', index=False)
         extra['trace_summary'].to_csv(out / 'trace_summary.csv', index=False)
+        result['folds'].to_csv(out / 'fold_scores.csv', index=False)
+        scored = [c for c in result['checks'] if 'scope' in c]
         write_json(out / 'audit.json', {'source_runs': audits, 'selections': len(result['selections']),
                    'candidate_profiles': len(result['profiles']), 'fit_records': len(result['fits']),
-                   'reconstructed_candidate_files': len([c for c in result['checks'] if 'candidates' in c]),
-                   'max_abs_score_difference': max(c['max_abs_score_difference'] for c in result['checks'] if 'candidates' in c),
+                   'fold_score_rows': len(result['folds']),
+                   'reconstructed_all_candidate_models': sum(c['scope'] == 'all_candidates' for c in scored),
+                   'reconstructed_selected_only_models': sum(c['scope'] == 'selected_only' for c in scored),
+                   'max_abs_score_difference': max(c['max_abs_score_difference'] for c in scored),
                    'committed_exports_match': True, 'fitting_performed': False, 'scientific_bank_opened': False,
                    'scope': 'Same-workflow inventory of exposed development runs; not independent A03 review.'})
         (out / 'report.md').write_text(report(result, extra, args.run_id), encoding='utf-8')
     args.export.mkdir(parents=True, exist_ok=False)
-    names = ('audit.json', 'inventory.csv', 'neural_traces.csv', 'paired_steps.csv', 'paired_summary.csv', 'profiles.csv',
+    names = ('audit.json', 'fold_scores.csv', 'inventory.csv', 'neural_traces.csv', 'paired_steps.csv', 'paired_summary.csv', 'profiles.csv',
              'regime_summary.csv', 'report.md', 'selection_adequacy.csv', 'tolerance_counts.csv', 'trace_summary.csv')
     provenance = {'run_id': args.run_id, 'source_runs': list(SOURCES), 'manifest_sha256': sha256(run.path / 'manifest.json'), 'artifacts': {}}
     for name in names:
@@ -315,7 +366,8 @@ def main():
 
 def report(result: dict, extra: dict, run_id: str) -> str:
     inv, sel, fits = result['inventory'], result['selections'], result['fits']
-    files = [c for c in result['checks'] if 'candidates' in c]
+    files = [c for c in result['checks'] if c.get('scope') == 'all_candidates']
+    selected_only = [c for c in result['checks'] if c.get('scope') == 'selected_only']
     regime, tol, paired, trace = extra['regime_summary'], extra['tolerance'], extra['paired_summary'], extra['trace_summary']
     logistic = sel[~sel.run_id.str.startswith('sequence')]
     iterations = logistic.groupby('run_id').maximum_observed_iterations.max()
@@ -341,10 +393,12 @@ reading. The inventory covers {len(inv)} class-forecast arms, {len(sel)} selecte
 selection is re-derived from its candidate scores with the campaign tie rule
 (smaller C; for LSTM smaller width, then fewer epochs). For the {len(files)} models
 whose runs saved every candidate's OOF predictions (component and sequence runs),
-candidate scores are recomputed from scenario-level predictions; the largest
-absolute difference is {max(c['max_abs_score_difference'] for c in files):.1e}. All candidate scores also match the
-committed compact exports. The six state-estimation arms have a different target
-and are excluded.
+all candidate scores are recomputed from scenario-level predictions; for the other
+{len(selected_only)}, the selected candidate's score is recomputed from its saved OOF predictions.
+The largest absolute difference is {max(c['max_abs_score_difference'] for c in files + selected_only):.1e}. All candidate scores also
+match the committed compact exports. Per-fold scores use each run's saved
+whole-scenario inner-fold membership ({len(result['folds'])} rows in `fold_scores.csv`). The six
+state-estimation arms have a different target and are excluded.
 
 ## Inventory
 
@@ -352,7 +406,7 @@ and are excluded.
 indicators. Each selection uses six candidates, three whole-scenario inner folds
 and one refit (19 fits); every arm has four training trials x two regimes.
 
-{table(inv, ['arm', 'family', 'partition_or_input', 'readout_columns_or_parameters', 'selected_settings', 'failed_fits', 'selection_seconds_total'])}
+{table(inv, ['arm', 'family', 'partition_or_input', 'readout_columns_or_parameters', 'selected_settings', 'failed_fits', 'maximum_observed_iterations', 'fold_scores', 'selection_seconds_total'])}
 
 Logistic selections used {seconds.get('logistic', 0) / 60:.1f} minutes of recorded selection time and the
 LSTM selections {seconds.get('LSTM', 0) / 60:.1f} minutes, excluding evaluation and reconstruction.
@@ -365,13 +419,15 @@ required. A selection at C=1000 or at 60 epochs is therefore a limit of the decl
 search, not a numerical failure, and a converged optimizer does not show that the
 search was wide enough.
 
-{table(regime, ['family', 'regime', 'selections', 'distinct_profiles', 'upper_budget_selections', 'upper_budget_distinct', 'upper_step_gain_median_at_edge', 'upper_step_gain_max_all', 'adjacent_gap_median'])}
+{table(regime, ['family', 'regime', 'selections', 'distinct_profiles', 'upper_budget_selections', 'upper_budget_distinct', 'upper_step_gain_median_at_edge', 'upper_step_gain_max_all', 'adjacent_gap_median', 'selected_fold_loss_range_median'])}
 
 `upper_step_gain` is the inner-OOF loss of the second-largest budget minus that of
 the largest (C=100 to 1000; for LSTM, 20 to 60 epochs at the selected width).
 Positive values mean the objective was still improving at the edge. Under
 no-reuse training several arms are bitwise identical models;
-`distinct_profiles` removes those duplicates.
+`distinct_profiles` removes those duplicates. `selected_fold_loss_range` is the
+spread of the selected candidate's loss across its three inner folds, a scale for
+fold heterogeneity rather than a confidence interval.
 
 ## Practical tolerance
 
@@ -399,7 +455,10 @@ errors. Candidate predictions within one inner-fold design are correlated, so
 these are descriptive resolution checks, not tests. The tuning and covariance
 runs saved only selected-C OOF predictions; their step gains are aggregate only.
 
-{table(paired, ['run_id', 'regime', 'step', 'models', 'gain_median', 'gain_min', 'gain_max', 'se_median', 'z_min', 'z_max', 'positive_gains'])}
+{table(paired, ['run_id', 'regime', 'step', 'models', 'gain_median', 'gain_min', 'gain_max', 'se_median', 'z_min', 'z_max', 'positive_gains', 'larger_better_all_folds', 'larger_better_no_fold'])}
+
+`larger_better_all_folds` and `larger_better_no_fold` count models in which the
+larger budget has lower loss in all three, or none, of the inner folds.
 
 For the component arms under matched training, the C=100 to 1000 step favors
 C=1000 in {int(pc[pc.regime == 'matched_mixture'].positive_gains.iloc[0])}/16 models; the largest paired z in its favor is
