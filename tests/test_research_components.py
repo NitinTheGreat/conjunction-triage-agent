@@ -121,3 +121,54 @@ def test_ordinary_components_ignore_oracle_windows_and_preprocessor_never_refits
         np.testing.assert_array_equal(t.base.scaler.center_,state)
     e.raw[0,1]=.5
     with pytest.raises(ValueError,match='visible prefix'):ComponentTransformer('grouped_no_age').fit([e])
+
+
+def campaign_fixture():
+    from research.simulation_regimes import scenario_folds
+    frame=pd.DataFrame({'series_id':[str(i) for i in range(12)]*2,'condition':['a']*12+['b']*12,
+        'y':list(np.arange(12)%2)*2,'event_weight':.5})
+    events=[event(str(i)) for i in range(12)]*2
+    return frame,events,scenario_folds(frame,3,123)
+
+
+def test_component_scenario_folds_and_partition_objective(tmp_path):
+    import joblib
+    from research.artifacts import read_table
+    from research.component_campaign import fit_component,validate_splits
+    from research.models import MonotonePlatt,policy_threshold
+    frame,events,splits=campaign_fixture();validate_splits(frame,events,splits)
+    with pytest.raises(ValueError,match='Scenario leakage'):
+        validate_splits(frame,events,[(np.arange(12),np.arange(12,24))])
+    with pytest.raises(ValueError,match='OOF coverage'):
+        validate_splits(frame,events,splits+[splits[0]])
+    saved,selection=fit_component(frame,events,'grouped_no_od_readout',splits,[.1,1.],123,tmp_path,'test')
+    assert selection['completed_training_fits']==7
+    for path in tmp_path.glob('fit_*.json'):
+        record=json.loads(path.read_text());assert record['status']=='complete'
+        assert record['objective_weight_sum']==pytest.approx(record['fit_scenarios'])
+        assert record['design_columns']==74
+    for k,(fit,valid) in enumerate(splits):
+        m=joblib.load(tmp_path/f'model_test_c{selection["C"]:g}_fold{k}.joblib')
+        q=m.predict(np.zeros((len(valid),1)),[events[i] for i in valid])
+        recorded=read_table(tmp_path/f'validation_test_c{selection["C"]:g}_fold{k}.parquet')
+        np.testing.assert_array_equal(q,recorded.raw_oof)
+        assert set(recorded.series_id).isdisjoint(frame.iloc[fit].series_id)
+        transform=ComponentTransformer('grouped_no_od_readout').fit([events[i] for i in fit])
+        np.testing.assert_array_equal(m.history.base.imputer.statistics_,transform.base.imputer.statistics_)
+    oof=read_table(tmp_path/'candidates_test.parquet');chosen=oof[oof.C==selection['C']]
+    calibration=MonotonePlatt().fit(chosen.raw_oof.to_numpy(),frame.y.to_numpy())
+    assert selection['calibration_slope']==calibration.slope and selection['calibration_intercept']==calibration.intercept
+    assert policy_threshold(calibration.predict(chosen.raw_oof),frame.y.to_numpy(),.95)==selection['threshold95']
+
+
+def test_component_convergence_warning_records_failure_and_stops(tmp_path,monkeypatch):
+    import warnings
+    from sklearn.exceptions import ConvergenceWarning
+    from research.component_campaign import fit_component
+    from research.models import ProbabilityModel
+    frame,events,splits=campaign_fixture()
+    def fail(*args,**kwargs):warnings.warn('synthetic solver failure',ConvergenceWarning)
+    monkeypatch.setattr(ProbabilityModel,'fit',fail)
+    with pytest.raises(ConvergenceWarning):fit_component(frame,events,'fixed_no_od',splits,[.1,1.],123,tmp_path,'failure')
+    records=list(tmp_path.glob('fit_*.json'));assert len(records)==1
+    record=json.loads(records[0].read_text());assert record['status']=='failed' and record['failure_type']=='ConvergenceWarning'
