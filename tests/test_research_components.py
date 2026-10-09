@@ -172,3 +172,38 @@ def test_component_convergence_warning_records_failure_and_stops(tmp_path,monkey
     with pytest.raises(ConvergenceWarning):fit_component(frame,events,'fixed_no_od',splits,[.1,1.],123,tmp_path,'failure')
     records=list(tmp_path.glob('fit_*.json'));assert len(records)==1
     record=json.loads(records[0].read_text());assert record['status']=='failed' and record['failure_type']=='ConvergenceWarning'
+
+
+def test_component_reconstruction_checks_all_candidates_and_detects_preprocessor_tampering(tmp_path):
+    import joblib
+    from research.component_campaign import fit_component
+    from research.summarize_components import reconstruct_selection
+    frame,events,splits=campaign_fixture();name='seed123_no_reuse_only_grouped_no_age'
+    _,selection=fit_component(frame,events,'grouped_no_age',splits,[.1,1.],123,tmp_path,name)
+    selection.update(seed=123,regime='no_reuse_only')
+    _,records,oof=reconstruct_selection(tmp_path,selection,frame,events,splits,[.1,1.],10000)
+    assert len(records)==7 and len(oof)==len(frame)
+    path=tmp_path/f'model_{name}_c0.1_fold0.joblib';model=joblib.load(path)
+    model.history.base.scaler.center_[0]+=1.;joblib.dump(model,path)
+    with pytest.raises(AssertionError):reconstruct_selection(tmp_path,selection,frame,events,splits,[.1,1.],10000)
+
+
+def test_component_paired_endpoints_use_correct_units_and_reject_missing_cases():
+    from research.metrics import loss
+    from research.summarize_components import paired_comparisons
+    rows=[];y=np.array([0,1,0,1]);a=np.array([.1,.9,.1,.9]);b=np.array([.2,.7,.1,.6])
+    for seed in (1,2,3):
+        for arm in ('grouped_no_age','grouped'):
+            for condition in ('no_reuse','overlap_90'):
+                q=a if arm=='grouped_no_age' and condition=='overlap_90' else b
+                rows.append(pd.DataFrame({'seed':seed,'training_fraction':.8,'regime':'matched_mixture','bank':'software',
+                    'arm':arm,'condition':condition,'series_id':list('abcd'),'y':y,'q':q,'review95':q>=.65,'log_loss':loss(y,q)}))
+    frame=pd.concat(rows,ignore_index=True);contrasts,ranges=paired_comparisons(frame,arms=('grouped_no_age',))
+    r=contrasts[(contrasts.seed==1)&(contrasts.condition=='overlap_90')].iloc[0]
+    assert r.log_loss_absolute_difference==pytest.approx((loss(y,a)-loss(y,b)).mean())
+    assert r.log_loss_degradation_difference==pytest.approx(r.log_loss_absolute_difference)
+    assert r.missed_absolute_difference==-.5 and r.reviewed_absolute_difference==.25
+    assert r.evaluation_scenarios==4 and r.positives==2
+    r=ranges[ranges.condition=='overlap_90'].iloc[0]
+    assert r.component_lower_loss_seeds==3 and r.training_repeats==3 and r.evaluation_scenarios==4
+    with pytest.raises(ValueError,match='Incomplete paired'):paired_comparisons(frame.drop(index=0),arms=('grouped_no_age',))

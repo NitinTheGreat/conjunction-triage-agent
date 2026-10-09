@@ -10,19 +10,19 @@ This is the live execution record. Update it as work happens. Checked preparatio
 
 | Field | Current checkpoint — replace after each work session |
 |---|---|
-| NOW | Provenance-component contract and four component transformers implemented; 20 construction tests pass. No component study fitting at this commit; tested runner is ready. |
-| NEXT | Implement and test the fixed 608-fit / 32-model component campaign, then reconstruct predictions and update reports. |
+| NOW | Component campaign components_20261010_v1 RUNNING under committed contract 31eb1f8 and runner 49dcb49. All 24 component implementation/audit tests pass. |
+| NEXT | Finish component campaign and reconstruction, update reports, then address tuning adequacy and precision planning. |
 | Active task / owner | V02 IN PROGRESS. Component feature/lineage tests pass; campaign and audit remain. Tuning adequacy and precision follow. |
 | Selected direction | **Track R, narrowed:** controlled robustness/measurement benchmark. Grouping remains a candidate and may be discarded if simpler controls explain results. |
 | Conditional extension | **Track E:** independent real-data efficacy, only after access and statistical requirements pass. |
 | Research blockers | None preventing V01/V02 preparation. Full methods for some close papers and independent operational data remain unavailable; no novelty or real efficacy claim is established. |
 | Current machine | Windows, PowerShell; repository at `F:\conjunction-triage`; Python environment at `.venv\Scripts\python.exe`. Paths elsewhere in this file are relative to the repository root. |
 | HEAD when this checklist was created | `89d7f2efb8bf135e02fa51760e0ed3bb33a105c9`; working tree contains pre-existing modifications and untracked files. |
-| Latest validation | 22 component tests passed in 3.29s; previous full suite 410 passed / 1 skipped. |
+| Latest validation | 24 component tests passed in 5.77s; full regression suite about to run. |
 | New scientific runs | Completed development/reconstruction runs sequence_preflight_20261009_v1, sequence_20261010_v1 and sequence_summary_20261010_v1, plus earlier runs. No frozen scientific evaluation. |
 | Scientific holdout status | Seed 20261012 / scientific:00000..04999 reserved **but not generated**. Candidate anisotropic configuration and sample size still need V03 freeze. Kelvins and all pilot banks are exposed. |
-| Running jobs / processes | None from this milestone. Campaign, reconstruction/watcher and tests exited successfully; manifests retain start/end records. |
-| Next executable command | Set CPU thread variables to 2; .venv\Scripts\python.exe -m research.component_campaign --run-id components_20261010_v1 |
+| Running jobs / processes | components_20261010_v1 active. Inspect its manifest/progress and docs/research/execution/components_campaign_20261010.local.log; do not start a duplicate. |
+| Next executable command | After campaign completes: .venv\Scripts\python.exe -m research.summarize_components --source processed/research/components_20261010_v1 --run-id components_summary_20261010_v1 --export docs/research/results/components_2026-10-10 |
 
 ### Copy this into the next assistant
 
