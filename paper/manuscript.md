@@ -139,6 +139,25 @@ separate from class q and physical collision probability.
 
 Report clipped class log loss, Brier score, calibration summaries and explicit review/miss counts. Use the frozen paired change-in-loss estimand for the reuse question, together with absolute losses and new-information controls. Report official log-risk loss separately. Nominal training recall targets are not population miss guarantees. Scenario bootstrap intervals conditional on one fitted model exclude training variability; address that limitation in the scientific design.
 
+**Proposed primary estimand (development choice, not yet frozen).** For each
+latent scenario, take the change in clipped log loss of the one-partition history
+summary (`singleton`) between 90% observation overlap and no reuse. Subtract the
+same change for the latest-message metadata comparator, which is invariant by
+construction because the latest window is matched. Average over scenarios. Under
+correctly specified noise and matched-mixture training, the exposed development
+banks give 0.070-0.075 nats across four training trials. The proposed decision
+margin is 0.02 nats, about a quarter of the history model's no-reuse advantage.
+Material degradation is confirmed if the lower 95% bound exceeds the margin and
+called not material if the upper bound falls below it; otherwise the result is
+inconclusive. A provisional 5,000 evaluation scenarios gives a half-width near
+0.0094 at the development SD. Secondary contrasts cover absolute loss under 90%
+overlap and solution reissue, solution-reissue degradation, and whether grouping
+or privileged lineage weighting reduces degradation. Rationale and limits:
+[primary contrast](../docs/research/execution/primary_contrast.md) and
+[planning report](../docs/research/results/precision_2026-10-10/report.md).
+Training-bank variability, the interval method under right skew, multiplicity
+and the held-out configuration remain to be fixed before V03.
+
 ## 5. Results
 
 **This section remains incomplete.** Pilot results support feasibility decisions, not confirmation. The candidate grouping model has not established superiority, and the corrected two-stage official-score model did not beat the latest-risk baseline in the initial campaign.

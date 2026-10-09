@@ -1,5 +1,35 @@
 # Report 1 — Evidence audit and current research results
 
+## V02 precision-planning follow-up - 10 October 2026
+
+The [precision planning run](../results/precision_2026-10-10/report.md)
+(`precision_planning_20261010_v2`, no fitting) recomputes 2,560 matched-training
+paired contrasts from audited per-scenario predictions. Each contrast is tied to
+its exact scenario set by an ID hash, and all 1,280 overlapping committed export
+rows reconcile to within 5e-16.
+
+Measured on exposed development banks (software noise, matched training, four
+overlapping training trials):
+
+- **No reuse:** the singleton history model's clipped log loss is lower than
+  latest-message metadata by 0.081-0.084 nats.
+- **90% overlap:** history loses 0.070-0.075 of that advantage. Its absolute
+  advantage shrinks to 0.009-0.012.
+- **Solution reissue:** history becomes worse than latest-only by 0.016-0.023.
+- **Invariance:** latest-message arms are exactly invariant to every reuse
+  condition, because the latest window is matched.
+- **Weighting:** grouping and privileged lineage weighting do not reduce the
+  degradation (+0.003 and +0.005 relative to singleton in the reference trial).
+
+On this basis the [primary contrast](../execution/primary_contrast.md) proposes
+this degradation at 90% overlap, with a 0.02-nat materiality margin and a
+provisional 5,000 evaluation scenarios. Not yet established:
+- whether the effect persists in an unseen configuration;
+- how much independent training banks vary;
+- which interval method is valid under the observed right skew.
+
+These are development estimates on exposed data, not confirmation.
+
 ## V02 tuning-adequacy follow-up - 10 October 2026
 
 The [tuning-adequacy inventory](../results/tuning_adequacy_2026-10-10/report.md)

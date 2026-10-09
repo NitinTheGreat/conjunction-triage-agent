@@ -1,5 +1,46 @@
 # Report 02 — Publication experiments and statistical analysis plan
 
+## Proposed Track R primary contrast - 10 October 2026
+
+§6.2's contrast T is now instantiated as P1 in the
+[primary-contrast record](../execution/primary_contrast.md), which is proposed
+and not frozen:
+
+| Element | Choice |
+|---|---|
+| Method M | `singleton` |
+| Comparator B | `latest_metadata` |
+| Condition | 90% observation overlap |
+| Noise | Correctly specified |
+| Training | `matched_mixture` |
+| Loss | Clipped log loss at 1e-6 |
+| Unit | Whole latent scenario |
+
+Grouping and privileged lineage weighting are secondary method questions, not
+the primary contrast, because development evidence does not favor them.
+
+- **Margin:** 0.02 nats. Material degradation is confirmed if the lower 95% bound
+  exceeds it and called not material if the upper bound falls below it;
+  otherwise the result is inconclusive.
+- **Sample size:** a provisional 5,000 scenarios. Recompute before generation if
+  the §4 sensitivity results show a paired SD above 0.40 or an effect below 0.035.
+- **Proposed secondary family:** absolute loss at 90% overlap (S1) and under
+  solution reissue (S6), solution-reissue degradation (S5), grouping versus
+  singleton (S2) and oracle weighting versus singleton (S3). A shared-bias
+  version (S4) is exploratory.
+
+The [planning report](../results/precision_2026-10-10/report.md) found two
+issues to resolve in the §3 specification:
+- **Interval asymmetry:** t-interval coverage was 0.937-0.956 in resampling, but
+  right skew made one bound anti-conservative at small n.
+- **Training variation:** training-trial variation is comparable to evaluation
+  precision for P1 and larger for the small method contrasts.
+
+A development campaign with fresh, independent training banks is running under a
+[committed contract](../execution/sensitivity_contract.md) to quantify both. It
+also tests other noise configurations without generating the candidate
+scientific configuration.
+
 ## V02 tuning decision and its design consequences - 10 October 2026
 
 The [tuning decision](../execution/tuning_decision.md), based on the

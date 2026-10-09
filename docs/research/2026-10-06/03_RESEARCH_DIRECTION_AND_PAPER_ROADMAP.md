@@ -1,5 +1,26 @@
 # Research direction and paper roadmap
 
+## Primary claim candidate - 10 October 2026
+
+The paper's proposed primary claim is now a **measurement of reuse-induced
+degradation**, not superiority of a new method: with the latest message and final
+label fixed, how much does 90% observation overlap degrade a history-based
+forecaster? Development evidence puts this at 0.070-0.075 nats, most of the
+history model's 0.081-0.084 no-reuse advantage. Under solution reissue, history
+becomes worse than latest-only. Grouping, covariance weighting and even privileged
+lineage weighting do not remove it. Those method questions become secondary
+contrasts that can support a well-bounded negative finding.
+
+This fits the manuscript title and the NARROW decision. Its value depends on
+three things:
+1. confirmation in an unseen simulator configuration with frozen rules;
+2. honest training-bank uncertainty;
+3. an explicit account of how far known information-reuse theory already
+   predicts the result.
+
+Next: the running sensitivity campaign, the §3 analysis specification, then V02
+acceptance and V03 freeze preparation.
+
 ## V02 tuning-adequacy decision - 10 October 2026
 
 **Restrict to the declared bounded implementations; continue the narrowed
