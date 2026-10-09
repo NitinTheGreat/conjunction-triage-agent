@@ -74,7 +74,7 @@ its limited controls remain preserved and distinct from this informed revision.
 - [x] Common expanded tuning grid and descriptive training-subset/fold sensitivity (remaining boundary choices recorded).
 - [x] Covariance-proxy comparator and direct-weighting ablation on exposed simulation banks.
 - [ ] Sequence adaptation and provenance-component ablations.
-- [ ] Separate state-fusion / oracle-lineage diagnostics.
+- [x] Separate state-fusion / visible-observation-union oracle diagnostics on exposed banks (not the class-forecast provenance ablations).
 - [ ] Precision planning and justified primary comparison.
 
 Commands already executed successfully (use **new unique IDs** for any rerun):
@@ -216,3 +216,52 @@ Next implement the [state-fusion/unique-observation diagnostics](state_fusion_pl
 with an explicit common-prior control and visible-only union. Sequence adaptation,
 provenance-component ablations, independent training-bank uncertainty and precision
 work remain. Do not mark V02 complete or open scientific outcomes.
+
+
+## State-fusion and visible-union diagnostics completed
+
+[Completed plan and exact commands](state_fusion_plan.md);
+[generated results](../results/fusion_2026-10-09/report.md);
+[audit](../results/fusion_2026-10-09/audit.json);
+[verification](fusion_verification.json).
+
+The six deterministic arms compare latest, Gaussian product, the product with
+one common prior, basic precision-weighted CI, and bias-omitting/bias-aware
+visible-union oracles. All 138,000 canonical message states reconstruct from
+visible observations before fusion; all 126,000 state records and 21,000 CI
+weight vectors then reconstruct exactly. Later observation IDs 60-79 are
+forbidden. Original state/cohort order and input/source/output hashes are checked.
+
+In software solution reissue, product and CI have the same point estimate, but
+the product's ellipse area is 0.028122 m^2 versus latest/CI 0.168730. Inclusion
+is 386/1,000 versus 947/1,000. Correcting only the repeated prior does not correct
+repeated likelihood information. In disjoint no-reuse data, that prior-once
+control exactly recovers the bias-omitting visible-union oracle, as expected.
+
+Software heavy-overlap squared error is 0.014655 m^2 for CI/product, 0.018341
+for latest, and 0.012420 for the visible-union oracle. CI-minus-latest difference
+is -0.003686 with marginal descriptive bootstrap interval [-0.004487, -0.002900].
+CI's ellipse inclusion is 969/1,000 versus product 458/1,000; uncertainty area and
+point-estimate accuracy must be assessed separately. These reproduce a known
+reuse mechanism in a toy model and do not establish novelty or class-score gains.
+
+Cumulative-information CI selects latest, already using all 60 visible
+observations. In shared-bias stress, this estimate's ellipse contains only
+290/1,000 states versus 955/1,000 for the bias-aware oracle. The latter gets B
+as privileged information and retains the working Gaussian prior; it is not a
+proven optimal estimator of the enriched mixture. Bigger nominal uncertainty
+regions and covariance assumptions cannot be turned into maneuver safety claims.
+
+The complete exports contain all seven conditions, three banks and 1,050
+prespecified scenario-paired contrast rows. Two thousand common resamples within
+each bank preserve pairing across arms/conditions. These are unweighted stress
+statistics, with marginal descriptive intervals and no multiplicity adjustment.
+Each bank has 1,000 independent scenarios. The general anisotropic CI solver is
+validated on analytic unit cases only; all campaign covariances are isotropic.
+
+Full suite: **392 passed, 1 skipped** in 59.53 seconds. Five compact bundles / 47
+artifact files pass byte checks. Original 57 raw/historical artifacts and eight
+frozen files are unchanged. Both runs have exited. Scientific outcomes remain
+reserved and ungenerated. NARROW remains the research direction; the next step
+is the [sequence-family adaptation](sequence_adaptation_plan.md), followed by
+observable-provenance component ablations and precision planning. V02 is open.

@@ -1,0 +1,93 @@
+{
+  "date": "2026-10-09",
+  "full_suite": {
+    "passed": 392,
+    "skipped": 1,
+    "seconds": 59.53,
+    "exit_code": 0,
+    "command": ".venv/Scripts/python.exe -m pytest -q --tb=short --no-showlocals",
+    "log": "docs/research/execution/verification_fusion_20261009.log",
+    "process_environment": {
+      "LOKY_MAX_CPU_COUNT": "2",
+      "OMP_NUM_THREADS": "2",
+      "MKL_NUM_THREADS": "2"
+    }
+  },
+  "completed_runs": [
+    {
+      "run_id": "fusion_20261009_v1",
+      "status": "complete",
+      "started_utc": "2026-10-09T18:02:27.603770+00:00",
+      "finished_utc": "2026-10-09T18:07:43.099181+00:00",
+      "command": [
+        "F:\\conjunction-triage\\.venv\\Scripts\\python.exe",
+        "F:\\conjunction-triage\\research\\fusion_campaign.py",
+        "--source",
+        "processed/research/cadence_20261009_v1",
+        "--truth-source",
+        "processed/research/simulation_20261009_v1",
+        "--run-id",
+        "fusion_20261009_v1"
+      ]
+    },
+    {
+      "run_id": "fusion_summary_20261009_v1",
+      "status": "complete",
+      "started_utc": "2026-10-09T18:07:47.414005+00:00",
+      "finished_utc": "2026-10-09T18:13:19.151019+00:00",
+      "command": [
+        "F:\\conjunction-triage\\.venv\\Scripts\\python.exe",
+        "F:\\conjunction-triage\\research\\summarize_fusion.py",
+        "--source",
+        "processed\\research\\fusion_20261009_v1",
+        "--run-id",
+        "fusion_summary_20261009_v1",
+        "--export",
+        "docs/research/results/fusion_2026-10-09"
+      ]
+    }
+  ],
+  "artifact_audit": "docs/research/results/fusion_2026-10-09/audit.json",
+  "export_checks": [
+    {
+      "bundle": "covariance_2026-10-09",
+      "status": "pass",
+      "artifacts_verified": 10,
+      "bytes_verified": 787628
+    },
+    {
+      "bundle": "fusion_2026-10-09",
+      "status": "pass",
+      "artifacts_verified": 6,
+      "bytes_verified": 202818
+    },
+    {
+      "bundle": "pilot_2026-10-09",
+      "status": "pass",
+      "artifacts_verified": 15,
+      "bytes_verified": 56746
+    },
+    {
+      "bundle": "tuning_2026-10-09",
+      "status": "pass",
+      "artifacts_verified": 9,
+      "bytes_verified": 400800
+    },
+    {
+      "bundle": "v02_2026-10-09",
+      "status": "pass",
+      "artifacts_verified": 7,
+      "bytes_verified": 156670
+    }
+  ],
+  "raw_data_manifest_files_unchanged": 12,
+  "historical_artifacts_unchanged": 45,
+  "frozen_files_unchanged": 8,
+  "scientific_bank_opened": false,
+  "active_milestone_jobs": [],
+  "next_environment_preflight": {
+    "torch_installed": false,
+    "check": "importlib.util.find_spec(torch) returned None; requirements.txt has no torch entry"
+  },
+  "scope": "Exposed static state diagnostics and same-workflow reconstruction, not class forecasting, operational efficacy, new fusion theory or independent scientific review."
+}

@@ -1,0 +1,61 @@
+{
+  "all_ci_weights_and_diagnostics_reconstructed": true,
+  "all_state_estimates_and_metrics_exactly_reconstructed": true,
+  "banks": [
+    {
+      "all_values_exactly_reconstructed": true,
+      "bank": "development",
+      "canonical_messages": 46000,
+      "estimate_rows": 42000,
+      "scenarios": 1000
+    },
+    {
+      "all_values_exactly_reconstructed": true,
+      "bank": "software",
+      "canonical_messages": 46000,
+      "estimate_rows": 42000,
+      "scenarios": 1000
+    },
+    {
+      "all_values_exactly_reconstructed": true,
+      "bank": "bias_stress",
+      "canonical_messages": 46000,
+      "estimate_rows": 42000,
+      "scenarios": 1000
+    }
+  ],
+  "bootstrap": {
+    "replicates": 2000,
+    "seed": 20261040,
+    "unit": "latent scenario within bank; common resample across conditions/arms; marginal descriptive intervals"
+  },
+  "ellipse_chi2_reference_threshold": 5.991464547107979,
+  "input_runs": [
+    {
+      "archived_sources_verified": 74,
+      "artifacts_verified": 13,
+      "inputs_verified": 14,
+      "run_id": "cadence_20261009_v1",
+      "status": "complete"
+    },
+    {
+      "archived_sources_verified": 68,
+      "artifacts_verified": 15,
+      "inputs_verified": 0,
+      "run_id": "simulation_20261009_v1",
+      "status": "complete"
+    }
+  ],
+  "limits": "Same-workflow reconstruction, not independent scientific review. Unweighted enriched static stress population, not real operational calibration; no class-forecast efficacy.",
+  "original_messages_risk_distance_and_sigmas_reconstructed": true,
+  "replay_disjoint_prior_once_and_oracle_identities": "pass",
+  "scientific_bank_opened": false,
+  "source_run": {
+    "archived_sources_verified": 84,
+    "artifacts_verified": 13,
+    "inputs_verified": 17,
+    "run_id": "fusion_20261009_v1",
+    "status": "complete"
+  },
+  "visible_observation_boundary_max_id": 59
+}

@@ -153,3 +153,24 @@ methods. Next complete [state-fusion/oracle diagnostics](state_fusion_plan.md),
 then remaining sequence/provenance-component and precision work before V03.
 Scientific scenarios remain unopened; same-workflow reconstruction does not
 complete A03 independent review.
+
+
+## State-fusion follow-up
+
+The [state-fusion/oracle campaign](../results/fusion_2026-10-09/report.md) exactly
+reconstructs 138,000 canonical messages and 126,000 state records. It reproduces
+known covariance double-counting: in software solution reissue, a six-message
+Gaussian product keeps the same mean as latest/CI but reduces ellipse area
+sixfold, with inclusion 386/1,000 versus 947/1,000. Prior correction alone does
+not remove repeated observations. Under shared bias, cumulative-information
+CI/latest inclusion is 290/1,000 versus 955/1,000 for an oracle given the true B.
+Thus CI does not repair these misspecified input covariances.
+
+The NARROW direction remains. These state diagnostics validate the controlled
+mechanism and expose assumption limits, but they are not a novel CI algorithm,
+a class-forecast gain, or an operational calibration guarantee. All campaign
+CI covariances are isotropic; general optimization is unit-tested only. Oracles
+retain the working Gaussian prior and are not claimed optimal for the enriched
+sampling mixture. The [sequence adaptation](sequence_adaptation_plan.md), class
+forecasting provenance-component ablations and precision design remain before
+scientific freeze. A03 independent review is still open.

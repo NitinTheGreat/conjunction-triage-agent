@@ -42,7 +42,7 @@ Dependence-aware and idempotent evidence combination predates this project. Exac
 
 Overlapping Covariance Intersection also provides recent prior art for fusion with partial structural covariance knowledge. Its required covariance bounds are not supplied by public observation-age metadata; a simulation comparison needs an explicit input mapping. [Pedroso et al., v2, October 2026](https://arxiv.org/html/2603.16768v2)
 
-**Development update:** V02 now includes a diagonal-volume weighting approximation and direct-weighting ablation on exposed simulation banks. They are not reproductions of the published evidence-theory method. **Pending:** sequence adaptation, fusion/provenance-component diagnostics, precision planning and an explicit account of what the completed study adds beyond prior work. See V01 for versioned sources and remaining access limits.
+**Development update:** V02 now includes a diagonal-volume weighting approximation and direct-weighting ablation on exposed simulation banks. They are not reproductions of the published evidence-theory method. Separate static state-fusion/oracle diagnostics are also complete on exposed banks. **Pending:** sequence adaptation, class-forecast provenance-component ablations, precision planning and an explicit account of what the completed study adds beyond prior work. See V01 for versioned sources and remaining access limits.
 
 ## 3. Task, data and information boundary
 
@@ -83,6 +83,19 @@ Use a static two-dimensional Gaussian encounter-plane model with immutable obser
 
 The pilot exposed two required revisions: distinct time/thinning controls need a richer cadence, and the new-information condition needs a matched training regime to separate information gain from classifier extrapolation. Include a latest-message metadata comparator so access to additional fields does not masquerade as a history benefit. Check observable-proxy versus oracle-lineage ablations only in simulation.
 
+Subsequent V02 runs implement those cadence/training controls and a separate
+state-estimation diagnostic. The latter compares latest, Gaussian products with
+and without repeated prior precision, basic precision-weighted CI and unique
+visible-observation oracles. It reconstructs message means/covariances from known
+lineage in common static coordinates. Only the oracles receive observation IDs;
+the bias-aware oracle additionally receives the true common-bias covariance.
+All methods exclude later observations. They retain a working Gaussian prior,
+so the information oracles are not claimed optimal for the enriched latent
+mixture. See the [state diagnostic contract](../docs/research/execution/state_fusion_plan.md).
+State error, uncertainty area and Gaussian-reference ellipse inclusion remain
+separate from class q and physical collision probability.
+
+
 ### 4.4 Endpoints and uncertainty
 
 Report clipped class log loss, Brier score, calibration summaries and explicit review/miss counts. Use the frozen paired change-in-loss estimand for the reuse question, together with absolute losses and new-information controls. Report official log-risk loss separately. Nominal training recall targets are not population miss guarantees. Scenario bootstrap intervals conditional on one fitted model exclude training variability; address that limitation in the scientific design.
@@ -110,6 +123,17 @@ new-information loss over grouping and singleton but lose to latest-message
 metadata. Shared-bias failures persist. These results support retaining simpler
 controls and a bounded benchmark question; they do not establish confirmatory
 superiority. Scientific result tables remain unfilled pending V03/V04.
+
+The [state-fusion development report](../docs/research/results/fusion_2026-10-09/report.md)
+reproduces known double-counting behavior. In the software reissue case, a product
+has the same point estimate as latest/CI but a sixfold smaller ellipse, with
+inclusion 386/1,000 versus 947/1,000. Under shared bias, cumulative-information
+CI/latest inclusion falls to 290/1,000 while the privileged bias-aware oracle
+includes 955/1,000. These unweighted, exposed-bank diagnostics are not a new CI
+method or a calibration guarantee. All campaign covariances are isotropic, and
+known analytic collapses are retained. They validate a controlled mechanism;
+confirmatory state or class-forecast claims remain pending.
+
 
 
 ## 6. Discussion and limitations

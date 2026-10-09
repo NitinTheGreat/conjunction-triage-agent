@@ -10,19 +10,19 @@ This is the live execution record. Update it as work happens. Checked preparatio
 
 | Field | Current checkpoint — replace after each work session |
 |---|---|
-| NOW | V02 covariance-proxy comparison complete and audited: 16 new models / 224,000 new predictions, compared with 72 verified saved controls. Three reports and manuscript status updated. |
-| NEXT | Implement state-fusion and unique-visible-observation diagnostics from docs/research/execution/state_fusion_plan.md. Then finish sequence/provenance-component comparisons and precision planning. |
-| Active task / owner | V02 remains IN PROGRESS. Cadence, regime, tuning/subset and covariance-proxy/direct-weighting substeps are complete. State-fusion/oracle diagnostics are the next bounded implementation. |
+| NOW | V02 state-fusion/oracle diagnostics complete: 138,000 canonical messages and 126,000 state records reconstructed exactly. All three reports and manuscript status updated. |
+| NEXT | Start sequence-adaptation dependency and compute-budget preflight from docs/research/execution/sequence_adaptation_plan.md. Then complete sequence fits, observable-provenance component ablations and precision planning. |
+| Active task / owner | V02 remains IN PROGRESS. Covariance weighting and separate state-fusion/oracle diagnostics are complete on exposed banks. No sequence model has been trained; PyTorch is absent from the current environment. |
 | Selected direction | **Track R, narrowed:** controlled robustness/measurement benchmark. Grouping remains a candidate and may be discarded if simpler controls explain results. |
 | Conditional extension | **Track E:** independent real-data efficacy, only after access and statistical requirements pass. |
 | Research blockers | None preventing V01/V02 preparation. Full methods for some close papers and independent operational data remain unavailable; no novelty or real efficacy claim is established. |
 | Current machine | Windows, PowerShell; repository at `F:\conjunction-triage`; Python environment at `.venv\Scripts\python.exe`. Paths elsewhere in this file are relative to the repository root. |
 | HEAD when this checklist was created | `89d7f2efb8bf135e02fa51760e0ed3bb33a105c9`; working tree contains pre-existing modifications and untracked files. |
-| Latest validation | 374 passed, 1 skipped in 71.28s. All new forecasts, 16 thresholds, 42,000 weight-diagnostic rows and eight singleton equivalences reconstructed. Four compact bundles / 41 artifacts pass hashes; original 57 raw/historical and 8 frozen files unchanged. |
-| New scientific runs | Completed development runs covariance_20261009_v1 and covariance_summary_20261009_v1, plus the earlier tuning/regime/pilot runs. No frozen scientific evaluation. |
+| Latest validation | 392 passed, 1 skipped in 59.53s. Exact source reconstruction, replay/oracle identities and 21,000 CI weight vectors pass. Five compact bundles / 47 artifacts pass hashes; original 57 raw/historical and 8 frozen files unchanged. |
+| New scientific runs | Completed development/reconstruction runs fusion_20261009_v1 and fusion_summary_20261009_v1, plus earlier covariance/tuning/regime/pilot runs. No frozen scientific evaluation. |
 | Scientific holdout status | Seed 20261012 / scientific:00000..04999 reserved **but not generated**. Candidate anisotropic configuration and sample size still need V03 freeze. Kelvins and all pilot banks are exposed. |
-| Running jobs / processes | None from this milestone. Covariance training, reconstruction and full tests exited successfully; manifests retain original process/start/end records. |
-| Next executable command | `Get-Content -Encoding UTF8 docs/research/execution/state_fusion_plan.md`; then inspect research/simulation.py and existing numerical tests. No state-fusion campaign CLI exists yet. |
+| Running jobs / processes | None from this milestone. Fusion campaign, reconstruction and full tests exited successfully; manifests retain original process/start/end records. |
+| Next executable command | `Get-Content -Encoding UTF8 docs/research/execution/sequence_adaptation_plan.md`; inspect requirements.txt and verify a supported local CPU dependency/budget before implementation. No sequence runner CLI exists yet. |
 
 ### Copy this into the next assistant
 
@@ -505,3 +505,65 @@ observation reuse. Existing isotropic covariances make some fusion controls
 collapse, so document ties and degeneracy explicitly. Keep state error/covariance
 diagnostics separate from class-forecast loss. No fusion runner exists yet.
 Sequence adaptation, provenance-component ablations and precision work follow.
+
+
+### V02 state-fusion/oracle milestone - 9 October 2026
+
+Completed implementation commits: `89b67c4` (Gaussian fusion, visible-union
+oracles and pre-evaluation contract), `e09458d` (exact reconstruction and paired
+scenario intervals). The compact result/documentation checkpoint is a subsequent
+scoped commit; inspect `git log` for its hash. Author and committer remain
+`NitinTheGreat <nitinpandey1304@gmail.com>`, without assistant attribution. No push.
+
+Evidence: [generated results](docs/research/results/fusion_2026-10-09/report.md),
+[audit](docs/research/results/fusion_2026-10-09/audit.json),
+[verification](docs/research/execution/fusion_verification.json),
+[completed acceptance checklist/formulas/commands](docs/research/execution/state_fusion_plan.md).
+Both `fusion_20261009_v1` and `fusion_summary_20261009_v1` are complete. The new
+bundle contains six byte-exact artifacts plus provenance. Bulk message/state
+records and exact source archives remain in ignored run directories.
+
+All 138,000 canonical messages reconstruct from original observations before
+fusion. The audit exactly reproduces all 126,000 six-arm state records and
+21,000 CI weight vectors. Only unique visible observation IDs 0-59 enter the
+oracles; future IDs fail. Ordinary methods receive only Gaussian estimates,
+not lineage or latent states. Each exposed bank still has 1,000 independent
+scenarios; messages, conditions and method repeats do not increase that count.
+
+**Measured result:** software solution reissue gives the Gaussian product the
+same mean as latest/CI but an ellipse six times smaller, with inclusion
+386/1,000 versus 947/1,000. The prior-once product fixes common-prior reuse under
+disjoint observations but does not fix overlapping likelihoods. Under software
+heavy overlap, CI state MSE is 0.014655 m^2 versus latest 0.018341 and the
+visible-union oracle 0.012420. This is a state-estimation result, not class-q loss.
+Cumulative-information CI collapses to latest/union. With omitted shared bias,
+its ellipse inclusion is 290/1,000 versus 955/1,000 for the privileged bias-aware
+oracle. Input covariance misspecification remains a failure, not a CI guarantee.
+
+These reproduce known information-reuse behavior in a static toy model. No new
+fusion theory, orbital validation, class-forecast benefit or operational safety
+claim follows. All oracles retain the working wide Gaussian prior and are not
+claimed Bayes-optimal for the enriched mixture. All production covariances are
+isotropic; the general anisotropic solver is validated only by analytic tests.
+The NARROW benchmark direction remains; final novelty and scope are unresolved.
+
+The exports retain all banks/conditions and 1,050 prespecified contrasts with
+2,000 common scenario resamples per bank. Intervals are unweighted, descriptive,
+marginal and not adjusted for multiplicity. Assess state error, uncertainty area
+and ellipse inclusion together. Do not compare these directly to class q or Pc.
+
+Validation: **392 passed / 1 skipped** in 59.53 seconds, exit 0. Five compact
+bundles / 47 artifact files pass checksums. Original 12 raw/data-manifest,
+45 historical and eight frozen files are unchanged. All milestone jobs exited;
+scientific seed 20261012 remains reserved and ungenerated. A03 independent
+scientific review remains open. No paid inference or external submission occurred.
+
+**Next task:** the [sequence-family adaptation plan](docs/research/execution/sequence_adaptation_plan.md).
+PyTorch is not installed (`importlib.util.find_spec('torch')` returned None), and
+requirements do not list it. Verify official compatibility, record a separate
+research dependency, run a small synthetic timing/masking check, and commit an
+explicit budget before study fits. Include a latest-only neural arm to distinguish
+capacity from history information. No sequence CLI exists yet; do not invent one.
+Observable-provenance component ablations and precision planning also remain.
+V02 stays unchecked; state-oracle diagnostics do not replace class-forecast
+component ablations.

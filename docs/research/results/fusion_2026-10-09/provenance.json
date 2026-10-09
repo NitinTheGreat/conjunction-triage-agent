@@ -1,0 +1,15 @@
+{
+  "artifacts": {
+    "audit.json": "c627b53c7fed200d68a38b16a8188d948386fc07b56b12d984a84a47ac2b6d19",
+    "ci_diagnostics.csv": "ea48f51aef910e6380d75d075c36aae91d522be6a9c480378fefe91b4ee934d3",
+    "metrics.csv": "044f29a09545cdc6a7d2cff79a4bc36cf27f275faa8bd03ce436edab3d5516ee",
+    "paired_contrasts.csv": "582342d2d4867e61ead7a7ae47731dbc96d453936e40598737744cc71e8e04a9",
+    "reconstruction.csv": "35ca3098c32f462a941daaeb80becd4b7bdab0539e893be19051ae9a3b35d377",
+    "report.md": "b108ef2566341a519c44b3fc7c5310df8d29439392d06e5905c7d1dc1dd7fc42"
+  },
+  "manifest_sha256": "d4d594f2a28c5f4ae51baef46176875e045185bbc56fa97a00ae128d1c361410",
+  "run_id": "fusion_summary_20261009_v1",
+  "source_runs": [
+    "fusion_20261009_v1"
+  ]
+}
