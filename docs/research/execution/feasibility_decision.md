@@ -133,3 +133,23 @@ by the remaining sequence/component/oracle comparisons and precision design.
 The scientific bank remains unopened. Full verification is 359 passed / 1 skipped;
 all 72 selected thresholds and 1,008,000 prediction rows reconstruct. This is a
 same-workflow artifact audit, not A03 independent scientific review.
+
+
+## Covariance-proxy follow-up
+
+The [16-model covariance-proxy campaign](../results/covariance_2026-10-09/report.md)
+and forecast reconstruction are complete. Both the fitted-trend approximation
+and direct-weighting ablation improve software new-information loss over grouping
+and singleton in all three training subsets, while latest-message metadata
+beats both in all three. Direct weighting's tiny full-reference advantage over
+latest-metadata (0.062217 versus 0.062295) is not stable under the subset design.
+Heavy-overlap rankings against history controls are mixed, and shared-bias
+absolute losses/missed-positive counts remain poor. Eight new fits select the
+upper C boundary. No superiority claim or operational recall guarantee follows.
+
+The NARROW decision stands. Retain the covariance proxies as transparent
+approximate controls; they are not reproductions of published evidence-theory
+methods. Next complete [state-fusion/oracle diagnostics](state_fusion_plan.md),
+then remaining sequence/provenance-component and precision work before V03.
+Scientific scenarios remain unopened; same-workflow reconstruction does not
+complete A03 independent review.

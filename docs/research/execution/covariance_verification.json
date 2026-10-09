@@ -1,0 +1,83 @@
+{
+  "date": "2026-10-09",
+  "full_suite": {
+    "passed": 374,
+    "skipped": 1,
+    "seconds": 71.28,
+    "exit_code": 0,
+    "command": ".venv/Scripts/python.exe -m pytest -q --tb=short --no-showlocals",
+    "log": "docs/research/execution/verification_covariance_20261009.log",
+    "process_environment": {
+      "LOKY_MAX_CPU_COUNT": "2",
+      "OMP_NUM_THREADS": "2",
+      "MKL_NUM_THREADS": "2"
+    }
+  },
+  "completed_runs": [
+    {
+      "run_id": "covariance_20261009_v1",
+      "status": "complete",
+      "started_utc": "2026-10-09T17:37:37.316724+00:00",
+      "finished_utc": "2026-10-09T17:41:30.520867+00:00",
+      "command": [
+        "F:\\conjunction-triage\\.venv\\Scripts\\python.exe",
+        "F:\\conjunction-triage\\research\\covariance_campaign.py",
+        "--source",
+        "processed/research/cadence_20261009_v1",
+        "--reference",
+        "processed/research/tuning_20261009_v1",
+        "--run-id",
+        "covariance_20261009_v1"
+      ]
+    },
+    {
+      "run_id": "covariance_summary_20261009_v1",
+      "status": "complete",
+      "started_utc": "2026-10-09T17:41:43.348602+00:00",
+      "finished_utc": "2026-10-09T17:43:44.300905+00:00",
+      "command": [
+        "F:\\conjunction-triage\\.venv\\Scripts\\python.exe",
+        "F:\\conjunction-triage\\research\\summarize_covariance.py",
+        "--source",
+        "processed\\research\\covariance_20261009_v1",
+        "--run-id",
+        "covariance_summary_20261009_v1",
+        "--export",
+        "docs/research/results/covariance_2026-10-09"
+      ]
+    }
+  ],
+  "artifact_audit": "docs/research/results/covariance_2026-10-09/audit.json",
+  "export_checks": [
+    {
+      "bundle": "covariance_2026-10-09",
+      "status": "pass",
+      "artifacts_verified": 10,
+      "bytes_verified": 787628
+    },
+    {
+      "bundle": "pilot_2026-10-09",
+      "status": "pass",
+      "artifacts_verified": 15,
+      "bytes_verified": 56746
+    },
+    {
+      "bundle": "tuning_2026-10-09",
+      "status": "pass",
+      "artifacts_verified": 9,
+      "bytes_verified": 400800
+    },
+    {
+      "bundle": "v02_2026-10-09",
+      "status": "pass",
+      "artifacts_verified": 7,
+      "bytes_verified": 156670
+    }
+  ],
+  "raw_data_manifest_files_unchanged": 12,
+  "historical_artifacts_unchanged": 45,
+  "frozen_files_unchanged": 8,
+  "scientific_bank_opened": false,
+  "active_milestone_jobs": [],
+  "scope": "Exposed simulation and artifact reconstruction; no real-data proxy evaluation, published-method reproduction or independent scientific review."
+}

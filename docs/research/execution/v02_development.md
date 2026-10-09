@@ -72,7 +72,8 @@ its limited controls remain preserved and distinct from this informed revision.
 - [x] Scenario-grouped, equally weighted two-regime evaluation with metadata baseline.
 - [x] Artifact reconstruction and compact, hash-preserving result export.
 - [x] Common expanded tuning grid and descriptive training-subset/fold sensitivity (remaining boundary choices recorded).
-- [ ] Covariance-proxy / sequence adaptations and component ablations.
+- [x] Covariance-proxy comparator and direct-weighting ablation on exposed simulation banks.
+- [ ] Sequence adaptation and provenance-component ablations.
 - [ ] Separate state-fusion / oracle-lineage diagnostics.
 - [ ] Precision planning and justified primary comparison.
 
@@ -164,3 +165,54 @@ Next implement the [covariance-proxy comparator and ablations](covariance_proxy_
 The plan records the simulator's zero normal sigmas and the real-data geometry
 limitation; a naive 3D determinant would collapse to zero. No comparator runner
 exists yet. Keep all unfavorable outcomes and the current immutable campaign.
+
+
+## Covariance-proxy comparison completed
+
+[Implementation, acceptance checks and commands](covariance_proxy_plan.md);
+[generated tables](../results/covariance_2026-10-09/report.md);
+[audit](../results/covariance_2026-10-09/audit.json);
+[verification](covariance_verification.json).
+
+The 16 new models use the identical scenario subsets/folds, two regimes, common
+six-value C grid, calibration and threshold rules. The existing 72 control models
+are reused after data/code/fold compatibility checks; their saved results were
+not overwritten. Total comparison: 88 models and 1,232,000 repeated evaluation
+rows. Evaluation still has 1,000 independent scenarios per exposed bank.
+
+The proxies are a radial/tangential diagonal-volume trend approximation and a
+direct inverse-volume ablation. Neither reproduces Sanchez's evidence-theory
+pipeline or supplies encounter-plane geometry for real CDMs. All constant-volume
+conditions have exactly uniform message weights; no-reuse-only fits reproduce
+the original singleton OOF/thresholds/constant-condition predictions in all eight
+mode/trial checks. New-information conditions have distinct nonuniform weights.
+Under matched training those changing weights can change fitted coefficients;
+equal evaluation weights alone do not imply identical predictors.
+
+| Matched full-data condition | Trend | Direct | Singleton | Grouped | Latest metadata |
+|---|---:|---:|---:|---:|---:|
+| Software heavy overlap, log loss | 0.172379 | 0.172675 | 0.170962 | 0.173125 | 0.182578 |
+| Software new information, log loss | 0.062395 | 0.062217 | 0.063820 | 0.066160 | 0.062295 |
+| Bias new information, log loss | 1.821654 | 1.865558 | 1.796076 | 1.918247 | 1.532965 |
+
+Across the three training subsets, **both proxies beat grouping and singleton on
+software new-information loss in all three, but lose to latest-metadata in all
+three**. The small direct-versus-metadata full-reference advantage does not
+persist. Heavy-overlap comparisons against singleton/grouping change rank across
+subsets. Under bias, both proxies lose to latest-metadata in every subset for
+heavy overlap and new information. Full-data new-information miss counts are
+188/326 (trend) and 189/326 (direct), underscoring the failed transfer of the
+nominal training-recall threshold.
+
+The NARROW benchmark direction remains. All new candidate/final fits pass strict
+convergence (maximum 141 iterations); 8/16 new selected C values remain at 1000.
+The audit recomputes every new prediction, all metrics, OOF-selected losses and
+thresholds, diagnostics and the eight singleton equivalences. Full suite:
+**374 passed, 1 skipped** in 71.28 seconds. Four compact result bundles contain
+41 checksum-verified artifact files. The original 57 raw/historical artifacts
+and eight frozen files retain their hashes. Both new runs have exited.
+
+Next implement the [state-fusion/unique-observation diagnostics](state_fusion_plan.md),
+with an explicit common-prior control and visible-only union. Sequence adaptation,
+provenance-component ablations, independent training-bank uncertainty and precision
+work remain. Do not mark V02 complete or open scientific outcomes.

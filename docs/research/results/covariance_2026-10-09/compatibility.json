@@ -1,0 +1,29 @@
+{
+  "legacy_history_ast_unchanged": true,
+  "reuse_scope": "All nine archived control arms; no control refitting or new tuning.",
+  "same_cadence_inputs": true,
+  "source_runs": [
+    {
+      "archived_sources_verified": 74,
+      "artifacts_verified": 13,
+      "inputs_verified": 14,
+      "run_id": "cadence_20261009_v1",
+      "status": "complete"
+    },
+    {
+      "archived_sources_verified": 77,
+      "artifacts_verified": 306,
+      "inputs_verified": 10,
+      "run_id": "tuning_20261009_v1",
+      "status": "complete"
+    }
+  ],
+  "unchanged_shared_modules": [
+    "models.py",
+    "simulation_regimes.py",
+    "tuning_stability.py",
+    "data.py",
+    "metrics.py",
+    "evaluate.py"
+  ]
+}

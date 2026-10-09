@@ -10,19 +10,19 @@ This is the live execution record. Update it as work happens. Checked preparatio
 
 | Field | Current checkpoint — replace after each work session |
 |---|---|
-| NOW | V02 expanded-grid/subset milestone complete: 72 selected models and 1,008,000 evaluation rows audited. Three reports updated; grouping superiority remains unsupported. |
-| NEXT | Implement the covariance-proxy comparator and direct-weighting ablation from docs/research/execution/covariance_proxy_plan.md, starting with numerical/fallback/invariance tests. Then continue sequence/component/oracle comparisons and precision planning. |
-| Active task / owner | V02 remains IN PROGRESS. Cadence, training-regime and common-grid/subset checks are complete. The next comparator has a design and acceptance checklist; its runner is not implemented. |
+| NOW | V02 covariance-proxy comparison complete and audited: 16 new models / 224,000 new predictions, compared with 72 verified saved controls. Three reports and manuscript status updated. |
+| NEXT | Implement state-fusion and unique-visible-observation diagnostics from docs/research/execution/state_fusion_plan.md. Then finish sequence/provenance-component comparisons and precision planning. |
+| Active task / owner | V02 remains IN PROGRESS. Cadence, regime, tuning/subset and covariance-proxy/direct-weighting substeps are complete. State-fusion/oracle diagnostics are the next bounded implementation. |
 | Selected direction | **Track R, narrowed:** controlled robustness/measurement benchmark. Grouping remains a candidate and may be discarded if simpler controls explain results. |
 | Conditional extension | **Track E:** independent real-data efficacy, only after access and statistical requirements pass. |
 | Research blockers | None preventing V01/V02 preparation. Full methods for some close papers and independent operational data remain unavailable; no novelty or real efficacy claim is established. |
 | Current machine | Windows, PowerShell; repository at `F:\conjunction-triage`; Python environment at `.venv\Scripts\python.exe`. Paths elsewhere in this file are relative to the repository root. |
 | HEAD when this checklist was created | `89d7f2efb8bf135e02fa51760e0ed3bb33a105c9`; working tree contains pre-existing modifications and untracked files. |
-| Latest validation | 359 passed, 1 skipped in 60.13s; all 72 thresholds and 1,008,000 prediction rows audited. Three compact bundles / 31 artifact files pass hashes. Original 57 raw/historical and 8 frozen files unchanged; see docs/research/execution/tuning_verification.json. |
-| New scientific runs | Completed development runs tuning_20261009_v1 and tuning_summary_20261009_v1, alongside the earlier cadence/regime/pilot runs. No frozen scientific evaluation. |
+| Latest validation | 374 passed, 1 skipped in 71.28s. All new forecasts, 16 thresholds, 42,000 weight-diagnostic rows and eight singleton equivalences reconstructed. Four compact bundles / 41 artifacts pass hashes; original 57 raw/historical and 8 frozen files unchanged. |
+| New scientific runs | Completed development runs covariance_20261009_v1 and covariance_summary_20261009_v1, plus the earlier tuning/regime/pilot runs. No frozen scientific evaluation. |
 | Scientific holdout status | Seed 20261012 / scientific:00000..04999 reserved **but not generated**. Candidate anisotropic configuration and sample size still need V03 freeze. Kelvins and all pilot banks are exposed. |
-| Running jobs / processes | None from this milestone. Training, reconstruction and tests exited successfully; completed manifests retain original PIDs and start/end times. |
-| Next executable command | `Get-Content -Encoding UTF8 docs/research/execution/covariance_proxy_plan.md`; then inspect research/history.py and research/simulation_regimes.py. No new comparator CLI exists yet. |
+| Running jobs / processes | None from this milestone. Covariance training, reconstruction and full tests exited successfully; manifests retain original process/start/end records. |
+| Next executable command | `Get-Content -Encoding UTF8 docs/research/execution/state_fusion_plan.md`; then inspect research/simulation.py and existing numerical tests. No state-fusion campaign CLI exists yet. |
 
 ### Copy this into the next assistant
 
@@ -440,3 +440,68 @@ real-data sigmas also do not supply a full encounter-plane transformation.
 Record the proposed approximation honestly. The sequence, component/oracle and
 precision tasks remain after this. V02 stays unchecked; no scientific freeze or
 publication claim is implied by this completed substep.
+
+
+### V02 covariance-proxy milestone - 9 October 2026
+
+Completed implementation commits: `4f5a90b` (two weighting approximations,
+validated history integration and equal-budget campaign), `4d955e3` (forecast
+reconstruction and scenario-paired comparisons). This evidence/handoff checkpoint
+is a further scoped commit; `git log` gives its hash. Author and committer remain
+`NitinTheGreat <nitinpandey1304@gmail.com>`, with no assistant attribution. No push.
+
+Evidence: [result report](docs/research/results/covariance_2026-10-09/report.md),
+[audit](docs/research/results/covariance_2026-10-09/audit.json),
+[verification](docs/research/execution/covariance_verification.json),
+[completed acceptance checklist and exact commands](docs/research/execution/covariance_proxy_plan.md).
+Runs `covariance_20261009_v1` and `covariance_summary_20261009_v1` are complete.
+The export contains ten byte-exact artifacts plus provenance. Full models,
+predictions, source archives and logs remain local/ignored; transfer them for
+complete reconstruction elsewhere.
+
+The two added arms are `covariance_trend` (inverse fitted log-volume trend) and
+`covariance_direct` (direct inverse volume). Both use an explicitly approximate
+radial/tangential diagonal variance product and retain singleton's feature/readout
+contract. This is not the published Sanchez inference method or a real-CDM
+geometry reconstruction. Required invalid inputs have explicit uniform fallback
+or upstream rejection; future records do not enter the visible prefix.
+
+Sixteen new fits use exactly the four saved trials, two regimes, six-value C grid,
+scenario folds, calibration and threshold rules. Seventy-two control fits are
+reused only after data/code/legacy-feature compatibility checks. The combined
+1,232,000 prediction rows still concern the same 1,000 scenarios per exposed
+bank. The three 800-scenario training subsets overlap; descriptive ranges are
+not confidence intervals or independent training-bank replication.
+
+**Measured result:** both proxies beat grouped and singleton software
+new-information loss in all three subsets, but latest-metadata beats both in
+all three. Full-data trend/direct losses are 0.062395/0.062217 versus grouped
+0.066160 and latest-metadata 0.062295. Direct's tiny full-reference advantage
+over latest-metadata does not persist across subsets. Singleton has lower
+full-reference software heavy-overlap loss than either proxy; subset rankings
+against history controls vary. Shared-bias performance remains poor. Keep all
+conditions and adverse results; the NARROW benchmark direction remains.
+
+All 42,000 event/mode diagnostic rows reconstruct. Constant-covariance conditions
+have exactly uniform weights, and eight no-reuse-only checks reproduce saved
+singleton OOF predictions/thresholds/constant-condition forecasts. Matched
+training may still change coefficients because new-information summaries are
+weighted differently. All new forecasts were recomputed from saved models;
+all metrics and 16 selected thresholds/OOF losses reconstruct. Eight of 16 new
+fits still select C=1000; maximum observed iterations is 141 with no convergence
+failure. The common tuning boundary remains a design limitation before V03.
+
+Validation: **374 passed / 1 skipped** in 71.28 seconds, exit 0. The existing skip
+is credential-presence dependent; no paid inference occurred. Four compact
+bundles / 41 artifact files pass byte checks. Original 12 raw/data-manifest,
+45 historical and eight frozen files match their hashes. No milestone process
+is active. Reserved scientific seed 20261012 remains ungenerated. V02 and A03
+independent review remain unchecked.
+
+**Exact next step:** implement the [state-fusion and visible-observation-union
+plan](docs/research/execution/state_fusion_plan.md). Start with analytic matrix
+and observation-boundary tests; distinguish the repeated-prior error from shared
+observation reuse. Existing isotropic covariances make some fusion controls
+collapse, so document ties and degeneracy explicitly. Keep state error/covariance
+diagnostics separate from class-forecast loss. No fusion runner exists yet.
+Sequence adaptation, provenance-component ablations and precision work follow.

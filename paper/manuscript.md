@@ -42,7 +42,7 @@ Dependence-aware and idempotent evidence combination predates this project. Exac
 
 Overlapping Covariance Intersection also provides recent prior art for fusion with partial structural covariance knowledge. Its required covariance bounds are not supplied by public observation-age metadata; a simulation comparison needs an explicit input mapping. [Pedroso et al., v2, October 2026](https://arxiv.org/html/2603.16768v2)
 
-**Pending:** V02 implementation of the selected sequence/weighting adaptations and fusion diagnostics, and an explicit account of what the completed study adds beyond existing approaches. See V01 for versioned sources and remaining access limits.
+**Development update:** V02 now includes a diagonal-volume weighting approximation and direct-weighting ablation on exposed simulation banks. They are not reproductions of the published evidence-theory method. **Pending:** sequence adaptation, fusion/provenance-component diagnostics, precision planning and an explicit account of what the completed study adds beyond prior work. See V01 for versioned sources and remaining access limits.
 
 ## 3. Task, data and information boundary
 
@@ -61,6 +61,15 @@ OD signatures and coarse observation-age intervals are proxies. Unknown age rema
 Include latest-risk, latest-message metadata, causal logistic/boosting, singleton pooling, time grouping, random grouping, thinning, change-based selection and ignore-update controls. The candidate constructs at most eight label-free partitions, summarizes each with group-normalized weights, fits one shared regularized logistic model with total event weight one, and calibrates the maximum partition score. A range across partition scores is a sensitivity measure, not a confidence or coverage interval.
 
 The initial design is implemented in `research/history.py` and `research/models.py`. V02 may revise it in new versioned runs. Report all candidate changes and failed controls; do not rewrite the pilot as the final protocol.
+
+The V02 weighting controls use `(t_sigma_r?+c_sigma_r?)*(t_sigma_t?+c_sigma_t?)`
+as a radial/tangential diagonal-volume proxy, either through inverse fitted
+log-linear time trend or direct inverse volume. They preserve singleton summary
+features and the common calibrated logistic readout. Missing/invalid precision
+inputs and degenerate time/volume histories have declared fallback behavior.
+Normal uncertainty, cross-covariance and real encounter-plane geometry are not
+reconstructed. See the [implementation contract](../docs/research/execution/covariance_proxy_plan.md).
+
 
 ### 4.2 Development versus scientific evaluation
 
@@ -87,12 +96,21 @@ Report clipped class log loss, Brier score, calibration summaries and explicit r
 | Cohort flow and information boundary | Data crosswalk plus A01 cohort audit | PENDING final table |
 | Frozen primary paired reuse contrast | V04 predictions and protocol | PENDING experiment |
 | Absolute loss and genuine-new-information control | V04 paired scenarios | PENDING experiment |
-| Comparator/ablation and noise sensitivity | V02/V04 runs | PENDING experiment |
+| Comparator/ablation and noise sensitivity | V02/V04 runs | Development partial; scientific evaluation pending |
 | Retrospective class forecast and review/miss frontier | A01 frozen retrospective analysis | Pilot only |
 | Separate corrected official-score reconstruction | B04 predictions; A01 selected analysis | Pilot complete, final scope pending |
 | Failure cases and provenance limits | A01/V04 failure records | PENDING analysis |
 
 Pilot tables are reproducible through `research.summarize_pilot`; the run IDs and measured values belong in the development supplement if retained. Leave all scientific result cells empty until their source run is complete.
+
+The [covariance development report](../docs/research/results/covariance_2026-10-09/report.md)
+adds 16 models against 72 saved controls on the same exposed scenarios. Across
+three overlapping training subsets, both weighting proxies improve software
+new-information loss over grouping and singleton but lose to latest-message
+metadata. Shared-bias failures persist. These results support retaining simpler
+controls and a bounded benchmark question; they do not establish confirmatory
+superiority. Scientific result tables remain unfilled pending V03/V04.
+
 
 ## 6. Discussion and limitations
 

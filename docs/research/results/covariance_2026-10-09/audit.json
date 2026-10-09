@@ -1,0 +1,91 @@
+{
+  "all_class_metrics_reconstructed": true,
+  "all_new_oof_losses_and_thresholds_reconstructed": true,
+  "all_new_predictions_reconstructed_from_models": true,
+  "combined_prediction_rows": 1232000,
+  "compatibility": {
+    "legacy_history_ast_unchanged": true,
+    "reuse_scope": "All nine archived control arms; no control refitting or new tuning.",
+    "same_cadence_inputs": true,
+    "source_runs": [
+      {
+        "archived_sources_verified": 74,
+        "artifacts_verified": 13,
+        "inputs_verified": 14,
+        "run_id": "cadence_20261009_v1",
+        "status": "complete"
+      },
+      {
+        "archived_sources_verified": 77,
+        "artifacts_verified": 306,
+        "inputs_verified": 10,
+        "run_id": "tuning_20261009_v1",
+        "status": "complete"
+      }
+    ],
+    "unchanged_shared_modules": [
+      "models.py",
+      "simulation_regimes.py",
+      "tuning_stability.py",
+      "data.py",
+      "metrics.py",
+      "evaluate.py"
+    ]
+  },
+  "limits": "Exposed paired scenarios; three overlapping training subsets; no independent scientific replication or published-method reproduction.",
+  "new_prediction_rows": 224000,
+  "no_reuse_singleton_equivalences_reconstructed": [
+    {
+      "arm": "covariance_trend",
+      "seed": 20261022,
+      "singleton_oof_and_constant_condition_predictions": "pass"
+    },
+    {
+      "arm": "covariance_direct",
+      "seed": 20261022,
+      "singleton_oof_and_constant_condition_predictions": "pass"
+    },
+    {
+      "arm": "covariance_trend",
+      "seed": 20261031,
+      "singleton_oof_and_constant_condition_predictions": "pass"
+    },
+    {
+      "arm": "covariance_direct",
+      "seed": 20261031,
+      "singleton_oof_and_constant_condition_predictions": "pass"
+    },
+    {
+      "arm": "covariance_trend",
+      "seed": 20261032,
+      "singleton_oof_and_constant_condition_predictions": "pass"
+    },
+    {
+      "arm": "covariance_direct",
+      "seed": 20261032,
+      "singleton_oof_and_constant_condition_predictions": "pass"
+    },
+    {
+      "arm": "covariance_trend",
+      "seed": 20261033,
+      "singleton_oof_and_constant_condition_predictions": "pass"
+    },
+    {
+      "arm": "covariance_direct",
+      "seed": 20261033,
+      "singleton_oof_and_constant_condition_predictions": "pass"
+    }
+  ],
+  "replay_invariance_reconstructed": true,
+  "same_reference_folds_and_scenario_weights": true,
+  "scientific_bank_opened": false,
+  "selected_new_models": 16,
+  "source_run": {
+    "archived_sources_verified": 81,
+    "artifacts_verified": 83,
+    "inputs_verified": 29,
+    "run_id": "covariance_20261009_v1",
+    "status": "complete"
+  },
+  "weight_diagnostics_reconstructed": true
+}

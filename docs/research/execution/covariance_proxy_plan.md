@@ -1,9 +1,9 @@
 # Next V02 step: covariance-proxy comparator
 
 Prepared 9 October 2026 from the inspected implementation and the
-[closest-work method notes](closest_work_comparison.md). **Design only: this
-comparator has not been implemented or evaluated.** Preserve the current nine-arm
-campaign and its tuning results as a separate development experiment.
+[closest-work method notes](closest_work_comparison.md). **Completed on exposed simulation banks.** The implementation, 16-model campaign
+and reconstruction are complete; the original proposal below is retained with
+its recorded scope. The nine-arm reference remains an immutable separate run.
 
 ## Concrete issue to resolve first
 
@@ -50,33 +50,33 @@ future messages and oracle observation IDs must never enter this comparator.
 
 ## Acceptance checklist and expected evidence
 
-- [ ] Implement the proxy in a separate, clearly named module or transformer
+- [x] Implement the proxy in a separate, clearly named module or transformer
   mode. Record exact field mapping and fallback semantics before model fitting.
-- [ ] Check analytic equal-volume and exponential-volume examples, finite
+- [x] Check analytic equal-volume and exponential-volume examples, finite
   normalized weights, common sigma-unit rescaling, tied times, missing/invalid
   sigmas, and single-message prefixes. Equal covariance must produce uniform
   pooling; it cannot identify repeated data by itself.
-- [ ] Check exact replay/order invariance, post-cutoff mutation invariance and
+- [x] Check exact replay/order invariance, post-cutoff mutation invariance and
   training-only preprocessing. Use existing fold and scenario-weight contracts.
-- [ ] Audit weight distributions and fallback counts on the **exposed** banks
+- [x] Audit weight distributions and fallback counts on the **exposed** banks
   before evaluating predictive loss. Existing overlap/reissue windows have
   constant nominal covariance, so several conditions should collapse to uniform
   pooling by construction. New-information histories can vary in covariance.
-- [ ] Add a direct inverse-volume ablation to distinguish the proposed fitted
+- [x] Add a direct inverse-volume ablation to distinguish the proposed fitted
   trend from direct weighting, plus the existing uniform/singleton control.
   Keep the feature/readout and preprocessing contracts comparable.
-- [ ] Evaluate under the same two training regimes, common C grid, convergence
+- [x] Evaluate under the same two training regimes, common C grid, convergence
   policy, scenario folds, subsets, calibration and endpoints. Record any compute
   deviation explicitly. Reuse compatible saved comparator results only after
   checking hashes, data, folds and budgets; do not train just the new method on
   favorable cases.
-- [ ] Export all conditions, fallback diagnostics, selected parameters and
+- [x] Export all conditions, fallback diagnostics, selected parameters and
   paired absolute-loss/degradation comparisons. Report an exact collapse to
   uniform pooling or a worse result without treating it as a software failure.
-- [ ] Update the V02 record and root handoff, run relevant checks, and commit
+- [x] Update the V02 record and root handoff, run relevant checks, and commit
   only completed code, tests and compact evidence under the requested identity.
 
-No production runner command exists for this task yet. Start by reading
+The production runner now exists (exact commands below). Implementation began by reading
 `research/history.py`, `research/simulation.py`, `research/simulation_regimes.py`
 and this plan. State-fusion/oracle diagnostics and the sequence-family
 adaptation remain separate subsequent steps. Keep the reserved scientific bank
@@ -125,3 +125,43 @@ Focused validation before the campaign: 19 tests passed in 5.66 seconds, coverin
 the new numerical/information-boundary checks and existing model/regime tests.
 The run manifest must still complete and its artifacts reconstruct before the
 evaluation/export acceptance boxes can be checked.
+
+
+## Completed evidence and measured conclusion
+
+Runs `covariance_20261009_v1` and `covariance_summary_20261009_v1` are complete.
+[Generated report](../results/covariance_2026-10-09/report.md),
+[audit](../results/covariance_2026-10-09/audit.json),
+[verification](covariance_verification.json). This checks the proposed proxy and
+its direct-weighting ablation on the exposed simulation design; it does not
+reproduce the published Sanchez method or evaluate the proxy on real CDMs.
+
+The campaign adds 16 models and 224,000 predictions to the saved 72-control-model
+comparison. All new predictions were recomputed from saved models. The audit
+also reconstructs 42,000 event/mode weight diagnostics, all 16 selected thresholds,
+OOF losses and eight no-reuse-only singleton equivalences. All fits passed strict
+convergence checks (maximum 141 iterations); eight select the C=1000 boundary.
+Full suite: **374 passed, 1 skipped** in 71.28 seconds.
+
+Both proxies improve software new-information loss over grouping and singleton
+in all three 800-scenario subsets. Latest-metadata beats both in all three.
+Direct weighting has a very small lower full-data loss than latest-metadata
+(0.062217 versus 0.062295), but that ordering does not persist in the subsets.
+Shared-bias failures and mixed heavy-overlap rankings remain. This supports
+retaining the proxies as comparators; it does not establish a superior method.
+The 1,232,000 combined prediction rows reuse the same 1,000 scenarios per
+exposed evaluation bank, not new independent outcomes.
+
+Commands executed (use new IDs and export destinations for any rerun):
+
+```powershell
+.\.venv\Scripts\python.exe -m research.covariance_campaign --source processed/research/cadence_20261009_v1 --reference processed/research/tuning_20261009_v1 --run-id covariance_20261009_v1
+.\.venv\Scripts\python.exe -m research.summarize_covariance --source processed/research/covariance_20261009_v1 --run-id covariance_summary_20261009_v1 --export docs/research/results/covariance_2026-10-09
+.\.venv\Scripts\python.exe -m research.verify_exports --root docs/research/results
+```
+
+Process-local LOKY_MAX_CPU_COUNT, OMP_NUM_THREADS and MKL_NUM_THREADS were each 2.
+No campaign or reconstruction process remains active. Next is the
+[state-fusion and unique-observation diagnostic plan](state_fusion_plan.md).
+V02 stays open for that work, sequence/provenance-component comparisons and
+precision planning. Scientific scenarios remain reserved and ungenerated.

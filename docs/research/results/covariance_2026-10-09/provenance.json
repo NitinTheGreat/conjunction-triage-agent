@@ -1,0 +1,20 @@
+{
+  "artifacts": {
+    "audit.json": "5618efb1246c88b285fb6a1cfa1ffbcd6ee8cacc228d9b90144e3c27ffd6b896",
+    "candidate_scores.csv": "1e4f814e99f17ef029b365f1dd167b1748dd80d0cbc8d5cfde29c45751023f09",
+    "comparison_ranges.csv": "58587eac859a56dacad5881ba1cf5a4ecd4a6972f19105d8bf02190e436a4b24",
+    "compatibility.json": "28216513ca6e5978d693f5d24d044376eab4c22048939e06b6b825cc7d5ac246",
+    "loss_ranges.csv": "ebe89cfe57b0f436d66f0aaf0b0ae6873e1588af17147d9a13804b9cd90d66ef",
+    "metrics.csv": "64045c5f05c5587dfff83555d68949f25a884e67da80f03364982f3dce743f03",
+    "paired_contrasts.csv": "0d5564b2de7f52a02f681f8e77f390870fdadc2ba149602339717cc69194d01e",
+    "report.md": "685fcad22cbb7b931e5f2615bd9f2d5a193fef26f6ff073c56e6733f9663bd03",
+    "selections.csv": "627e119e4809ae8bd97efae02838339e974d34d02e6a9a5ba4b2d943193779ef",
+    "weight_diagnostics.csv": "2e10523d2789c87bb040b224705f5187617ec711d83b789c8a42564a686926b1"
+  },
+  "manifest_sha256": "8067c8c9126b11234da241950d3f2c0f4edf76123781f005137b78d4cb8c9732",
+  "run_id": "covariance_summary_20261009_v1",
+  "source_runs": [
+    "covariance_20261009_v1",
+    "tuning_20261009_v1"
+  ]
+}
