@@ -1,0 +1,20 @@
+{
+  "artifacts": {
+    "audit.json": "0cff3292c2447532e2350057e4442ce71a05830c7d909055f197e1b789aeaa91",
+    "candidate_scores.csv": "37154c8a80aead5ce241cb2183ca0f46cf0170e6e8228b0d1de53b8f47fb028b",
+    "comparison_ranges.csv": "8d33989660d6f45e3706948f326c0e0a284e187346b5cd5d3d23dd2e8fce7df9",
+    "fit_records.csv": "99dac5b17235a8f977a7e931e0bf234944e63a05c4982f58e0699907ed87f259",
+    "loss_ranges.csv": "141b9d54bf3c292fc3f2e013ae69b8ba20c23fa2625ea804dda94eab3c58c080",
+    "metrics.csv": "f6893ec309fdd9dc84422d3255c524ae8c8d2d39f42dde03e376829a780cf6d9",
+    "paired_contrasts.csv": "ca534514ffa90afa811a20ad74817a8c3c607f1e9871767c750cc25ed631c615",
+    "report.md": "9e7f007ff50684afda5cb5a422fd0344091a30bbfc7588658d4a9049dbe0c053",
+    "selections.csv": "75f671062d5f721bad73457bdb85ad113c12db5d6bef55558f6d37f09a41c96e"
+  },
+  "manifest_sha256": "482d892d45bee443c764dfd84c59d12b6901c586a7017b82339c0888f58c4f63",
+  "run_id": "sequence_summary_20261010_v1",
+  "source_runs": [
+    "sequence_20261010_v1",
+    "tuning_20261009_v1",
+    "covariance_20261009_v1"
+  ]
+}

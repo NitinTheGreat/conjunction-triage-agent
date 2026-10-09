@@ -69,7 +69,9 @@ independently tested here. Scientific seed 20261012 remains unopened.
 
 - [x] Local CPU dependency, synthetic timing and masking/determinism preflight.
 - [x] Fixed grid and failure policy recorded before study fitting.
-- [ ] Complete all 304 fits, 16 selected models and 224,000 predictions.
-- [ ] Reconstruct saved predictions, selections and paired comparisons.
-- [ ] Report all bias/reuse/new-information results and training sensitivity.
+- [x] Complete all 304 fits, 16 selected models and 224,000 predictions.
+- [x] Reconstruct saved predictions, selections and paired comparisons.
+- [x] Report all bias/reuse/new-information results and training sensitivity.
 - [ ] Complete provenance-component ablations and precision planning before V03.
+
+Completed 10 October 2026; [audited results](../results/sequence_2026-10-10/report.md). The JSON contract above is unchanged from its pre-fit commit. All 16 selections reach 60 epochs and eight reach maximum width; tuning adequacy remains an explicit V02 decision.

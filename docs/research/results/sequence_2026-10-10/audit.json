@@ -1,0 +1,57 @@
+{
+  "all_candidate_preprocessors_and_oof_reconstructed": true,
+  "all_combined_metrics_reconstructed": true,
+  "calibration_and_thresholds_reconstructed": true,
+  "combined_prediction_rows": 1456000,
+  "compatibility": {
+    "covariance_audit": {
+      "archived_sources_verified": 81,
+      "artifacts_verified": 83,
+      "inputs_verified": 29,
+      "run_id": "covariance_20261009_v1",
+      "status": "complete"
+    },
+    "legacy_history_ast_unchanged": true,
+    "reuse_scope": "All nine archived control arms; no control refitting or new tuning.",
+    "same_cadence_inputs": true,
+    "source_runs": [
+      {
+        "archived_sources_verified": 74,
+        "artifacts_verified": 13,
+        "inputs_verified": 14,
+        "run_id": "cadence_20261009_v1",
+        "status": "complete"
+      },
+      {
+        "archived_sources_verified": 77,
+        "artifacts_verified": 306,
+        "inputs_verified": 10,
+        "run_id": "tuning_20261009_v1",
+        "status": "complete"
+      }
+    ],
+    "unchanged_shared_modules": [
+      "models.py",
+      "simulation_regimes.py",
+      "tuning_stability.py",
+      "data.py",
+      "metrics.py",
+      "evaluate.py"
+    ]
+  },
+  "folds_scenario_weights_and_labels_verified": true,
+  "new_predictions_bitwise_reconstructed": 224000,
+  "reconstructed_candidate_oof_rows": 285600,
+  "reconstructed_fits": 304,
+  "replay_and_latest_only_invariants_verified": true,
+  "scientific_bank_opened": false,
+  "scope": "Same-workflow artifact verification; not A03 independent review or confirmatory evaluation.",
+  "selected_models": 16,
+  "source_run": {
+    "archived_sources_verified": 88,
+    "artifacts_verified": 959,
+    "inputs_verified": 27,
+    "run_id": "sequence_20261010_v1",
+    "status": "complete"
+  }
+}

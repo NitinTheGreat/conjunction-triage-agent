@@ -1,7 +1,7 @@
 # Research execution checklist and assistant handoff
 
 **Project:** ConjunctionTriage  
-**Created:** 6 October 2026; **last checkpoint:** 9 October 2026
+**Created:** 6 October 2026; **last checkpoint:** 10 October 2026
 **Purpose:** carry the project from the research reports to a defensible paper, with work resumable by Codex, Claude Code, or another coding assistant using this file and the repository.
 
 This is the live execution record. Update it as work happens. Checked preparation tasks describe work already evidenced in the repository; unchecked implementation and experiment tasks remain to be done. A completed task can produce a negative or inconclusive finding. A checkbox does not mean that the proposed method succeeded or that a paper is accepted.
@@ -10,19 +10,19 @@ This is the live execution record. Update it as work happens. Checked preparatio
 
 | Field | Current checkpoint — replace after each work session |
 |---|---|
-| NOW | Fixed-budget sequence campaign sequence_20261010_v1 is RUNNING. Contract bde47ec preceded study fitting; runner committed as 88ec87d. |
-| NEXT | Run the tested fixed 304-fit / 16-model sequence campaign, reconstruct results, then provenance-component ablations and precision planning. |
-| Active task / owner | V02 IN PROGRESS. All 18 sequence implementation/audit tests pass; no completed or audited sequence study result yet. |
+| NOW | Sequence adaptation and latest-only capacity control complete: 304 fits, 285,600 candidate OOF values and 224,000 new forecasts audited. Three reports and manuscript updated. |
+| NEXT | Implement observable-provenance component ablations from docs/research/execution/provenance_component_plan.md; resolve tuning adequacy and precision before V03. |
+| Active task / owner | V02 IN PROGRESS. Sequence, covariance and separate state-fusion comparisons are complete on exposed banks. Component ablations, budget adequacy and precision remain. |
 | Selected direction | **Track R, narrowed:** controlled robustness/measurement benchmark. Grouping remains a candidate and may be discarded if simpler controls explain results. |
 | Conditional extension | **Track E:** independent real-data efficacy, only after access and statistical requirements pass. |
 | Research blockers | None preventing V01/V02 preparation. Full methods for some close papers and independent operational data remain unavailable; no novelty or real efficacy claim is established. |
 | Current machine | Windows, PowerShell; repository at `F:\conjunction-triage`; Python environment at `.venv\Scripts\python.exe`. Paths elsewhere in this file are relative to the repository root. |
 | HEAD when this checklist was created | `89d7f2efb8bf135e02fa51760e0ed3bb33a105c9`; working tree contains pre-existing modifications and untracked files. |
-| Latest validation | 18 sequence implementation/audit tests passed in 10.49s. Full suite now running with CPU dependency installed. |
-| New scientific runs | Completed development/reconstruction runs fusion_20261009_v1 and fusion_summary_20261009_v1, plus earlier covariance/tuning/regime/pilot runs. No frozen scientific evaluation. |
+| Latest validation | 410 passed / 1 skipped in 64.59s; three targeted audit tests passed after final metadata checks. Six compact bundles / 56 artifacts pass hashes. Original 57 raw/historical and 8 frozen files unchanged. |
+| New scientific runs | Completed development/reconstruction runs sequence_preflight_20261009_v1, sequence_20261010_v1 and sequence_summary_20261010_v1, plus earlier runs. No frozen scientific evaluation. |
 | Scientific holdout status | Seed 20261012 / scientific:00000..04999 reserved **but not generated**. Candidate anisotropic configuration and sample size still need V03 freeze. Kelvins and all pilot banks are exposed. |
-| Running jobs / processes | sequence_20261010_v1 campaign active; inspect processed/research/sequence_20261010_v1/manifest.json and progress.json. Full pytest validation also running; local logs under docs/research/execution/. |
-| Next executable command | Inspect sequence_20261010_v1 status. After complete: .venv\Scripts\python.exe -m research.summarize_sequence --source processed/research/sequence_20261010_v1 --run-id sequence_summary_20261010_v1 --export docs/research/results/sequence_2026-10-10 |
+| Running jobs / processes | None from this milestone. Campaign, reconstruction/watcher and tests exited successfully; manifests retain start/end records. |
+| Next executable command | Get-Content -Encoding UTF8 docs/research/execution/provenance_component_plan.md; fix the component contract and construction tests before study fitting. No component runner CLI exists yet. |
 
 ### Copy this into the next assistant
 
@@ -578,3 +578,54 @@ component ablations.
 Evidence: [contract](docs/research/execution/sequence_contract.md), [settings](docs/research/execution/sequence_contract.json), [synthetic environment/timing](docs/research/execution/sequence_preflight.json). Exact next step is runner/fold-audit implementation. Scientific reservation unopened; V02 remains open.
 
 Sequence runner added and targeted suite expanded: 15 passed in 8.65s. Tests verify whole-scenario fold separation, reconstruct inner OOF from saved fold models, refit calibration/threshold from selected OOF, and retain a deliberately injected candidate failure. Ready for the declared campaign; no study fit at this commit.
+
+### V02 sequence-adaptation milestone - 10 October 2026
+
+- [x] Pin compatible local CPU dependency and pass synthetic timing/masking/determinism checks.
+- [x] Commit the six-candidate contract before study fitting; implement history and latest-only LSTM.
+- [x] Complete 304 fits and 16 selected models on unchanged scenario subsets/folds.
+- [x] Reconstruct all 285,600 candidate OOF values, train-only preprocessors, selections, calibration and thresholds.
+- [x] Reconstruct 224,000 new forecasts bitwise and compare with 88 compatible saved controls.
+- [x] Preserve every reuse/bias/new-information condition, paired endpoint and subset sensitivity table.
+- [x] Update three reports, manuscript, verification and portable handoff.
+- [ ] Complete provenance-component ablations, tuning-adequacy decision and precision planning; V02 remains open.
+
+Evidence: [results](docs/research/results/sequence_2026-10-10/report.md),
+[audit](docs/research/results/sequence_2026-10-10/audit.json),
+[fixed contract](docs/research/execution/sequence_contract.md),
+[verification](docs/research/execution/sequence_verification.json),
+[exact commands and interpretation](docs/research/execution/v02_development.md).
+
+In matched software new-information cases, full-reference history LSTM loss is
+0.109397, latest-only LSTM 0.083539 and latest metadata 0.062295. History loses
+to both latest controls in all three overlapping subsets. On software heavy
+overlap it beats latest-only LSTM in all three but loses to singleton/grouping
+in all three. Under shared-bias new information, its full-reference loss improves
+to 0.812824 versus latest metadata 1.532965, yet it misses 160/326 positives.
+Ignore-updates beats latest-only LSTM on this bias condition in all three subsets
+and beats history LSTM in one. Keep these tradeoffs; no uniform neural or history
+advantage has been established.
+
+All 16 selections reach 60 epochs and eight reach maximum width. Candidate
+profiles and loss traces remain available for an explicit tuning-adequacy decision.
+The combined 1,456,000 prediction rows reuse the same 1,000 scenarios per evaluation
+bank; the three 800-scenario training subsets overlap and are not independent
+replications. Selected OOF calibration/threshold reuse is not risk certification.
+
+The environment now contains PyTorch 2.14.1+cpu; optional installation is recorded
+in requirements-sequence.txt and sequence_preflight.json. Preserve historical
+requirements.txt. Model weights, prediction Parquets, source archives and local
+logs remain outside Git; transfer required ignored data and processed/research/
+artifacts for another machine. Safe model loading uses weights_only=True.
+
+Implementation commits: bde47ec (preflight/contract), 88ec87d (campaign), c3c4966
+(reconstruction), 44a22bd (stricter audit and next-step plan). The results/checkpoint
+commit follows these. Author and committer are NitinTheGreat with the requested
+email, without assistant trailers. No push or paid inference was performed.
+
+**Next:** [observable-provenance component plan](docs/research/execution/provenance_component_plan.md).
+The current grouping rule uses OD fields and time gaps, not categorical age;
+separate age readout, OD readout and OD grouping interventions accordingly.
+Run label-free construction checks and commit the component budget before fitting.
+A03 independent review and V03 scientific freeze remain unchecked. Seed 20261012
+and scientific:00000..04999 remain reserved but ungenerated. No milestone job is active.

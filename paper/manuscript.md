@@ -1,6 +1,6 @@
 # Observation reuse and the limits of history-based conjunction-risk forecasting
 
-**Working manuscript skeleton — 9 October 2026. Not submission-ready.**
+**Working manuscript skeleton — 10 October 2026. Not submission-ready.**
 
 Authors, affiliations, venue, disclosures and funding: **TO BE COMPLETED BY AUTHORS**.
 
@@ -42,7 +42,7 @@ Dependence-aware and idempotent evidence combination predates this project. Exac
 
 Overlapping Covariance Intersection also provides recent prior art for fusion with partial structural covariance knowledge. Its required covariance bounds are not supplied by public observation-age metadata; a simulation comparison needs an explicit input mapping. [Pedroso et al., v2, October 2026](https://arxiv.org/html/2603.16768v2)
 
-**Development update:** V02 now includes a diagonal-volume weighting approximation and direct-weighting ablation on exposed simulation banks. They are not reproductions of the published evidence-theory method. Separate static state-fusion/oracle diagnostics are also complete on exposed banks. **Pending:** sequence adaptation, class-forecast provenance-component ablations, precision planning and an explicit account of what the completed study adds beyond prior work. See V01 for versioned sources and remaining access limits.
+**Development update:** V02 now includes a diagonal-volume weighting approximation and direct-weighting ablation on exposed simulation banks. They are not reproductions of the published evidence-theory method. Separate static state-fusion/oracle diagnostics are also complete on exposed banks. The bounded sequence adaptation and latest-only capacity control are now complete on these exposed banks. **Pending:** class-forecast provenance-component ablations, a tuning-adequacy decision, precision planning and an explicit account of what the completed study adds beyond prior work. See V01 for versioned sources and remaining access limits.
 
 ## 3. Task, data and information boundary
 
@@ -62,7 +62,7 @@ Include latest-risk, latest-message metadata, causal logistic/boosting, singleto
 
 The initial design is implemented in `research/history.py` and `research/models.py`. V02 may revise it in new versioned runs. Report all candidate changes and failed controls; do not rewrite the pilot as the final protocol.
 
-The V02 weighting controls use `(t_sigma_r?+c_sigma_r?)*(t_sigma_t?+c_sigma_t?)`
+The V02 weighting controls use `(t_sigma_r**2+c_sigma_r**2)*(t_sigma_t**2+c_sigma_t**2)`
 as a radial/tangential diagonal-volume proxy, either through inverse fitted
 log-linear time trend or direct inverse volume. They preserve singleton summary
 features and the common calibrated logistic readout. Missing/invalid precision
@@ -70,6 +70,24 @@ inputs and degenerate time/volume histories have declared fallback behavior.
 Normal uncertainty, cross-covariance and real encounter-plane geometry are not
 reconstructed. See the [implementation contract](../docs/research/execution/covariance_proxy_plan.md).
 
+The sequence adaptation compares a history LSTM with a latest-message-only LSTM
+of the same architecture family. Each has two unidirectional layers, dropout 0.2
+between layers, and a linear binary-class readout from the last valid hidden
+state. Widths 8/16/32 crossed with 20/60 fixed epochs give six candidates per arm;
+there is no early stopping. Packed lengths exclude padding from recurrence.
+Training-prefix-only median imputation and robust scaling are shared policies
+across arms, followed by per-message missingness flags and categorical age bins.
+The latest-only arm uses training-history distribution statistics for this
+preprocessing but receives no earlier messages from an evaluation event.
+
+Both arms use BCE, Adam, scenario weight one across variants, common scenario
+folds and the same four training subsets as the earlier controls. Selected inner
+OOF scores also fit monotone calibration and the nominal recall threshold; this
+reuse supplies no independent risk certification. The model is smaller than
+the reviewed next-CDM sequence family and changes its prediction target and loss.
+It is an adaptation, not a reproduction or a claim of best current performance.
+The [fixed contract](../docs/research/execution/sequence_contract.md) records
+optimizer details, seeds, CPU settings, candidate selection and failure policy.
 
 ### 4.2 Development versus scientific evaluation
 
@@ -135,6 +153,28 @@ known analytic collapses are retained. They validate a controlled mechanism;
 confirmatory state or class-forecast claims remain pending.
 
 
+
+The [sequence development report](../docs/research/results/sequence_2026-10-10/report.md)
+adds 16 selected models and audits all 304 training-fit checkpoints. Under matched
+training, the full-reference history LSTM has software new-information log loss
+0.109397 versus 0.083539 for its latest-only capacity control and 0.062295 for
+latest-message metadata. Across all three overlapping training subsets, history
+also loses to singleton/grouping on software heavy overlap and to both latest
+controls on new information. It beats latest-only LSTM on software heavy overlap
+in all three subsets, showing why the capacity control and absolute-loss controls
+answer different questions.
+
+Under shared-bias new-information stress, history loss is 0.812824 versus
+1.532965 for latest-message metadata, but it still misses 160 of 326 positives
+at the nominal training-recall threshold. Both neural arms improve bias-stress
+new-information loss over latest-metadata, singleton, grouping and covariance
+controls across all three subsets;
+that improvement does not remove the large review/miss failure. The simple
+ignore-updates control has lower bias-stress new-information loss than latest-only
+LSTM in all three subsets and than history LSTM in one. All 16 neural
+selections use the maximum epoch budget and eight use maximum width. This
+bounded adaptation does not establish model-family superiority or inferiority.
+The component, tuning-adequacy and precision work remains before scientific freeze.
 
 ## 6. Discussion and limitations
 

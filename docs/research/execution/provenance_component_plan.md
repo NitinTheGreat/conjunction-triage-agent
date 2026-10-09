@@ -85,6 +85,14 @@ unchanged. No component runner exists at this planning checkpoint.
 
 ## Precision planning follows the component results
 
+Review tuning adequacy before choosing a scientific comparator. Neural selections
+at the maximum epoch budget and logistic selections at maximum C are not evidence
+of optimal fitting. Use the saved OOF profiles and training-loss traces to decide
+whether a further development-only, predeclared budget extension is necessary,
+or whether the paper must explicitly restrict its comparison to these bounded
+implementations. Do not infer that an entire model family is inferior from one
+small fixed grid. Record the decision and compute tradeoff before V03.
+
 After the complete development comparison, choose a defensible primary contrast
 and practical effect/precision target. Use paired per-scenario variances and
 positive counts, not the repeated prediction-row total or three overlapping

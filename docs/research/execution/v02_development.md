@@ -265,3 +265,76 @@ frozen files are unchanged. Both runs have exited. Scientific outcomes remain
 reserved and ungenerated. NARROW remains the research direction; the next step
 is the [sequence-family adaptation](sequence_adaptation_plan.md), followed by
 observable-provenance component ablations and precision planning. V02 is open.
+
+## Sequence adaptation and latest-only capacity control completed
+
+[Fixed contract](sequence_contract.md); [synthetic preflight](sequence_preflight.json);
+[complete comparison](../results/sequence_2026-10-10/report.md);
+[checkpoint/metric audit](../results/sequence_2026-10-10/audit.json);
+[verification](sequence_verification.json).
+
+A separate CPU dependency, PyTorch 2.14.1+cpu, was installed after official
+compatibility/index checks. Synthetic masking and repeat-fit checks passed before
+study fitting. Contract commit `bde47ec` fixes widths 8/16/32 crossed with 20/60
+fixed epochs, two LSTM layers, Adam, dropout .2, float32, two CPU threads and
+scenario-grouped folds. `88ec87d` adds the campaign; `c3c4966` and `44a22bd` add
+and tighten reconstruction. Every commit uses the requested author/committer.
+
+The campaign `sequence_20261010_v1` completed all 304 fits, 16 selected models
+and 224,000 predictions. Reconstruction `sequence_summary_20261010_v1` verifies
+all 285,600 candidate OOF values from saved fold checkpoints, train-only
+preprocessors, selected scores, calibration and thresholds; all selected-model
+forecasts reconstruct bitwise in this environment. Controls use the identical
+source scenarios, subsets and folds. The combined 1,456,000 rows repeatedly
+score 1,000 scenarios per evaluation bank and do not increase independent n.
+
+Full-reference, matched-training findings:
+
+| Bank / condition | History LSTM loss | Latest-only LSTM loss | Latest metadata loss | History missed positives |
+|---|---:|---:|---:|---:|
+| Software / heavy overlap | 0.173154 | 0.190712 | 0.182578 | 11/194 |
+| Software / new information | 0.109397 | 0.083539 | 0.062295 | 3/194 |
+| Shared bias / heavy overlap | 0.498648 | 0.478717 | 0.497310 | 127/326 |
+| Shared bias / new information | 0.812824 | 0.873985 | 1.532965 | 160/326 |
+
+Singleton remains better on full-reference software heavy overlap (0.170962).
+Across the three overlapping 800-scenario subsets, history beats latest-only
+LSTM on software heavy overlap in all three, but loses to singleton/grouping
+in all three. It loses to latest-only LSTM and latest metadata on software
+new information in all three. Both neural arms improve shared-bias new-information
+loss over latest-metadata, singleton, grouping and covariance controls in all three
+subsets; severe missed-positive counts remain. Ignore-updates beats latest-only
+LSTM on bias-stress new information in all three subsets and beats history LSTM
+in one; neural bias robustness is not uniformly best among the controls. These are descriptive comparisons, not independent replications.
+No universal history benefit follows from these condition-dependent tradeoffs.
+
+All 16 selections use the maximum epoch budget; eight use maximum width. The
+saved profiles and training traces support a later tuning-adequacy decision.
+Equal six-candidate counts do not imply equal compute or optimized families.
+The adaptation changes the reviewed sequence model's capacity, target and loss;
+it is not a published-method reproduction or a SOTA comparison.
+
+The CPU preflight ran with:
+
+```powershell
+.venv\Scripts\python.exe -m research.sequence_preflight --run-id sequence_preflight_20261009_v1
+```
+
+The completed campaign and audit commands (run IDs are exclusive; inspect existing
+artifacts rather than rerunning these IDs):
+
+```powershell
+$env:OMP_NUM_THREADS='2'
+$env:MKL_NUM_THREADS='2'
+$env:LOKY_MAX_CPU_COUNT='2'
+.venv\Scripts\python.exe -m research.sequence_campaign --run-id sequence_20261010_v1
+.venv\Scripts\python.exe -m research.summarize_sequence --source processed/research/sequence_20261010_v1 --run-id sequence_summary_20261010_v1 --export docs/research/results/sequence_2026-10-10
+.venv\Scripts\python.exe -m research.verify_exports --root docs/research/results
+```
+
+Full suite: **410 passed, 1 skipped** in 64.59 seconds. After the final audit
+metadata checks were tightened, its three targeted tests passed in 9.15 seconds.
+This artifact audit is not independent A03 review. Next implement the
+[observable-provenance component ablations](provenance_component_plan.md), then
+resolve tuning adequacy and precision before V03. Reserved scientific seed
+20261012 remains ungenerated, and V02 remains unchecked.

@@ -1,0 +1,122 @@
+{
+  "date": "2026-10-10",
+  "full_suite": {
+    "passed": 410,
+    "skipped": 1,
+    "seconds": 64.59,
+    "exit_code": 0,
+    "command": ".venv/Scripts/python.exe -m pytest -q",
+    "log": "docs/research/execution/verification_sequence_20261010.local.log",
+    "scope": "Full suite after sequence implementation; three targeted audit tests rerun after final stricter metadata assertions.",
+    "skip_reason": "Existing credential-presence test"
+  },
+  "post_audit_edit_tests": {
+    "passed": 3,
+    "seconds": 9.15,
+    "exit_code": 0,
+    "command": ".venv/Scripts/python.exe -m pytest tests/test_research_sequence_summary.py -q"
+  },
+  "thread_environment": {
+    "LOKY_MAX_CPU_COUNT": "2",
+    "OMP_NUM_THREADS": "2",
+    "MKL_NUM_THREADS": "2"
+  },
+  "completed_runs": [
+    {
+      "run_id": "sequence_preflight_20261009_v1",
+      "status": "complete",
+      "started_utc": "2026-10-09T18:27:34.341760+00:00",
+      "finished_utc": "2026-10-09T18:27:41.131853+00:00",
+      "command": [
+        "F:\\conjunction-triage\\.venv\\Scripts\\python.exe",
+        "F:\\conjunction-triage\\research\\sequence_preflight.py",
+        "--run-id",
+        "sequence_preflight_20261009_v1"
+      ],
+      "git_head": "e2e0c31bf9fdb09a0dbca9fdda381977554b33bf"
+    },
+    {
+      "run_id": "sequence_20261010_v1",
+      "status": "complete",
+      "started_utc": "2026-10-09T18:32:20.406910+00:00",
+      "finished_utc": "2026-10-09T18:58:41.313329+00:00",
+      "command": [
+        "F:\\conjunction-triage\\.venv\\Scripts\\python.exe",
+        "F:\\conjunction-triage\\research\\sequence_campaign.py",
+        "--run-id",
+        "sequence_20261010_v1"
+      ],
+      "git_head": "88ec87d0fe90e562945ee2c355a0482e7e0acd60"
+    },
+    {
+      "run_id": "sequence_summary_20261010_v1",
+      "status": "complete",
+      "started_utc": "2026-10-09T18:58:56.835503+00:00",
+      "finished_utc": "2026-10-09T19:03:25.987898+00:00",
+      "command": [
+        "F:\\conjunction-triage\\.venv\\Scripts\\python.exe",
+        "F:\\conjunction-triage\\research\\summarize_sequence.py",
+        "--source",
+        "processed/research/sequence_20261010_v1",
+        "--run-id",
+        "sequence_summary_20261010_v1",
+        "--export",
+        "docs/research/results/sequence_2026-10-10"
+      ],
+      "git_head": "44a22bd1aaa406f36e3cff8268e72aa723fa337f"
+    }
+  ],
+  "artifact_audit": "docs/research/results/sequence_2026-10-10/audit.json",
+  "audited_training_fits": 304,
+  "audited_candidate_oof_rows": 285600,
+  "reconstructed_new_predictions": 224000,
+  "combined_prediction_rows": 1456000,
+  "export_checks": [
+    {
+      "bundle": "covariance_2026-10-09",
+      "status": "pass",
+      "artifacts_verified": 10,
+      "bytes_verified": 787628
+    },
+    {
+      "bundle": "fusion_2026-10-09",
+      "status": "pass",
+      "artifacts_verified": 6,
+      "bytes_verified": 202818
+    },
+    {
+      "bundle": "pilot_2026-10-09",
+      "status": "pass",
+      "artifacts_verified": 15,
+      "bytes_verified": 56746
+    },
+    {
+      "bundle": "sequence_2026-10-10",
+      "status": "pass",
+      "artifacts_verified": 9,
+      "bytes_verified": 1646781
+    },
+    {
+      "bundle": "tuning_2026-10-09",
+      "status": "pass",
+      "artifacts_verified": 9,
+      "bytes_verified": 400800
+    },
+    {
+      "bundle": "v02_2026-10-09",
+      "status": "pass",
+      "artifacts_verified": 7,
+      "bytes_verified": 156670
+    }
+  ],
+  "protected_files_unchanged": {
+    "raw_files": 12,
+    "historical_artifacts": 45,
+    "frozen_files": 8
+  },
+  "historical_requirements_unchanged": true,
+  "running_milestone_jobs": [],
+  "scientific_bank_opened": false,
+  "independent_scientific_review_complete": false,
+  "dependency_preflight": "docs/research/execution/sequence_preflight.json"
+}

@@ -1,6 +1,7 @@
-# Next V02 step: a bounded sequence-family adaptation
+# Completed V02 step: a bounded sequence-family adaptation
 
-Prepared 9 October 2026. **Preflight and implementation complete; the declared study campaign is running.**
+Prepared 9 October 2026. **Completed and audited 10 October 2026: 304 fits, 16 selected models and 224,000 new forecasts.**
+See [results](../results/sequence_2026-10-10/report.md) and [verification](sequence_verification.json).
 See [fixed implementation contract](sequence_contract.md) and [synthetic evidence](sequence_preflight.json).
 This follows the [V01 compatibility decision](closest_work_comparison.md).
 It adapts an accessible LSTM family to the final recorded-risk class; it will not
@@ -8,13 +9,13 @@ reproduce Pinto's next-message MSE experiment or establish state-of-the-art stat
 
 ## Start with the environment and compute budget
 
-Read `requirements.txt` and inspect the existing Python environment. At this
-checkpoint, `importlib.util.find_spec('torch')` returned `None`; PyTorch is not
-installed and is not listed in requirements. Verify the current official
-Python/Windows CPU compatibility before choosing an exact version. Use a separate
-research dependency file and the local virtual environment; preserve frozen
-files and historical dependency records. Record actual package versions and
-installation/verification commands. No paid inference or GPU service is needed.
+Before the 9 October preflight, `importlib.util.find_spec('torch')` returned
+`None`. PyTorch 2.14.1+cpu is now installed through the separate
+`requirements-sequence.txt`; the historical requirements file is unchanged.
+Official Windows/Python compatibility, exact wheel hashes, package versions and
+installation/verification commands are recorded in the linked preflight and
+contract. Preserve those records and the frozen files when reproducing this run.
+No paid inference or GPU service was used.
 
 Before using study labels, run a tiny synthetic tensor/masking benchmark to
 estimate runtime. Then record architecture, optimizer, grid, epochs, precision,
@@ -65,19 +66,22 @@ overlapping 800-scenario subsets. Retain all bias/reuse/new-information conditio
   mutations, loss weighting, finite outputs, deterministic evaluation, and
   separation of fit/OOF/calibration cases. Save model metadata and checkpoints
   without pickling unaudited third-party source.
-- [ ] Complete the declared regime/trial grid, save candidate OOF scores,
+- [x] Complete the declared regime/trial grid, save candidate OOF scores,
   selected models, seeds, thresholds, failures and per-fit runtime. Do not
   silently omit failed configurations or call partial output a completed study.
-- [ ] Reconstruct predictions and compare paired absolute/degradation loss,
+- [x] Reconstruct predictions and compare paired absolute/degradation loss,
   Brier score and review/miss counts with all applicable saved controls. Keep
   adverse bias results, training sensitivity and capacity limitations explicit.
-- [ ] Export compact evidence, update reports/manuscript/handoff, and commit
+- [x] Export compact evidence, update reports/manuscript/handoff, and commit
   completed stages using the requested identity. Leave the scientific bank
   unopened and V02 unchecked until remaining criteria pass.
 
 After this adaptation, complete observable-provenance component ablations and
 precision planning. State-fusion/oracle diagnostics do not replace those class
-forecasting experiments. The campaign CLI is `python -m research.sequence_campaign --run-id sequence_20261010_v1`.
-It is already running at this checkpoint: inspect its manifest/progress, do not
-launch a duplicate. After completion use `research.summarize_sequence` to audit
-all checkpoints and export the comparisons.
+forecasting experiments. The campaign `sequence_20261010_v1` and reconstruction
+`sequence_summary_20261010_v1` are complete. Exact commands and limitations are
+in [V02 development](v02_development.md). These run IDs are exclusive; do not
+rerun them or overwrite their artifacts. Next follow the
+[observable-provenance component plan](provenance_component_plan.md), then resolve
+tuning adequacy and precision. All 16 neural selections hit the epoch ceiling;
+eight hit maximum width. Scientific outcomes remain reserved and ungenerated.
