@@ -1,23 +1,66 @@
 {
   "version": 1,
   "date": "2026-10-10",
-  "status": "draft",
+  "status": "fixed_before_generation",
   "purpose": [
     "Plan section 3: estimate variation across independently generated training banks relative to evaluation precision for P1 and secondary contrasts.",
     "Plan section 4: check whether development conclusions persist across noise anisotropy, noise scale and shared bias, and measure runtime for V03 sizing."
   ],
   "scientific_reservation": "seed 20261012 and IDs scientific:00000..04999 are refused by the generator and are not generated",
   "excluded_candidate_scientific_configuration": {
-    "eigenvalues": [0.144, 0.036],
+    "eigenvalues": [
+      0.144,
+      0.036
+    ],
     "rotation_degrees": 30.0,
     "note": "Not generated here, so it remains an unseen configuration; anisotropy ratios 2 and 8 bracket its ratio of 4. Only a label-free numerical-integration accuracy check was run on its noise covariance."
   },
   "configurations": {
-    "iso": {"eigenvalues": [0.09, 0.09], "rotation_degrees": 0.0, "shared_bias_variance": 0.0, "training_banks": 6},
-    "aniso2": {"eigenvalues": [0.12, 0.06], "rotation_degrees": 60.0, "shared_bias_variance": 0.0, "training_banks": 2},
-    "aniso8": {"eigenvalues": [0.16, 0.02], "rotation_degrees": 60.0, "shared_bias_variance": 0.0, "training_banks": 2},
-    "noise2": {"eigenvalues": [0.18, 0.18], "rotation_degrees": 0.0, "shared_bias_variance": 0.0, "training_banks": 2},
-    "bias": {"eigenvalues": [0.09, 0.09], "rotation_degrees": 0.0, "shared_bias_variance": 0.01, "training_banks": 2}
+    "iso": {
+      "eigenvalues": [
+        0.09,
+        0.09
+      ],
+      "rotation_degrees": 0.0,
+      "shared_bias_variance": 0.0,
+      "training_banks": 6
+    },
+    "aniso2": {
+      "eigenvalues": [
+        0.12,
+        0.06
+      ],
+      "rotation_degrees": 60.0,
+      "shared_bias_variance": 0.0,
+      "training_banks": 2
+    },
+    "aniso8": {
+      "eigenvalues": [
+        0.16,
+        0.02
+      ],
+      "rotation_degrees": 60.0,
+      "shared_bias_variance": 0.0,
+      "training_banks": 2
+    },
+    "noise2": {
+      "eigenvalues": [
+        0.18,
+        0.18
+      ],
+      "rotation_degrees": 0.0,
+      "shared_bias_variance": 0.0,
+      "training_banks": 2
+    },
+    "bias": {
+      "eigenvalues": [
+        0.09,
+        0.09
+      ],
+      "rotation_degrees": 0.0,
+      "shared_bias_variance": 0.01,
+      "training_banks": 2
+    }
   },
   "transfer_source": "iso",
   "training_scenarios": 1000,
@@ -26,11 +69,30 @@
   "seed_rule": "evaluation seed = seed_base + 10 * configuration_index; training bank k (1..K) seed = evaluation seed + k; the inner-fold seed equals the training-bank seed",
   "integration_seed_base": 20261190,
   "preflight_seed_base": 20261180,
-  "arms": ["singleton", "latest_metadata", "grouped", "oracle_lineage_weight"],
+  "arms": [
+    "singleton",
+    "latest_metadata",
+    "grouped",
+    "oracle_lineage_weight"
+  ],
   "regime": "matched_mixture",
-  "conditions": ["no_reuse", "overlap_50", "overlap_90", "solution_reissue", "new_information", "burst_reissue"],
+  "conditions": [
+    "no_reuse",
+    "overlap_50",
+    "overlap_90",
+    "solution_reissue",
+    "new_information",
+    "burst_reissue"
+  ],
   "evaluation_conditions": "all seven, including exact_replay",
-  "C": [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0],
+  "C": [
+    0.01,
+    0.1,
+    1.0,
+    10.0,
+    100.0,
+    1000.0
+  ],
   "inner_folds": 3,
   "max_iter": 10000,
   "selection_and_calibration": "Unchanged V02 rules: minimum weighted inner-OOF clipped log loss with ties to smaller C; monotone Platt on selected OOF; nominal 95% training-recall threshold; refit on the full training bank.",
@@ -46,5 +108,11 @@
     "Transfer: iso-trained contrasts on each other configuration's evaluation bank."
   ],
   "interpretation": "Exposed development evidence for design decisions only; no confirmation, operational or orbital-validity claim.",
-  "runtime_estimate": "to be filled from the preflight before fixing"
+  "runtime_estimate": "Preflight sensitivity_preflight_20261010_v1 (code 0f2bde2): generation 0.038-0.040 s/scenario isotropic and 0.095 s/scenario anisotropic, about 23 min for 26,000 scenarios; four-arm fitting 16.7 s on 300 scenarios, about 13 min for 14 banks of 1,000 at linear scaling; evaluation of 152 model-bank pairs on 14,000 sequences, about 10-20 min. Total about 45-90 min with 2 CPU threads; predictions about 2.1 million rows.",
+  "preflight": {
+    "run_id": "sensitivity_preflight_20261010_v1",
+    "integration_max_rel_difference": 2.141e-07,
+    "integration_max_abs_difference": 3.36e-15,
+    "all_configurations_passed": true
+  }
 }
