@@ -10,19 +10,19 @@ This is the live execution record. Update it as work happens. Checked preparatio
 
 | Field | Current checkpoint — replace after each work session |
 |---|---|
-| NOW | First research cycle and V01 compatibility review complete: 27/42 numbered tasks. Five scoped commits preserve work. Track R remains narrowed to robustness/measurement. |
-| NEXT | **V02 - repair generator/control distinction**, then matched new-information training, covariance-proxy/sequence adaptations, state-fusion diagnostics and precision planning. See the V01 comparison document. |
-| Active task / owner | V02 ready. No active research job; revised generator code has not yet been implemented. |
+| NOW | First V02 implementation phase complete: distinct cadence controls, nine-arm/two-regime evaluation, and audited results. 27/42 numbered tasks; V02 stays open for comparators, ablations and precision planning. |
+| NEXT | Continue V02 with a common expanded C grid and training-seed sensitivity, then covariance-proxy/sequence adaptations, separate fusion/oracle diagnostics and precision planning. All 18 pilot fits reached the C-grid upper edge. |
+| Active task / owner | V02 in progress overall; completed cadence/training-regime milestone. No active research run. |
 | Selected direction | **Track R, narrowed:** controlled robustness/measurement benchmark. Grouping remains a candidate and may be discarded if simpler controls explain results. |
 | Conditional extension | **Track E:** independent real-data efficacy, only after access and statistical requirements pass. |
 | Research blockers | None preventing V01/V02 preparation. Full methods for some close papers and independent operational data remain unavailable; no novelty or real efficacy claim is established. |
 | Current machine | Windows, PowerShell; repository at `F:\conjunction-triage`; Python environment at `.venv\Scripts\python.exe`. Paths elsewhere in this file are relative to the repository root. |
 | HEAD when this checklist was created | `89d7f2efb8bf135e02fa51760e0ed3bb33a105c9`; working tree contains pre-existing modifications and untracked files. |
-| Latest validation | **349 passed, 1 skipped** in 47.40s on 9 October; five input runs passed checksum/metric/fold audits, all eight frozen files and 57 raw/historical files unchanged. See execution verification and synthesis audit. |
-| New scientific runs | Completed **development** runs: data v2, CV v2 (11 arms x 5 folds), two-stage v1, simulation v1, mechanism v1, synthesis v1 and two-stage reconstruction v1. No frozen confirmatory evaluation yet. |
+| Latest validation | 353 passed, 1 skipped in 52.24s; 252,000 prediction rows and all 18 thresholds audited. Original 57 raw/historical artifacts and 8 frozen files unchanged. See V02 verification and generated audit. |
+| New scientific runs | Completed development runs cadence_20261009_v1, regimes_20261009_v1 and regimes_summary_20261009_v1, in addition to earlier pilot runs. No frozen scientific evaluation. |
 | Scientific holdout status | Seed 20261012 / scientific:00000..04999 reserved **but not generated**. Candidate anisotropic configuration and sample size still need V03 freeze. Kelvins and all pilot banks are exposed. |
-| Running jobs / processes | None from this session. Failed data v1 and CV v1 are retained with explicit failure reasons; all later named runs complete. |
-| Next executable command | `Get-Content -Encoding UTF8 docs/research/execution/closest_work_comparison.md` then inspect `research/simulation.py` and `tests/test_research_simulation.py`. Implement the V02 generator/control distinction test first; no successor campaign CLI exists yet. |
+| Running jobs / processes | None from this session. Completed manifests and execution logs retain original PIDs/commands; do not restart completed runs. |
+| Next executable command | `Get-Content -Encoding UTF8 docs/research/execution/v02_development.md`; inspect research/simulation_regimes.py before adding configurable tuning/training seeds. The existing CLI has fixed C/seed settings; new options must be implemented and tested before use. |
 
 ### Copy this into the next assistant
 
@@ -362,3 +362,15 @@ Evidence: [closest-work comparison](docs/research/execution/closest_work_compari
 V01 acceptance passes: targets, datasets, horizons, splits/calibration knowledge, metric compatibility and adaptation/approximation/discussion status are recorded. The selected V02 set includes a named covariance-proxy approximation, an accessible sequence-family adaptation, and separate fusion diagnostics. Strongest-current-method or field-wide novelty claims remain unsupported. V02 is open, beginning with irregular-cadence/control-distinction tests and a latest-metadata simulation comparator; reserve all scientific outcomes until V03.
 
 Additional completed commits: `5cde0d5` (small results, feasibility, manuscript and handoff), `de99a3d` (byte-exact evidence export across Git checkouts). All 15 evidence blobs were checked against source artifact SHA-256 values directly in the Git index. Source PDFs/code, local logs and machine snapshots stay out of Git. This V01 checkpoint is the next incremental commit; inspect `git log` for its hash. All new commits use the user's requested author and committer; no assistant trailer is added. No push performed.
+
+### V02 cadence and training-regime milestone - 9 October 2026
+
+Completed incremental implementation commits: `2f981d0` (irregular cadence and repeated-solution controls) and `35d2c9c` (whole-scenario folds, objective weights and two-regime runner). The current result/audit checkpoint is a further scoped commit; `git log` gives its hash. Author and committer remain the requested user identity with no assistant trailer.
+
+Evidence: [V02 development record and commands](docs/research/execution/v02_development.md), [generated results](docs/research/results/v02_2026-10-09/report.md), [audit](docs/research/results/v02_2026-10-09/audit.json), [verification](docs/research/execution/v02_verification.json). All three new run manifests are complete. Nine models under each training regime produce 252,000 paired evaluation rows. Each latent scenario has total objective weight one regardless of its number of variants/partitions. Inner folds keep all variants together and use identical scenario assignments across regimes.
+
+Results: matched training lowers new-information loss for 8/9 software-bank arms and 9/9 bias-bank arms. Grouped software loss improves from 0.23961 to 0.06595, but latest-metadata is 0.06276 and singleton 0.06339. Grouped matched heavy-overlap loss is 0.17502 versus singleton 0.17474. Shared bias still causes poor absolute performance. All 18 fits selected C=10, the upper boundary; a common expanded tuning grid and training-seed sensitivity are needed before selecting a final comparison. This does not establish grouping superiority or operational efficacy.
+
+Construction now distinguishes fixed-time, thinning and burst-change controls; original scenarios, numerical observation solutions and labels are retained, with revised publication times/age categories. These are the same exposed pilot scenarios, not additional independent evidence. Exact replay and matched-latest checks pass. Scientific seed 20261012 and reserved scenario outcomes remain unopened.
+
+Validation: 353 passed / 1 skipped in 52.24s, exit 0. All saved class metrics, 18 thresholds, scenario folds, weights and input/output/source hashes reconstructed. Original 12 raw/data-manifest files, 45 historical artifacts and 8 frozen files unchanged. No active research jobs. V02 remains unchecked; A03 independent review remains outstanding. No paid inference, external communication, submission or Git push occurred.

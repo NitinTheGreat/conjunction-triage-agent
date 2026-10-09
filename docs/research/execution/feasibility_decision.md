@@ -105,3 +105,7 @@ The real-data grouping model also trails the latest-risk-only and causal boostin
 V02 must include a **latest-message metadata** comparator in simulation as well as distinct cadence controls. The first simulation comparison used risk-only latest prediction, while the history arms accessed more fields. Real-data evaluation already includes the metadata comparator. This additional control is required before attributing a difference to history grouping.
 
 All five corrected B5 threshold selections, both-stage OOF membership boundaries and three official aggregate scores were independently reconstructed from saved artifacts by `research.verify_two_stage`, run `verify_two_stage_20261009_v1`. This is a same-assistant software reconstruction, not A03 independent scientific review. Full final test suite: 349 passed, 1 skipped in 47.40 seconds. The existing skip is credential-presence dependent; no credentials were printed or used for inference.
+
+## V02 development follow-up
+
+The [cadence/training-regime revision](../results/v02_2026-10-09/report.md) now distinguishes the earlier collapsed controls and includes a latest-message metadata comparator. Matched training improves the new-information condition for most predictors, but grouping does not establish a consistent advantage and shared-bias failures remain. All 18 fits reached the upper C-grid boundary. The NARROW decision remains; complete the remaining development comparisons, tuning and precision work before freezing any scientific evaluation.

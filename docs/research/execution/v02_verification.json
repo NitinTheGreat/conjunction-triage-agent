@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-09",
+  "full_suite": {
+    "passed": 353,
+    "skipped": 1,
+    "seconds": 52.24,
+    "exit_code": 0,
+    "command": ".venv/Scripts/python.exe -m pytest -q --tb=short --no-showlocals",
+    "process_environment": {
+      "LOKY_MAX_CPU_COUNT": "2",
+      "OMP_NUM_THREADS": "2",
+      "MKL_NUM_THREADS": "2"
+    }
+  },
+  "focused_simulation_tests": {
+    "passed": 5,
+    "seconds": 6.93
+  },
+  "focused_model_regime_tests": {
+    "passed": 7,
+    "seconds": 5.92
+  },
+  "artifact_audit": "docs/research/results/v02_2026-10-09/audit.json",
+  "raw_and_historical_files_unchanged": 57,
+  "frozen_files_unchanged": 8,
+  "scientific_bank_opened": false,
+  "active_research_runs": []
+}

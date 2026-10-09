@@ -1,0 +1,17 @@
+{
+  "artifacts": {
+    "audit.json": "24f68b7ab69e7b32b5c353a8c96cb36eb1c09a96eb46d9995302100741087f51",
+    "construction_checks.json": "2492ee1918e4eee2bc7d3bff10f2521b2739cb062271c1b0201d475eb474f1ed",
+    "contrasts.json": "59fe792da70b1d970b1a0282b2803072253f642416ec2d9c62c978ee0736bc00",
+    "control_prediction_differences.json": "45c2c07b5d5f65851f8d0252e700f165c725d1879ba5b751ddc71f3e50448799",
+    "metrics.csv": "d78531a1a88ba8aed50c7a858470c4fc8e248ce89ba15f8f179999f530dfb316",
+    "regime_differences.csv": "c0da5f25255719a564c37ac10c6e0bd7fed659fac960d80d9d694fe23b28ff1d",
+    "report.md": "e71fba3c033c390a53f8cd412c259c141c7be3c11c81105214f8d95b8149f7ad"
+  },
+  "manifest_sha256": "e4f861936d5036cdd95853d7343de348cc77f00c04887249ac7c1a8187fd21b9",
+  "run_id": "regimes_summary_20261009_v1",
+  "source_runs": [
+    "cadence_20261009_v1",
+    "regimes_20261009_v1"
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "matched_mixture/bias_stress/burst_reissue": {
+    "change": 0.30723257412034005,
+    "fixed": 0.23401289232320188,
+    "thin": 0.5698022303942336
+  },
+  "matched_mixture/bias_stress/exact_replay": {
+    "change": 0.05100943515458428,
+    "fixed": 0.13582331777774498,
+    "thin": 0.5693637037557128
+  },
+  "matched_mixture/bias_stress/new_information": {
+    "change": 0.04913252177361782,
+    "fixed": 0.0744006309750323,
+    "thin": 0.2589571341097891
+  },
+  "matched_mixture/bias_stress/no_reuse": {
+    "change": 0.05100943515458428,
+    "fixed": 0.13582331777774498,
+    "thin": 0.5693637037557128
+  },
+  "matched_mixture/bias_stress/overlap_50": {
+    "change": 0.05837619861948745,
+    "fixed": 0.16927975587297528,
+    "thin": 0.7022069195814072
+  },
+  "matched_mixture/bias_stress/overlap_90": {
+    "change": 0.050236113036990715,
+    "fixed": 0.08825606889541188,
+    "thin": 0.2451048075203749
+  },
+  "matched_mixture/bias_stress/solution_reissue": {
+    "change": 0.07412883594177311,
+    "fixed": 0.07134516079968578,
+    "thin": 0.08916205880226957
+  },
+  "matched_mixture/software/burst_reissue": {
+    "change": 0.19329041831331534,
+    "fixed": 0.26463608426584384,
+    "thin": 0.5612632107889365
+  },
+  "matched_mixture/software/exact_replay": {
+    "change": 0.0580580762780471,
+    "fixed": 0.1639049097237238,
+    "thin": 0.6843035598563645
+  },
+  "matched_mixture/software/new_information": {
+    "change": 0.046603507000374356,
+    "fixed": 0.08009541186253641,
+    "thin": 0.2071037957710865
+  },
+  "matched_mixture/software/no_reuse": {
+    "change": 0.0580580762780471,
+    "fixed": 0.1639049097237238,
+    "thin": 0.6843035598563645
+  },
+  "matched_mixture/software/overlap_50": {
+    "change": 0.05354195293114644,
+    "fixed": 0.14430354920550437,
+    "thin": 0.6007075529085188
+  },
+  "matched_mixture/software/overlap_90": {
+    "change": 0.0559857741925453,
+    "fixed": 0.09248444388979932,
+    "thin": 0.20269960644586327
+  },
+  "matched_mixture/software/solution_reissue": {
+    "change": 0.07746322159592911,
+    "fixed": 0.0742228707349919,
+    "thin": 0.09590367166019187
+  },
+  "no_reuse_only/bias_stress/burst_reissue": {
+    "change": 0.879540474722902,
+    "fixed": 0.9901633803334707,
+    "thin": 0.9756147079877278
+  },
+  "no_reuse_only/bias_stress/exact_replay": {
+    "change": 0.0,
+    "fixed": 0.23102007157806909,
+    "thin": 0.9029805889496256
+  },
+  "no_reuse_only/bias_stress/new_information": {
+    "change": 0.0,
+    "fixed": 0.08317676653935258,
+    "thin": 0.4690423805907566
+  },
+  "no_reuse_only/bias_stress/no_reuse": {
+    "change": 0.0,
+    "fixed": 0.23102007157806909,
+    "thin": 0.9029805889496256
+  },
+  "no_reuse_only/bias_stress/overlap_50": {
+    "change": 0.0,
+    "fixed": 0.998615937373027,
+    "thin": 0.9999274753612023
+  },
+  "no_reuse_only/bias_stress/overlap_90": {
+    "change": 0.0,
+    "fixed": 0.9981651318535032,
+    "thin": 0.9980152672017103
+  },
+  "no_reuse_only/bias_stress/solution_reissue": {
+    "change": 0.9995813570397496,
+    "fixed": 0.9979273471915122,
+    "thin": 0.9976643074603564
+  },
+  "no_reuse_only/software/burst_reissue": {
+    "change": 0.8733752596437201,
+    "fixed": 0.9924404272013001,
+    "thin": 0.9520846679128531
+  },
+  "no_reuse_only/software/exact_replay": {
+    "change": 0.0,
+    "fixed": 0.27930828850377054,
+    "thin": 0.848404733001563
+  },
+  "no_reuse_only/software/new_information": {
+    "change": 0.0,
+    "fixed": 0.12357330799948543,
+    "thin": 0.32093229699899284
+  },
+  "no_reuse_only/software/no_reuse": {
+    "change": 0.0,
+    "fixed": 0.27930828850377054,
+    "thin": 0.848404733001563
+  },
+  "no_reuse_only/software/overlap_50": {
+    "change": 0.0,
+    "fixed": 0.9985653784807165,
+    "thin": 0.99922998161785
+  },
+  "no_reuse_only/software/overlap_90": {
+    "change": 0.0,
+    "fixed": 0.9978397600436552,
+    "thin": 0.9975878726439162
+  },
+  "no_reuse_only/software/solution_reissue": {
+    "change": 0.9993279106830896,
+    "fixed": 0.9979761552490553,
+    "thin": 0.9977904309026245
+  }
+}
