@@ -86,22 +86,29 @@ def main():
     parser.add_argument('--run-id', required=True)
     parser.add_argument('--export', type=Path, required=True)
     parser.add_argument('--seed', type=int, default=20261041)
+    parser.add_argument('--candidates', nargs='+', default=[c[0] for c in CANDIDATES])
+    parser.add_argument('--design', nargs='+', default=[f'{n}:{r}' for n, r in DESIGN],
+                        help='evaluation scenarios:outer replicates pairs')
     args = parser.parse_args()
+    candidates = [c for c in CANDIDATES if c[0] in args.candidates]
+    design = [tuple(int(v) for v in item.split(':')) for item in args.design]
+    if not candidates or len(candidates) != len(set(args.candidates)) or any(len(d) != 2 or min(d) < 2 for d in design):
+        raise ValueError('Unknown candidate or malformed design')
     if args.export.exists():
         raise FileExistsError(args.export)
     runs = {r: (RUN_ROOT / r).resolve() for r in SOURCES}
     audits = [audit_run(p) for p in runs.values()]
-    config = {'sources': list(SOURCES), 'reference_seed': REFERENCE_SEED, 'candidates': [list(c) for c in CANDIDATES],
-              'design': [list(d) for d in DESIGN], 'inner_resamples': INNER, 'alpha': ALPHA, 'seed': args.seed,
+    config = {'sources': list(SOURCES), 'reference_seed': REFERENCE_SEED, 'candidates': [list(c) for c in candidates],
+              'design': [list(d) for d in design], 'inner_resamples': INNER, 'alpha': ALPHA, 'seed': args.seed,
               'fitting': 'none', 'scientific_bank': 'not generated'}
     with Run(args.run_id, 'interval_validation', config, [p / 'manifest.json' for p in runs.values()]) as run:
         rng = np.random.default_rng(args.seed)
         predictions = load_predictions(runs)
         rows = []
-        for cid, arm, comparator, condition, estimand, bank in CANDIDATES:
+        for cid, arm, comparator, condition, estimand, bank in candidates:
             group = predictions[(predictions.seed == REFERENCE_SEED) & (predictions.bank == bank)]
             values = contrast(paired_frames(group), arm, comparator, condition, estimand).to_numpy()
-            for n, outer in DESIGN:
+            for n, outer in design:
                 for r in validate(values, n, outer, rng):
                     rows.append({'id': cid, 'skewness': float(stats.skew(values)), **r})
                 print('DONE', cid, n, flush=True)
