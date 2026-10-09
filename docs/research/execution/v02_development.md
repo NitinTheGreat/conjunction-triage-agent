@@ -63,7 +63,7 @@ remain a failure case despite improvement over the deliberately shifted regime.
 
 All 18 fits selected C=10, the grid's upper edge. Expand the grid consistently
 across relevant arms before final selection; do not give only the proposed method
-extra tuning. Training-seed uncertainty remains unmeasured. The first pilot and
+extra tuning. At this earlier checkpoint, training-subset sensitivity was unmeasured; the expanded campaign below now measures a limited descriptive version. The first pilot and
 its limited controls remain preserved and distinct from this informed revision.
 
 ## Completed substeps and exact commands
@@ -71,7 +71,7 @@ its limited controls remain preserved and distinct from this informed revision.
 - [x] Distinct cadence/control construction and five simulation checks.
 - [x] Scenario-grouped, equally weighted two-regime evaluation with metadata baseline.
 - [x] Artifact reconstruction and compact, hash-preserving result export.
-- [ ] Common expanded tuning grid and training-seed sensitivity.
+- [x] Common expanded tuning grid and descriptive training-subset/fold sensitivity (remaining boundary choices recorded).
 - [ ] Covariance-proxy / sequence adaptations and component ablations.
 - [ ] Separate state-fusion / oracle-lineage diagnostics.
 - [ ] Precision planning and justified primary comparison.
@@ -85,13 +85,82 @@ Commands already executed successfully (use **new unique IDs** for any rerun):
 ```
 
 Process-local `LOKY_MAX_CPU_COUNT`, `OMP_NUM_THREADS`, and `MKL_NUM_THREADS` were
-each set to 2. Full suite: **353 passed, 1 skipped** in 52.24 seconds. No run is
-still active. Twelve raw/data-manifest files, 45 historical artifacts and all eight
+each set to 2. Full suite: **353 passed, 1 skipped** in 52.24 seconds. No run from that milestone remained
+active at its checkpoint. Twelve raw/data-manifest files, 45 historical artifacts and all eight
 frozen files matched their pre-work hashes. The scientific bank remains unopened.
 
 ## Remaining V02 work
 
-Comparator adaptations, component/oracle ablations, training-seed sensitivity,
-and precision planning remain open. Do not check V02 complete or start V03/V04
+Comparator adaptations, component/oracle ablations, broader independent training-bank
+uncertainty and precision planning remain open. The common-grid/subset substep is
+complete, but 25 upper-boundary choices still need a declared treatment before V03. Do not check V02 complete or start V03/V04
 merely because this generator repair passes. The scientific reservation stays
 unopened.
+
+## Expanded tuning and subset sensitivity completed
+
+Runs `tuning_20261009_v1` and `tuning_summary_20261009_v1` are complete.
+[Generated report and all comparisons](../results/tuning_2026-10-09/report.md);
+[artifact audit](../results/tuning_2026-10-09/audit.json);
+[verification](tuning_verification.json).
+
+All nine arms and both regimes use C = 0.01, 0.1, 1, 10, 100, 1000 and a common
+10,000-iteration cap. The full-data reference retains seed 20261022 and the
+preceding 1,000 scenarios/180 positives. Seeds 20261031/32/33 each select 800
+scenarios/144 positives without replacement within class. Every arm and regime
+shares the selected scenarios and whole-scenario folds within a trial. These are
+three overlapping subsets of one development bank, not independent training
+replications or confidence intervals. Full-data grid changes are reported
+separately from ranges over the three equal-size subsets.
+
+All 72 selected pipelines completed without candidate/final logistic convergence
+warnings. Maximum observed iterations: 262. Twenty-five selections still choose
+C=1000, none the lower boundary. Extending the grid does not prove optimal tuning;
+settle any further common-grid revision using training information before V03.
+All 1,008,000 evaluation rows reuse the same 1,000 software scenarios/194 positives
+and 1,000 bias-stress scenarios/326 positives across configurations. They are not
+one million independent outcomes.
+
+### Measured implications
+
+- Matched software heavy-overlap full-data loss: grouped 0.173125, singleton
+  0.170962, latest-metadata 0.182578. Across the three subsets, grouped minus
+  singleton loss ranges from +0.000280 to +0.001615: singleton wins in all three.
+  Grouping beats latest-metadata in all three of these heavy-overlap comparisons,
+  so the conclusion depends on the comparator.
+- Matched software new-information full-data loss: grouped 0.066160,
+  latest-metadata 0.062295, singleton 0.063820. Grouping loses to both controls
+  in all three subsets. Grouped loss ranges from 0.064222 to 0.075943; these are
+  descriptive ranges, not confidence bounds.
+- Matched bias-stress new-information full-data loss: grouped 1.918247 versus
+  latest-metadata 1.532965. Grouping misses 190/326 positives at its nominal
+  training-recall threshold. Across subsets it misses 188-191/326. The training
+  target plainly does not transfer as a guarantee under this shift.
+- Bias-stress heavy-overlap grouped-minus-singleton loss changes sign across
+  subsets (-0.025860 to +0.035152). Preserve that reversal; selecting a favorable
+  seed would conceal the instability. Absolute loss and overlap-induced
+  degradation remain distinct saved endpoints.
+
+The NARROW decision remains. This campaign supports a bounded robustness study,
+not a general grouping-superiority claim. Scientific seed 20261012 remains
+reserved and ungenerated. A03 independent scientific review is still outstanding.
+
+Commands executed successfully (these IDs/destinations now exist):
+
+```powershell
+.\.venv\Scripts\python.exe -m research.tuning_stability --source processed/research/cadence_20261009_v1 --run-id tuning_20261009_v1
+.\.venv\Scripts\python.exe -m research.summarize_tuning --source processed/research/tuning_20261009_v1 --previous processed/research/regimes_20261009_v1 --run-id tuning_summary_20261009_v1 --export docs/research/results/tuning_2026-10-09
+.\.venv\Scripts\python.exe -m research.verify_exports --root docs/research/results
+```
+
+The three CPU environment variables above were each 2. Final suite: **359 passed,
+1 skipped** in 60.13 seconds, exit 0. The source/output/archive audit reconstructs
+all metrics, selected-OOF losses, 72 thresholds, scenario labels/folds/weights,
+replay and matched-latest invariance. All three compact bundles pass byte checks
+(31 artifact files). Original 12 raw/data-manifest, 45 historical and eight frozen
+files retain their hashes. Training and reconstruction jobs have exited.
+
+Next implement the [covariance-proxy comparator and ablations](covariance_proxy_plan.md).
+The plan records the simulator's zero normal sigmas and the real-data geometry
+limitation; a naive 3D determinant would collapse to zero. No comparator runner
+exists yet. Keep all unfavorable outcomes and the current immutable campaign.

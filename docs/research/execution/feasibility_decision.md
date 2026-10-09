@@ -109,3 +109,27 @@ All five corrected B5 threshold selections, both-stage OOF membership boundaries
 ## V02 development follow-up
 
 The [cadence/training-regime revision](../results/v02_2026-10-09/report.md) now distinguishes the earlier collapsed controls and includes a latest-message metadata comparator. Matched training improves the new-information condition for most predictors, but grouping does not establish a consistent advantage and shared-bias failures remain. All 18 fits reached the upper C-grid boundary. The NARROW decision remains; complete the remaining development comparisons, tuning and precision work before freezing any scientific evaluation.
+
+
+## Expanded tuning follow-up
+
+The [72-model tuning/subset campaign](../results/tuning_2026-10-09/report.md) is
+complete and audited. The common grid now reaches C=1000, with 25/72 remaining
+upper-edge selections. Three stratified 80% subsets of the exposed development
+bank measure membership/fold sensitivity; their overlap precludes treating them
+as independent replications. Evaluation scenarios are reused, not multiplied.
+
+The NARROW decision remains: grouping loses to singleton pooling on matched
+software heavy-overlap loss in all three subsets, and loses to latest-metadata
+and singleton on new-information loss in all three. Bias-stress heavy-overlap
+ranking against singleton reverses across subsets. Grouping still has poor
+absolute performance under shared bias, including 190/326 missed positives in
+the full-data new-information case despite the nominal training-recall target.
+The full grid-change table and all conditions are retained, including unfavorable
+results. These observations do not select a confirmatory primary comparison.
+
+Next is the [covariance-proxy comparator plan](covariance_proxy_plan.md), followed
+by the remaining sequence/component/oracle comparisons and precision design.
+The scientific bank remains unopened. Full verification is 359 passed / 1 skipped;
+all 72 selected thresholds and 1,008,000 prediction rows reconstruct. This is a
+same-workflow artifact audit, not A03 independent scientific review.

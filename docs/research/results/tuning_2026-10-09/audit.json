@@ -1,0 +1,49 @@
+{
+  "all_convergence_checks_passed": true,
+  "candidate_grid_equal": true,
+  "class_metrics_reconstructed": true,
+  "limits": "Three overlapping training subsets; candidate aggregate OOF losses retained for all C, event-level OOF predictions retained for selected C; no independent scientific replication.",
+  "prediction_rows": 1008000,
+  "replay_and_matched_latest_reconstructed": true,
+  "same_scenario_folds_across_arms_and_regimes": true,
+  "scenario_weights_one": true,
+  "scientific_reserved_bank_opened": false,
+  "selected_models": 72,
+  "selected_oof_losses_and_thresholds_reconstructed": true,
+  "source_runs": [
+    {
+      "archived_sources_verified": 77,
+      "artifacts_verified": 306,
+      "inputs_verified": 10,
+      "run_id": "tuning_20261009_v1",
+      "status": "complete"
+    },
+    {
+      "archived_sources_verified": 75,
+      "artifacts_verified": 78,
+      "inputs_verified": 11,
+      "run_id": "regimes_20261009_v1",
+      "status": "complete"
+    }
+  ],
+  "training_subset_overlap": [
+    {
+      "intersection": 645,
+      "seed_a": 20261031,
+      "seed_b": 20261032,
+      "union": 955
+    },
+    {
+      "intersection": 641,
+      "seed_a": 20261031,
+      "seed_b": 20261033,
+      "union": 959
+    },
+    {
+      "intersection": 636,
+      "seed_a": 20261032,
+      "seed_b": 20261033,
+      "union": 964
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "artifacts": {
+    "audit.json": "3b32e23d042fc030f9dc50f0ab87b994c893296e35f6a98536ce70faf435178a",
+    "candidate_scores.csv": "8e5a2eedbcaa485b3206bbde5a3c176d293e51d84c6810e1930f05335b1c0796",
+    "grid_boundaries.csv": "c084547870b2b80dc9e6a6f324a8ce42ef5acaee91c4b0cb4b3b6c128a6b7d86",
+    "grouped_comparisons.csv": "e18504db099820e58043bba405f7ddb6bbb9ea17ec5c0eadb6e3ccefaa46100b",
+    "metrics.csv": "9ce938a35239d89a2125162e2be566bba23d3aca75f0b10d650cc606157c007f",
+    "reference_grid_change.csv": "623e188d6b9e050f62e7e9aeb3ebdf786308bd9219ba86b20abd3155d68623e3",
+    "report.md": "1afd34d6ffe69b02b4a59981240ff63e9e7f733d7ade5bbd588711c5801b5d5b",
+    "selections.csv": "33fbd15e4cf0c6f6a0c8c88033e47a8f5dacec2b2b9ee57a41bc1ea291b2e6e1",
+    "subset_ranges.csv": "f5c96ccb9918d5c54b60382d3e2974ede4a6fe6ab4836c2406ebe514044d6cd8"
+  },
+  "manifest_sha256": "72fde4e3b4ed91ddffdfb871cf2e23819eabbb749ededb111869dffa112345ff",
+  "run_id": "tuning_summary_20261009_v1",
+  "source_runs": [
+    "tuning_20261009_v1",
+    "regimes_20261009_v1"
+  ]
+}

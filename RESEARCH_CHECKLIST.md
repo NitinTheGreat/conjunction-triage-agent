@@ -10,19 +10,19 @@ This is the live execution record. Update it as work happens. Checked preparatio
 
 | Field | Current checkpoint — replace after each work session |
 |---|---|
-| NOW | First V02 implementation phase complete: distinct cadence controls, nine-arm/two-regime evaluation, and audited results. 27/42 numbered tasks; V02 stays open for comparators, ablations and precision planning. |
-| NEXT | Continue V02 with a common expanded C grid and training-seed sensitivity, then covariance-proxy/sequence adaptations, separate fusion/oracle diagnostics and precision planning. All 18 pilot fits reached the C-grid upper edge. |
-| Active task / owner | V02 in progress overall; completed cadence/training-regime milestone. No active research run. |
+| NOW | V02 expanded-grid/subset milestone complete: 72 selected models and 1,008,000 evaluation rows audited. Three reports updated; grouping superiority remains unsupported. |
+| NEXT | Implement the covariance-proxy comparator and direct-weighting ablation from docs/research/execution/covariance_proxy_plan.md, starting with numerical/fallback/invariance tests. Then continue sequence/component/oracle comparisons and precision planning. |
+| Active task / owner | V02 remains IN PROGRESS. Cadence, training-regime and common-grid/subset checks are complete. The next comparator has a design and acceptance checklist; its runner is not implemented. |
 | Selected direction | **Track R, narrowed:** controlled robustness/measurement benchmark. Grouping remains a candidate and may be discarded if simpler controls explain results. |
 | Conditional extension | **Track E:** independent real-data efficacy, only after access and statistical requirements pass. |
 | Research blockers | None preventing V01/V02 preparation. Full methods for some close papers and independent operational data remain unavailable; no novelty or real efficacy claim is established. |
 | Current machine | Windows, PowerShell; repository at `F:\conjunction-triage`; Python environment at `.venv\Scripts\python.exe`. Paths elsewhere in this file are relative to the repository root. |
 | HEAD when this checklist was created | `89d7f2efb8bf135e02fa51760e0ed3bb33a105c9`; working tree contains pre-existing modifications and untracked files. |
-| Latest validation | 353 passed, 1 skipped in 52.24s; 252,000 prediction rows and all 18 thresholds audited. Original 57 raw/historical artifacts and 8 frozen files unchanged. See V02 verification and generated audit. |
-| New scientific runs | Completed development runs cadence_20261009_v1, regimes_20261009_v1 and regimes_summary_20261009_v1, in addition to earlier pilot runs. No frozen scientific evaluation. |
+| Latest validation | 359 passed, 1 skipped in 60.13s; all 72 thresholds and 1,008,000 prediction rows audited. Three compact bundles / 31 artifact files pass hashes. Original 57 raw/historical and 8 frozen files unchanged; see docs/research/execution/tuning_verification.json. |
+| New scientific runs | Completed development runs tuning_20261009_v1 and tuning_summary_20261009_v1, alongside the earlier cadence/regime/pilot runs. No frozen scientific evaluation. |
 | Scientific holdout status | Seed 20261012 / scientific:00000..04999 reserved **but not generated**. Candidate anisotropic configuration and sample size still need V03 freeze. Kelvins and all pilot banks are exposed. |
-| Running jobs / processes | None from this session. Completed manifests and execution logs retain original PIDs/commands; do not restart completed runs. |
-| Next executable command | `Get-Content -Encoding UTF8 docs/research/execution/v02_development.md`; inspect research/simulation_regimes.py before adding configurable tuning/training seeds. The existing CLI has fixed C/seed settings; new options must be implemented and tested before use. |
+| Running jobs / processes | None from this milestone. Training, reconstruction and tests exited successfully; completed manifests retain original PIDs and start/end times. |
+| Next executable command | `Get-Content -Encoding UTF8 docs/research/execution/covariance_proxy_plan.md`; then inspect research/history.py and research/simulation_regimes.py. No new comparator CLI exists yet. |
 
 ### Copy this into the next assistant
 
@@ -220,6 +220,7 @@ Keep this file, uncommitted changes, and local artifacts in place, then use the 
 - [ ] Transfer the current source **and relevant uncommitted/untracked files**, including this checklist and the three reports; verify destination HEAD and working changes.
 - [ ] Inventory and transfer/reacquire required data from `dataset/`, historical/new results from `processed/`, and needed response caches from `cache/`. These directories are ignored by Git; a clone alone is insufficient. Do not automatically publish them or assume redistribution rights.
 - [ ] Compare source/destination manifests and hashes for the artifacts used by the selected task. Include the exact saved responses needed to avoid paid regeneration.
+- [ ] Preserve original run manifests. Some reconstruction inputs use absolute Windows paths; retain the original layout or implement and verify an explicit relocation map before full reconstruction on another machine. Do not rewrite hashed manifests merely to make paths resolve. Compact export verification below is independent of those paths.
 - [ ] Recreate the Python environment from recorded requirements and versions; do not copy a Windows virtual environment to another OS. Record any dependency changes rather than silently upgrading.
 - [ ] Configure credentials separately only when the selected task needs them; do not copy secret values into Markdown, commits, or the research bundle.
 - [ ] Run a small artifact-read/metric reconstruction check before resuming larger computations. Confirm the intended output namespace and scientific holdout status.
@@ -235,6 +236,14 @@ git status --short
 git rev-parse HEAD
 .\.venv\Scripts\python.exe --version
 ```
+
+Verify the committed compact result bundles without datasets, models or numerical dependencies:
+
+```powershell
+python -m research.verify_exports --root docs/research/results
+```
+
+This checks file bytes against the committed provenance manifests. It does not retrain models or independently validate the science. Full reconstruction still needs the ignored data/run transfer above.
 
 For P03 or relevant validation after changes, the earlier successful Windows test configuration was:
 
@@ -374,3 +383,60 @@ Results: matched training lowers new-information loss for 8/9 software-bank arms
 Construction now distinguishes fixed-time, thinning and burst-change controls; original scenarios, numerical observation solutions and labels are retained, with revised publication times/age categories. These are the same exposed pilot scenarios, not additional independent evidence. Exact replay and matched-latest checks pass. Scientific seed 20261012 and reserved scenario outcomes remain unopened.
 
 Validation: 353 passed / 1 skipped in 52.24s, exit 0. All saved class metrics, 18 thresholds, scenario folds, weights and input/output/source hashes reconstructed. Original 12 raw/data-manifest files, 45 historical artifacts and 8 frozen files unchanged. No active research jobs. V02 remains unchecked; A03 independent review remains outstanding. No paid inference, external communication, submission or Git push occurred.
+
+
+### V02 common-grid and subset milestone - 9 October 2026
+
+Completed implementation commits: `d1faebe` (equal expanded grid, strict
+convergence and whole-scenario subsets), `a5144cb` (artifact reconstruction and
+portable checksum verification), `0085d22` (next covariance-proxy plan).
+The result/report checkpoint is a subsequent scoped commit; inspect `git log`
+for its hash. All use `NitinTheGreat <nitinpandey1304@gmail.com>` as author and
+committer, with no assistant attribution. No push performed.
+
+Evidence: [generated result report](docs/research/results/tuning_2026-10-09/report.md),
+[audit](docs/research/results/tuning_2026-10-09/audit.json),
+[verification](docs/research/execution/tuning_verification.json),
+[V02 measured conclusions and exact commands](docs/research/execution/v02_development.md).
+Both `tuning_20261009_v1` and `tuning_summary_20261009_v1` are complete.
+The latter exports nine byte-exact artifacts plus provenance. Full predictions,
+72 saved models, selected-C OOF predictions and all aggregate candidate losses
+remain in ignored run directories. A clone retains readable results; transfer
+local data/runs for complete reconstruction.
+
+The common C grid is [0.01, 0.1, 1, 10, 100, 1000]. All candidate/final logistic
+fits completed without convergence warnings; maximum observed iterations 262.
+Twenty-five of 72 selections remain at the upper boundary. The full-data
+reference uses the preceding 1,000-scenario training cohort/fold seed; three
+stratified 800-scenario subsets each contain 144 positives. They overlap and
+measure descriptive membership/fold sensitivity, not independent training-bank
+replication. All configurations reuse the same 1,000 evaluation scenarios per
+bank; 1,008,000 prediction rows do not increase the independent case count.
+
+**Measured outcome: NARROW remains.** Under matched training, grouped software
+heavy-overlap loss is 0.173125 versus singleton 0.170962 in the full-data trial;
+singleton also wins in all three subsets. Grouping beats latest-metadata on
+software heavy overlap but loses to it and singleton on new-information loss
+in all three subsets. Under shared bias, heavy-overlap grouped-versus-singleton
+ranking reverses across subsets. Full-data grouped new-information bias loss is
+1.918247, with 190/326 missed positives. Preserve this failure of the nominal
+training-recall target under shift. The full condition/grid-change tables retain
+unfavorable comparisons and separate absolute loss from reuse-induced degradation.
+
+Validation: **359 passed / 1 skipped** in 60.13s, exit 0. The existing skip is
+credential-presence dependent; no paid inference occurred. All class metrics,
+selected-OOF losses, 72 thresholds, scenario labels/folds/weights, replay and
+matched-latest checks reconstruct. All three compact bundles pass checksums
+(31 artifact files). The 12 raw/data-manifest, 45 historical and eight frozen
+files match their original hashes. No milestone process is active. Scientific
+seed 20261012 remains reserved and ungenerated. A03 independent review is open.
+
+**Exact next task:** implement the [covariance-proxy comparator and ablation
+plan](docs/research/execution/covariance_proxy_plan.md). Its acceptance checklist
+starts with equal-volume/exponential-volume examples, missing/invalid-input
+handling, unit rescaling and replay/future-message invariance. The simulator's
+normal sigmas are zero, so a naive 3D determinant would be identically zero;
+real-data sigmas also do not supply a full encounter-plane transformation.
+Record the proposed approximation honestly. The sequence, component/oracle and
+precision tasks remain after this. V02 stays unchecked; no scientific freeze or
+publication claim is implied by this completed substep.

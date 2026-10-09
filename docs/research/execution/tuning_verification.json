@@ -1,0 +1,77 @@
+{
+  "date": "2026-10-09",
+  "full_suite": {
+    "passed": 359,
+    "skipped": 1,
+    "seconds": 60.13,
+    "exit_code": 0,
+    "command": ".venv/Scripts/python.exe -m pytest -q --tb=short --no-showlocals",
+    "log": "docs/research/execution/verification_tuning_final_20261009.log",
+    "process_environment": {
+      "LOKY_MAX_CPU_COUNT": "2",
+      "OMP_NUM_THREADS": "2",
+      "MKL_NUM_THREADS": "2"
+    }
+  },
+  "completed_runs": [
+    {
+      "run_id": "tuning_20261009_v1",
+      "status": "complete",
+      "started_utc": "2026-10-09T17:05:23.950071+00:00",
+      "finished_utc": "2026-10-09T17:23:30.296722+00:00",
+      "command": [
+        "F:\\conjunction-triage\\.venv\\Scripts\\python.exe",
+        "F:\\conjunction-triage\\research\\tuning_stability.py",
+        "--source",
+        "processed/research/cadence_20261009_v1",
+        "--run-id",
+        "tuning_20261009_v1"
+      ]
+    },
+    {
+      "run_id": "tuning_summary_20261009_v1",
+      "status": "complete",
+      "started_utc": "2026-10-09T17:23:36.846877+00:00",
+      "finished_utc": "2026-10-09T17:24:12.370666+00:00",
+      "command": [
+        "F:\\conjunction-triage\\.venv\\Scripts\\python.exe",
+        "F:\\conjunction-triage\\research\\summarize_tuning.py",
+        "--source",
+        "processed\\research\\tuning_20261009_v1",
+        "--previous",
+        "processed/research/regimes_20261009_v1",
+        "--run-id",
+        "tuning_summary_20261009_v1",
+        "--export",
+        "docs/research/results/tuning_2026-10-09"
+      ]
+    }
+  ],
+  "artifact_audit": "docs/research/results/tuning_2026-10-09/audit.json",
+  "export_checks": [
+    {
+      "bundle": "pilot_2026-10-09",
+      "status": "pass",
+      "artifacts_verified": 15,
+      "bytes_verified": 56746
+    },
+    {
+      "bundle": "tuning_2026-10-09",
+      "status": "pass",
+      "artifacts_verified": 9,
+      "bytes_verified": 400800
+    },
+    {
+      "bundle": "v02_2026-10-09",
+      "status": "pass",
+      "artifacts_verified": 7,
+      "bytes_verified": 156670
+    }
+  ],
+  "raw_data_manifest_files_unchanged": 12,
+  "historical_artifacts_unchanged": 45,
+  "frozen_files_unchanged": 8,
+  "scientific_bank_opened": false,
+  "active_milestone_jobs": [],
+  "scope": "Exploratory development and artifact reconstruction; not independent scientific review or confirmation."
+}
