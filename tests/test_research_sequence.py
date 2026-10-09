@@ -113,3 +113,77 @@ def test_empty_visible_prefix_and_invalid_visible_fields_fail():
     with pytest.raises(ValueError): prefix(e)
     e = event(); e.raw[0, 2] = np.inf
     with pytest.raises(ValueError): prefix(e)
+
+
+def campaign_fixture():
+    from research.simulation_regimes import scenario_folds
+    frame = pd.DataFrame({'series_id': [str(i) for i in range(12)] * 2,
+        'condition': ['a'] * 12 + ['b'] * 12, 'y': list(np.arange(12) % 2) * 2,
+        'event_weight': [.5] * 24})
+    events = [event(i) for i in range(12)] * 2
+    return frame, events, scenario_folds(frame, 3, 123)
+
+
+def test_whole_scenario_fold_and_objective_validation():
+    from research.sequence_campaign import validate_splits
+    frame, events, splits = campaign_fixture()
+    validate_splits(frame, events, splits)
+    with pytest.raises(ValueError, match='Scenario leaks'):
+        validate_splits(frame, events, [(np.arange(12), np.arange(12, 24))])
+    with pytest.raises(ValueError, match='exactly once'):
+        validate_splits(frame, events, splits + [splits[0]])
+    with pytest.raises(ValueError, match='order mismatch'):
+        validate_splits(frame, events[::-1], splits)
+    bad = frame.copy(); bad.loc[0, 'event_weight'] = 1.
+    with pytest.raises(ValueError, match='objective unit'):
+        validate_splits(bad, events, splits)
+
+
+def test_candidate_checkpoints_reconstruct_oof_and_calibration_without_refit_scores(tmp_path, monkeypatch):
+    from research.artifacts import read_table
+    from research.models import MonotonePlatt, policy_threshold
+    from research.sequence_campaign import fit_sequence
+    frame, events, splits = campaign_fixture()
+    seen = []
+    original = SequenceModel.fit
+
+    def recording_fit(self, fitting, y, weights):
+        seen.append({e.identity for e in fitting})
+        return original(self, fitting, y, weights)
+
+    monkeypatch.setattr(SequenceModel, 'fit', recording_fit)
+    saved, selected = fit_sequence(frame, events, 'lstm_history', splits, [(2, 1), (3, 1)], 123, tmp_path, 'test')
+    assert len(seen) == 7 and selected['completed_training_fits'] == 7
+    for k, (fit, valid) in enumerate(splits):
+        for j in range(2):
+            assert seen[2*k+j] == set(frame.iloc[fit].series_id)
+            assert seen[2*k+j].isdisjoint(frame.iloc[valid].series_id)
+        checkpoint = tmp_path/f'model_test_h{selected["hidden"]}_e1_fold{k}.pt'
+        model = SequenceModel.load(checkpoint)
+        recorded = read_table(tmp_path/f'validation_test_h{selected["hidden"]}_e1_fold{k}.parquet')
+        np.testing.assert_array_equal(recorded.raw_oof, model.predict(None, [events[i] for i in valid]))
+        assert set(recorded.series_id) == set(frame.iloc[valid].series_id)
+    candidates = read_table(tmp_path/'candidates_test.parquet')
+    chosen = candidates[candidates.hidden == selected['hidden']]
+    calibration = MonotonePlatt().fit(chosen.raw_oof.to_numpy(), frame.y.to_numpy())
+    assert calibration.slope == selected['calibration_slope']
+    assert calibration.intercept == selected['calibration_intercept']
+    assert policy_threshold(calibration.predict(chosen.raw_oof), frame.y.to_numpy(), .95) == selected['threshold95']
+    assert seen[-1] == set(frame.series_id)
+
+
+def test_failed_candidate_is_recorded_and_never_silently_skipped(tmp_path, monkeypatch):
+    import json
+    from research.sequence_campaign import fit_sequence
+    frame, events, splits = campaign_fixture()
+
+    def fail(*args, **kwargs):
+        raise FloatingPointError('synthetic fault')
+
+    monkeypatch.setattr(SequenceModel, 'fit', fail)
+    with pytest.raises(FloatingPointError):
+        fit_sequence(frame, events, 'lstm_latest', splits, [(2, 1)], 123, tmp_path, 'failure')
+    records = list(tmp_path.glob('fit_*.json'))
+    assert len(records) == 1
+    record = json.loads(records[0].read_text())
+    assert record['status'] == 'failed' and record['failure_type'] == 'FloatingPointError'

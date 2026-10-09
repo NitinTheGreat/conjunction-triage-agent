@@ -11,7 +11,7 @@ This is the live execution record. Update it as work happens. Checked preparatio
 | Field | Current checkpoint — replace after each work session |
 |---|---|
 | NOW | Sequence CPU/synthetic preflight and 12 boundary tests pass. Fixed six-candidate contract recorded before study fitting; see docs/research/execution/sequence_contract.md. |
-| NEXT | Complete sequence campaign runner and fold/calibration tests; run fixed 304-fit / 16-model campaign, reconstruct results, then provenance-component ablations and precision planning. |
+| NEXT | Run the tested fixed 304-fit / 16-model sequence campaign, reconstruct results, then provenance-component ablations and precision planning. |
 | Active task / owner | V02 IN PROGRESS. PyTorch 2.14.1+cpu installed; no sequence study fit yet. History/latest-only tensor model and synthetic preflight implemented. |
 | Selected direction | **Track R, narrowed:** controlled robustness/measurement benchmark. Grouping remains a candidate and may be discarded if simpler controls explain results. |
 | Conditional extension | **Track E:** independent real-data efficacy, only after access and statistical requirements pass. |
@@ -22,7 +22,7 @@ This is the live execution record. Update it as work happens. Checked preparatio
 | New scientific runs | Completed development/reconstruction runs fusion_20261009_v1 and fusion_summary_20261009_v1, plus earlier covariance/tuning/regime/pilot runs. No frozen scientific evaluation. |
 | Scientific holdout status | Seed 20261012 / scientific:00000..04999 reserved **but not generated**. Candidate anisotropic configuration and sample size still need V03 freeze. Kelvins and all pilot banks are exposed. |
 | Running jobs / processes | None. Installer, synthetic preflight and targeted tests exited successfully. |
-| Next executable command | Read docs/research/execution/sequence_contract.md and sequence_contract.json; finish campaign runner and tests before the first study fit. |
+| Next executable command | Set OMP_NUM_THREADS, MKL_NUM_THREADS and LOKY_MAX_CPU_COUNT to 2; .venv\Scripts\python.exe -m research.sequence_campaign --run-id sequence_20261010_v1 |
 
 ### Copy this into the next assistant
 
@@ -576,3 +576,5 @@ component ablations.
 - [ ] Complete the 304-fit campaign and reconstruction; no study result exists at this checkpoint.
 
 Evidence: [contract](docs/research/execution/sequence_contract.md), [settings](docs/research/execution/sequence_contract.json), [synthetic environment/timing](docs/research/execution/sequence_preflight.json). Exact next step is runner/fold-audit implementation. Scientific reservation unopened; V02 remains open.
+
+Sequence runner added and targeted suite expanded: 15 passed in 8.65s. Tests verify whole-scenario fold separation, reconstruct inner OOF from saved fold models, refit calibration/threshold from selected OOF, and retain a deliberately injected candidate failure. Ready for the declared campaign; no study fit at this commit.
