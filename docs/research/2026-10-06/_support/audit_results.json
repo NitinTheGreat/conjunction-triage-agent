@@ -1,0 +1,563 @@
+{
+  "generated_utc": "2026-10-05T20:43:44.355745+00:00",
+  "repository_head": "89d7f2efb8bf135e02fa51760e0ed3bb33a105c9",
+  "scope": "Offline audit of historical artifacts; no new model fit or model call",
+  "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+  "packages": {
+    "numpy": "2.4.6",
+    "pandas": "3.0.3",
+    "duckdb": "1.5.5",
+    "scikit-learn": "1.9.0",
+    "scipy": "1.17.1",
+    "pyarrow": "25.0.1"
+  },
+  "artifact_sha256": {
+    "processed/test_predictions.parquet": "12ecd5c94b036e36493f1a5ebfb88aabc29e5a1c5ba0a34aa92c489dbc722a4f",
+    "processed/exploratory_v2_predictions_test.parquet": "f27f2faacf8eaa24854d01b3463a1dbfe6c78ae637c289c867cf9aeb5d5062dd",
+    "processed/replayed_runs.parquet": "aa92f1f9d3e355df8c7a56102a3f00bb9550ed413c34649c88b7aa49443ab703",
+    "processed/EXPLORATORY_second_model_runs.parquet": "d4f56b8b8968372908d55d7dafd7779b71434ce8487aaf669c36356d37a27220",
+    "processed/corrected_results.json": "e35f5360d7f7d38f8c013d753766375c487b38fad7ec9c36f0b94fd4b5358c3f"
+  },
+  "frozen_files": {
+    "core/features.py": {
+      "expected_prefix": "714e616d8145",
+      "observed_blob": "714e616d81454875c5e80a423ef66eb62aafdfd7",
+      "matches": true
+    },
+    "core/evaluation.py": {
+      "expected_prefix": "6c370f7c7797",
+      "observed_blob": "6c370f7c779714d15b7e143022cce69696d654b3",
+      "matches": true
+    },
+    "core/kelvins_metric.py": {
+      "expected_prefix": "863a9f26b778",
+      "observed_blob": "863a9f26b778f551e78afa6da028c8366db8950c",
+      "matches": true
+    },
+    "scripts/run_baselines.py": {
+      "expected_prefix": "f4ca37075674",
+      "observed_blob": "f4ca37075674b4fd52f53cba90abb6559dd18d1c",
+      "matches": true
+    },
+    "agent/triage_agent.py": {
+      "expected_prefix": "7c03a773eb71",
+      "observed_blob": "7c03a773eb71c7b392d9a13e589dac87dd13b752",
+      "matches": true
+    },
+    "agent/llm.py": {
+      "expected_prefix": "c2b596ac8f2c",
+      "observed_blob": "c2b596ac8f2c7bf15928bcc42dbe995aecf164d5",
+      "matches": true
+    },
+    "docs/PHASE6_PREREGISTRATION.md": {
+      "expected_prefix": "78cdb4603b88",
+      "observed_blob": "78cdb4603b887efb3b2b5b1c871a44d3789ebbd3",
+      "matches": true
+    },
+    "docs/PHASE6_DEVIATIONS.md": {
+      "expected_prefix": "24fa14b3c956",
+      "observed_blob": "24fa14b3c956ea9e8fb31772290f0105725f784d",
+      "matches": true
+    }
+  },
+  "primary_scores": {
+    "pred_B1_latest_cdm": {
+      "official": {
+        "L": 0.6939612611815034,
+        "mse_hr": 0.5128891069143503,
+        "f2": 0.7390745501285348,
+        "precision": 0.6460674157303371,
+        "recall": 0.7666666666666667,
+        "n_events": 2167,
+        "n_true_high_risk": 150,
+        "n_predicted_high_risk": 178,
+        "tp": 115,
+        "fp": 63,
+        "fn": 35
+      },
+      "independent_L": 0.6939612611815035
+    },
+    "pred_B2b_constant_minus5": {
+      "official": {
+        "L": 2.504139934848712,
+        "mse_hr": 0.6787513375990365,
+        "f2": 0.2710516805204192,
+        "precision": 0.0692201199815413,
+        "recall": 1.0,
+        "n_events": 2167,
+        "n_true_high_risk": 150,
+        "n_predicted_high_risk": 2167,
+        "tp": 150,
+        "fp": 2017,
+        "fn": 0
+      },
+      "independent_L": 2.504139934848712
+    },
+    "pred_B3_linear_extrapolation": {
+      "official": {
+        "L": 4.221746299422207,
+        "mse_hr": 2.9419834839179138,
+        "f2": 0.6968641114982578,
+        "precision": 0.45977011494252873,
+        "recall": 0.8,
+        "n_events": 2167,
+        "n_true_high_risk": 150,
+        "n_predicted_high_risk": 261,
+        "tp": 120,
+        "fp": 141,
+        "fn": 30
+      },
+      "independent_L": 4.221746299422206
+    },
+    "pred_B4_gbm_regressor": {
+      "official": {
+        "L": 36.87836068732736,
+        "mse_hr": 1.8196559549668105,
+        "f2": 0.049342105263157895,
+        "precision": 0.75,
+        "recall": 0.04,
+        "n_events": 2167,
+        "n_true_high_risk": 150,
+        "n_predicted_high_risk": 8,
+        "tp": 6,
+        "fp": 2,
+        "fn": 144
+      },
+      "independent_L": 36.87836068732736
+    },
+    "pred_B5_two_stage_gbm": {
+      "official": {
+        "L": 0.8978152784986071,
+        "mse_hr": 0.5341432669548674,
+        "f2": 0.5949367088607593,
+        "precision": 0.24102564102564103,
+        "recall": 0.94,
+        "n_events": 2167,
+        "n_true_high_risk": 150,
+        "n_predicted_high_risk": 585,
+        "tp": 141,
+        "fp": 444,
+        "fn": 9
+      },
+      "independent_L": 0.8978152784986069
+    },
+    "pred_agent": {
+      "official": {
+        "L": 1.6606049431442929,
+        "mse_hr": 0.8491729822896952,
+        "f2": 0.5113636363636364,
+        "precision": 0.6923076923076923,
+        "recall": 0.48,
+        "n_events": 2167,
+        "n_true_high_risk": 150,
+        "n_predicted_high_risk": 104,
+        "tp": 72,
+        "fp": 32,
+        "fn": 78
+      },
+      "independent_L": 1.6606049431442929
+    }
+  },
+  "exploratory_v2_score": {
+    "L": 0.7091895643894498,
+    "mse_hr": 0.5144380259819844,
+    "f2": 0.7253886010362696,
+    "precision": 0.6511627906976745,
+    "recall": 0.7466666666666667,
+    "n_events": 2167,
+    "n_true_high_risk": 150,
+    "n_predicted_high_risk": 172,
+    "tp": 112,
+    "fp": 60,
+    "fn": 38
+  },
+  "primary_bootstrap_v1_minus_B1": {
+    "seed": 20260821,
+    "resamples": 10000,
+    "usable": 10000,
+    "skipped": 0,
+    "median": 0.9461800444378619,
+    "mean": 0.9752939149386802,
+    "ci95": [
+      0.5119000218884602,
+      1.615171211824307
+    ],
+    "favourable_resamples": 0,
+    "fraction_favouring_arm": 0.0,
+    "scope": "event sampling, conditional on the stored fixed predictions"
+  },
+  "populations": {
+    "train": {
+      "events": 8293,
+      "high_risk": 66,
+      "high_risk_prevalence": 0.007958519233088147,
+      "censored_final_labels": 6838,
+      "exact_matches": 4609,
+      "both_ends_at_floor": 4502,
+      "uncensored_exact_matches": 107,
+      "high_risk_exact_matches": 0,
+      "high_risk_abs_delta_median": 0.32489143835097556
+    },
+    "test": {
+      "events": 2167,
+      "high_risk": 150,
+      "high_risk_prevalence": 0.0692201199815413,
+      "censored_final_labels": 1673,
+      "exact_matches": 1115,
+      "both_ends_at_floor": 1096,
+      "uncensored_exact_matches": 19,
+      "high_risk_exact_matches": 1,
+      "high_risk_abs_delta_median": 0.18082792469805442
+    }
+  },
+  "matched_repeat_diagnostic": {
+    "status": "post hoc complete-case sensitivity; not confirmatory",
+    "common_event_ids": [
+      "train:10000",
+      "train:10014",
+      "train:10036",
+      "train:10047",
+      "train:10077",
+      "train:10137",
+      "train:10141",
+      "train:10172",
+      "train:10175",
+      "train:10176",
+      "train:10184",
+      "train:10196",
+      "train:102",
+      "train:10223",
+      "train:10224",
+      "train:10236",
+      "train:1025",
+      "train:10263",
+      "train:10268",
+      "train:10308",
+      "train:10328",
+      "train:10352",
+      "train:10359",
+      "train:10360",
+      "train:10371",
+      "train:10378",
+      "train:1044",
+      "train:10486",
+      "train:10494",
+      "train:10510",
+      "train:10533",
+      "train:10542",
+      "train:10559",
+      "train:10569",
+      "train:10599",
+      "train:10627",
+      "train:10651",
+      "train:10663",
+      "train:10679",
+      "train:10683",
+      "train:10692",
+      "train:10712",
+      "train:10723",
+      "train:10739",
+      "train:10761",
+      "train:10764",
+      "train:10770",
+      "train:10782",
+      "train:10825",
+      "train:10843",
+      "train:10848",
+      "train:10902",
+      "train:10908",
+      "train:10945",
+      "train:10972",
+      "train:10982",
+      "train:11003",
+      "train:11018",
+      "train:11024",
+      "train:11033",
+      "train:11084",
+      "train:1112",
+      "train:11140",
+      "train:11141",
+      "train:11146",
+      "train:11183",
+      "train:11220",
+      "train:11224",
+      "train:11230",
+      "train:11241",
+      "train:11259",
+      "train:11260",
+      "train:11264",
+      "train:113",
+      "train:11342",
+      "train:11362",
+      "train:11396",
+      "train:11408",
+      "train:11434",
+      "train:1144",
+      "train:11446",
+      "train:11483",
+      "train:11487",
+      "train:11501",
+      "train:11502",
+      "train:11518",
+      "train:11519",
+      "train:11531",
+      "train:11543",
+      "train:11548",
+      "train:11550",
+      "train:11573",
+      "train:1166",
+      "train:11674",
+      "train:11676",
+      "train:11686",
+      "train:11712",
+      "train:11753",
+      "train:1176",
+      "train:11780",
+      "train:11801",
+      "train:11833",
+      "train:11846",
+      "train:11851",
+      "train:11876",
+      "train:1188",
+      "train:11960",
+      "train:11975",
+      "train:11987",
+      "train:11988",
+      "train:12019",
+      "train:12051",
+      "train:12072",
+      "train:12077",
+      "train:12092",
+      "train:12130",
+      "train:12134",
+      "train:12147",
+      "train:12155",
+      "train:12158",
+      "train:1217",
+      "train:12185",
+      "train:12240",
+      "train:12269",
+      "train:12270",
+      "train:12277",
+      "train:12301",
+      "train:12387",
+      "train:12391",
+      "train:12452",
+      "train:12463",
+      "train:12491",
+      "train:12494",
+      "train:12495",
+      "train:12513",
+      "train:1252",
+      "train:12528",
+      "train:12536",
+      "train:12540",
+      "train:12558",
+      "train:1259",
+      "train:12595",
+      "train:12629",
+      "train:12636",
+      "train:12653",
+      "train:12688",
+      "train:12693",
+      "train:1270",
+      "train:12705",
+      "train:12723",
+      "train:12729",
+      "train:12730",
+      "train:12769",
+      "train:12794",
+      "train:12826",
+      "train:1283",
+      "train:12836",
+      "train:12857",
+      "train:12870",
+      "train:12890",
+      "train:12897",
+      "train:12907",
+      "train:1291",
+      "train:12917",
+      "train:12919",
+      "train:12961",
+      "train:12992",
+      "train:12995",
+      "train:13014",
+      "train:13030",
+      "train:13146",
+      "train:136",
+      "train:1361",
+      "train:1370",
+      "train:1378",
+      "train:1388",
+      "train:1408",
+      "train:1414",
+      "train:1418",
+      "train:1437"
+    ],
+    "events": 180,
+    "labels_and_baselines_match_all_cells": true,
+    "arms": [
+      {
+        "provider": "gemini",
+        "prompt": "v1",
+        "runs": [
+          {
+            "run": 0,
+            "events": 180,
+            "high_risk": 11,
+            "L": 0.5156267704239856
+          },
+          {
+            "run": 1,
+            "events": 180,
+            "high_risk": 11,
+            "L": 0.813677738008453
+          },
+          {
+            "run": 2,
+            "events": 180,
+            "high_risk": 11,
+            "L": 1.8155441955903
+          }
+        ],
+        "sample_variance_L": 0.4637260150594428
+      },
+      {
+        "provider": "gemini",
+        "prompt": "v2",
+        "runs": [
+          {
+            "run": 0,
+            "events": 180,
+            "high_risk": 11,
+            "L": 0.15150429240819205
+          },
+          {
+            "run": 1,
+            "events": 180,
+            "high_risk": 11,
+            "L": 0.1503298405290588
+          },
+          {
+            "run": 2,
+            "events": 180,
+            "high_risk": 11,
+            "L": 0.1503298405290588
+          }
+        ],
+        "sample_variance_L": 4.597790721332146e-07
+      },
+      {
+        "provider": "opus",
+        "prompt": "v1",
+        "runs": [
+          {
+            "run": 0,
+            "events": 180,
+            "high_risk": 11,
+            "L": 0.6080282786615615
+          },
+          {
+            "run": 1,
+            "events": 180,
+            "high_risk": 11,
+            "L": 0.5982213709412137
+          },
+          {
+            "run": 2,
+            "events": 180,
+            "high_risk": 11,
+            "L": 0.59331791708104
+          }
+        ],
+        "sample_variance_L": 5.6102339437325536e-05
+      },
+      {
+        "provider": "opus",
+        "prompt": "v2",
+        "runs": [
+          {
+            "run": 0,
+            "events": 180,
+            "high_risk": 11,
+            "L": 0.6534182302979875
+          },
+          {
+            "run": 1,
+            "events": 180,
+            "high_risk": 11,
+            "L": 0.42013075927659266
+          },
+          {
+            "run": 2,
+            "events": 180,
+            "high_risk": 11,
+            "L": 0.6597620966115602
+          }
+        ],
+        "sample_variance_L": 0.018647744434717936
+      }
+    ],
+    "limitations": [
+      "selection by response success",
+      "only three repeats",
+      "original decision variables have different semantics"
+    ]
+  },
+  "corrected_pilot_audit": {
+    "validation_splits": 2,
+    "seeds": [
+      20260819,
+      20260820
+    ],
+    "test_set_read": true,
+    "ablation_rows": 0,
+    "test_summaries": [
+      {
+        "arm": "B4_gbm",
+        "variant": "original",
+        "n_features": 56,
+        "n_test_events": 2167,
+        "L": 36.87836068732736,
+        "f2": 0.049342105263157895,
+        "mse_hr": 1.8196559549668105,
+        "spearman": 0.6104831500701094,
+        "L_is_finite": true
+      },
+      {
+        "arm": "B5_two_stage_gbm",
+        "variant": "original",
+        "n_features": 56,
+        "n_test_events": 2167,
+        "L": 0.9159988790757939,
+        "f2": 0.5831265508684863,
+        "mse_hr": 0.5341432669548674,
+        "spearman": 0.4470613091878012,
+        "L_is_finite": true
+      },
+      {
+        "arm": "B4_gbm",
+        "variant": "corrected",
+        "n_features": 55,
+        "n_test_events": 2167,
+        "L": 51.865139183604676,
+        "f2": 0.033112582781456956,
+        "mse_hr": 1.7173887146888966,
+        "spearman": 0.6012318963237764,
+        "L_is_finite": true
+      },
+      {
+        "arm": "B5_two_stage_gbm",
+        "variant": "corrected",
+        "n_features": 55,
+        "n_test_events": 2167,
+        "L": 0.8552976378662964,
+        "f2": 0.6474480151228734,
+        "mse_hr": 0.5537607579758158,
+        "spearman": 0.4664755218540267,
+        "L_is_finite": true
+      }
+    ],
+    "current_runner_metadata_present": false
+  }
+}

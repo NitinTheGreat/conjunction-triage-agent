@@ -1,0 +1,138 @@
+{
+  "audit_date": "2026-10-06",
+  "scope": "New read-only feasibility audit",
+  "fingerprint_fields": [
+    "time_to_tca",
+    "mission_id",
+    "risk",
+    "max_risk_estimate",
+    "max_risk_scaling",
+    "miss_distance",
+    "relative_speed",
+    "t_sigma_r",
+    "c_sigma_r"
+  ],
+  "fingerprint_note": "DuckDB 64-bit hashes of nine typed source values excluding event_id, plus a sensitivity fingerprint formatting each value to 10 significant digits to tolerate CSV floating-point serialization; content-overlap diagnostic, not a cryptographic identity proof",
+  "files": {
+    "raw": {
+      "file": "raw_data_2015-2019.gz",
+      "rows": 199082,
+      "events": 15321,
+      "columns": 103,
+      "distinct_fingerprints": 199082
+    },
+    "train": {
+      "file": "train_data.csv",
+      "rows": 162634,
+      "events": 13154,
+      "columns": 103,
+      "distinct_fingerprints": 162634
+    },
+    "test": {
+      "file": "test_data.csv",
+      "rows": 24484,
+      "events": 2167,
+      "columns": 103,
+      "distinct_fingerprints": 24484
+    },
+    "private": {
+      "file": "test_data_private.csv",
+      "rows": 2167,
+      "events": 2167,
+      "columns": 103,
+      "distinct_fingerprints": 2167
+    }
+  },
+  "overlap": {
+    "train": {
+      "rows_matching_raw_fingerprint": 33892,
+      "rows_unmatched": 128742,
+      "split_events_with_match": 10426,
+      "rounded_rows_matching_raw": 162431,
+      "rounded_rows_unmatched": 203,
+      "rounded_split_events_with_match": 13154
+    },
+    "test": {
+      "rows_matching_raw_fingerprint": 4424,
+      "rows_unmatched": 20060,
+      "split_events_with_match": 1766,
+      "rounded_rows_matching_raw": 24460,
+      "rounded_rows_unmatched": 24,
+      "rounded_split_events_with_match": 2167
+    },
+    "private": {
+      "rows_matching_raw_fingerprint": 584,
+      "rows_unmatched": 1583,
+      "split_events_with_match": 584,
+      "rounded_rows_matching_raw": 2167,
+      "rounded_rows_unmatched": 0,
+      "rounded_split_events_with_match": 2167
+    }
+  },
+  "age_bins": {
+    "t": [
+      {
+        "end": 0.0,
+        "start": 1.0,
+        "rows": 162506
+      },
+      {
+        "end": 1.0,
+        "start": 2.0,
+        "rows": 103
+      },
+      {
+        "end": 2.0,
+        "start": 180.0,
+        "rows": 25
+      }
+    ],
+    "c": [
+      {
+        "end": 0.0,
+        "start": 1.0,
+        "rows": 102159
+      },
+      {
+        "end": 1.0,
+        "start": 2.0,
+        "rows": 25035
+      },
+      {
+        "end": 2.0,
+        "start": 180.0,
+        "rows": 35429
+      },
+      {
+        "end": null,
+        "start": null,
+        "rows": 11
+      }
+    ]
+  },
+  "od_transitions": {
+    "adjacent_transitions": 99997,
+    "same_OD_signature": 1268,
+    "same_OD_changed_risk": 1008,
+    "changed_OD_same_risk": 25282,
+    "tied_time_pairs": 0,
+    "fields": [
+      "t_obs_available",
+      "t_obs_used",
+      "t_actual_od_span",
+      "t_recommended_od_span",
+      "t_residuals_accepted",
+      "t_weighted_rms",
+      "c_obs_available",
+      "c_obs_used",
+      "c_actual_od_span",
+      "c_recommended_od_span",
+      "c_residuals_accepted",
+      "c_weighted_rms"
+    ],
+    "cohort": "All raw train rows with time_to_tca>=2, before retrospective eligibility or ingestion rejection"
+  },
+  "raw_events_with_any_split_fingerprint_match": 15321,
+  "raw_events_without_split_fingerprint_match": 0,
+  "raw_direct_event_id_overlap_warning": "Event IDs may be reassigned across files; never join different releases by bare event_id."
+}

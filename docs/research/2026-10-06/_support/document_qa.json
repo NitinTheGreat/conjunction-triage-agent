@@ -1,0 +1,122 @@
+{
+  "generated_utc": "2026-10-05T21:28:02.694065+00:00",
+  "revision": "Deep research revision; cutoff 2026-10-06",
+  "report_count": 3,
+  "total_report_words": 21071,
+  "reports": [
+    {
+      "file": "01_EVIDENCE_AUDIT_AND_CURRENT_RESULTS.md",
+      "words": 6450,
+      "sha256": "357e0fc6b5d69ea1ef3838ee3a86989e8dede16df60f6acab90b4c711a68c824",
+      "local_links_checked": 6
+    },
+    {
+      "file": "02_PUBLICATION_EXPERIMENTS_AND_ANALYSIS_PLAN.md",
+      "words": 7196,
+      "sha256": "c44a04b033c0343f7343f1abf4b1fc5caf140efb35b93b488db4fda2bf529ddc",
+      "local_links_checked": 3
+    },
+    {
+      "file": "03_RESEARCH_DIRECTION_AND_PAPER_ROADMAP.md",
+      "words": 7425,
+      "sha256": "69ea6090451964d6698a40b31da322898f15f6d61c901a6a775d871450f91061",
+      "local_links_checked": 8
+    }
+  ],
+  "all_markdown_files": [
+    {
+      "file": "01_EVIDENCE_AUDIT_AND_CURRENT_RESULTS.md",
+      "words": 6450,
+      "sha256": "357e0fc6b5d69ea1ef3838ee3a86989e8dede16df60f6acab90b4c711a68c824",
+      "local_links_checked": 6
+    },
+    {
+      "file": "02_PUBLICATION_EXPERIMENTS_AND_ANALYSIS_PLAN.md",
+      "words": 7196,
+      "sha256": "c44a04b033c0343f7343f1abf4b1fc5caf140efb35b93b488db4fda2bf529ddc",
+      "local_links_checked": 3
+    },
+    {
+      "file": "03_RESEARCH_DIRECTION_AND_PAPER_ROADMAP.md",
+      "words": 7425,
+      "sha256": "69ea6090451964d6698a40b31da322898f15f6d61c901a6a775d871450f91061",
+      "local_links_checked": 8
+    },
+    {
+      "file": "_support/deep_data_sources.md",
+      "words": 680,
+      "sha256": "f29fd17db8e177adafab49b11449974718d1ef83fc68d850e16ec7e4b6338344",
+      "local_links_checked": 0
+    },
+    {
+      "file": "_support/DEEP_LITERATURE_REVIEW.md",
+      "words": 2276,
+      "sha256": "36fd52f96b7d44d2ffcbec498d4db36890249ab5ec1daaaf789e93a63075809a",
+      "local_links_checked": 6
+    },
+    {
+      "file": "_support/deep_methods_sources.md",
+      "words": 1233,
+      "sha256": "99581ebfd3b045d6e7019d978dd0b7dc266babc6227bdc3b618dde96223e6cac",
+      "local_links_checked": 0
+    },
+    {
+      "file": "_support/literature_notes.md",
+      "words": 2669,
+      "sha256": "b2e0657f687874fc3771680c11579ef6a67880361a9036cdd2676f4d6aa67f1b",
+      "local_links_checked": 0
+    }
+  ],
+  "local_link_targets_checked": 23,
+  "broken_local_links": [],
+  "external_urls_recorded": 69,
+  "external_url_note": "Count of linked URLs, not a claim that every URL was freshly reachable or fully read; source ledgers govern access evidence.",
+  "support_json": {
+    "status": "strict JSON parsed",
+    "files": [
+      "audit_results.json",
+      "deep_data_audit.json",
+      "primary_source_ledger.json",
+      "verification_record.json"
+    ]
+  },
+  "primary_source_ledger_entries": 23,
+  "core_bibtex_entries": 11,
+  "bibtex_check": "Unique keys; balanced braces; every key present in source ledger. No typesetting engine run.",
+  "frozen_files_rechecked": {
+    "core/features.py": {
+      "observed_blob": "714e616d81454875c5e80a423ef66eb62aafdfd7",
+      "matches": true
+    },
+    "core/evaluation.py": {
+      "observed_blob": "6c370f7c779714d15b7e143022cce69696d654b3",
+      "matches": true
+    },
+    "core/kelvins_metric.py": {
+      "observed_blob": "863a9f26b778f551e78afa6da028c8366db8950c",
+      "matches": true
+    },
+    "scripts/run_baselines.py": {
+      "observed_blob": "f4ca37075674b4fd52f53cba90abb6559dd18d1c",
+      "matches": true
+    },
+    "agent/triage_agent.py": {
+      "observed_blob": "7c03a773eb71c7b392d9a13e589dac87dd13b752",
+      "matches": true
+    },
+    "agent/llm.py": {
+      "observed_blob": "c2b596ac8f2c7bf15928bcc42dbe995aecf164d5",
+      "matches": true
+    },
+    "docs/PHASE6_PREREGISTRATION.md": {
+      "observed_blob": "78cdb4603b887efb3b2b5b1c871a44d3789ebbd3",
+      "matches": true
+    },
+    "docs/PHASE6_DEVIATIONS.md": {
+      "observed_blob": "24fa14b3c956ea9e8fb31772290f0105725f784d",
+      "matches": true
+    }
+  },
+  "cross_review": "Independent data and methods reviewers checked Report03 consistency; material wording fixes applied.",
+  "note": "Document and preserved-artifact checks; no new model-training campaign or efficacy experiment. Earlier suite outcomes remain in verification_record.json and were not rerun for this revision."
+}

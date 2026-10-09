@@ -1,0 +1,52 @@
+{
+  "audit_date": "2026-10-06",
+  "repository_head": "89d7f2efb8bf135e02fa51760e0ed3bb33a105c9",
+  "working_tree": "Pre-existing changes preserved; reports audit the working tree, not a clean release.",
+  "checks": [
+    {
+      "command": ".venv/Scripts/python.exe -m pytest -q",
+      "exit_code": 1,
+      "passed": 336,
+      "failed": 1,
+      "skipped": 1,
+      "elapsed_seconds": 76.74,
+      "failure": "tests/test_hybrid.py::test_permutation_changes_only_the_llm_columns",
+      "cause": "joblib physical-core discovery raises a UserWarning after a Windows executable cannot be found (WinError 2); pytest treats warnings as errors."
+    },
+    {
+      "command": "$env:LOKY_MAX_CPU_COUNT='2'; .venv/Scripts/python.exe -m pytest -q --tb=short --no-showlocals",
+      "exit_code": 0,
+      "passed": 337,
+      "failed": 0,
+      "skipped": 1,
+      "elapsed_seconds": 55.16,
+      "skip_reason": "Credential-presence test skips because the existing environment has a configured provider credential. No credential value is included.",
+      "scope": "Full existing suite with process-local explicit CPU allocation; no source change. Test-internal model fitting is not a new research experiment."
+    },
+    {
+      "command": ".venv/Scripts/python.exe -u scripts/reproduce.py --check",
+      "exit_code": 1,
+      "result": "23/23 pinned packages installed; stopped at verify_phase1 failure; built nothing."
+    },
+    {
+      "command": ".venv/Scripts/python.exe -u scripts/verify_phase1.py",
+      "exit_code": 1,
+      "checks_passed": 6,
+      "checks_total": 7,
+      "failure": "Nested default pytest run encounters the same Windows CPU-discovery warning.",
+      "verified": "All four TraCSS files match manifest byte sizes and SHA-256; 94 tracked Python files scanned for declared imports."
+    },
+    {
+      "command": "$env:LOKY_MAX_CPU_COUNT='2'; .venv/Scripts/python.exe -u scripts/reproduce.py --check",
+      "exit_code": 0,
+      "elapsed_seconds_rounded": 50,
+      "result": "23/23 pinned packages installed; nested Phase 1 checks pass; all nine expected pipeline artifacts present; historical headline printed with every arm marked from an earlier run.",
+      "scope": "Reproduction check builds nothing and does not regenerate LLM responses. Underlying Phase 1 checksum verification covers the four TraCSS files; Kelvins file presence is checked by the runner. The historical learned-model rows remain scientifically superseded despite a passing infrastructure check."
+    }
+  ],
+  "limits": [
+    "No new paid inference, new scientific training campaign, external data request, or publication submission.",
+    "Archived prediction rescoring differs from regenerating historical model responses.",
+    "Passing software tests does not certify novelty, unbiased experimental design, or operational safety."
+  ]
+}
