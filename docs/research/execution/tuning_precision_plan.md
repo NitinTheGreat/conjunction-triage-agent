@@ -1,12 +1,27 @@
 # Next V02 step: tuning adequacy, precision and simulator sensitivity
 
 Prepared 10 October 2026. This is a work plan, not a frozen scientific protocol
-or a completed power analysis. Finish and inspect the
-[component audit](../results/components_2026-10-10/report.md) before making the
-decisions below. Scientific seed 20261012 and IDs scientific:00000..04999 remain
+or a completed power analysis. The
+[component audit](../results/components_2026-10-10/report.md) is complete and
+inspected (`components_summary_20261010_v1`), so the decisions below can proceed.
+Scientific seed 20261012 and IDs scientific:00000..04999 remain
 reserved and ungenerated. V02 remains open.
 
 ## 1. Decide what the comparison can support
+
+The completed campaign selection files already establish this starting inventory.
+Counts concern selected models, not independent data or all candidate fits.
+
+| Source run | Selected models | Upper grid selections |
+|---|---:|---|
+| tuning_20261009_v1 | 72 | 25 at C=1000 |
+| covariance_20261009_v1 | 16 | 8 at C=1000 |
+| components_20261010_v1 | 32 | 14 at C=1000 |
+| sequence_20261010_v1 | 16 | 16 at 60 epochs; 8 at width 32 |
+
+Thus 47 of 120 logistic selections reach maximum C. Read each run's
+`selections.json` and `completion.json` for the underlying records. This boundary
+inventory does not replace the profile, optimization and runtime analysis below.
 
 - [ ] Assemble one development inventory for the 17 class-forecast arms: exact
   fields, partition family, capacity, candidate grid, fit count, selected

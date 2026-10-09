@@ -1,0 +1,24 @@
+{
+  "artifacts": {
+    "audit.json": "b07657992d968b58ad8821c46497006dad1b83cafe945ae5f8fd2bd91360bed3",
+    "candidate_scores.csv": "4616780da47b11e95d4fffe522c9d32d9c2393c01fa62243bee0fbc68ea0a1b5",
+    "comparison_ranges.csv": "6ac4e1735215d69a03fddbafd61ac6206a5db63bfce1ddc517e80ed2110c400a",
+    "fit_records.csv": "58d506205160bec8c9d97ba9e6f77f73572588aaa383a63fdec85b9b350fdc9a",
+    "lineage_diagnostics.csv": "27c0722e67d6dc5ba60882cd1fa92305a02a7585137431783e11baa281f27b16",
+    "loss_ranges.csv": "4ac509734b1672d7e02effb335efa8d9b363d43124428432694c97e69bbb9f50",
+    "metrics.csv": "430b8859782e1aa9ed2238ae0552ebb26aca29d9d7b8f89b705e4c8def4af983",
+    "paired_contrasts.csv": "7bc26955d77ffcf74f2ff139346f326943e3d35585036aafcdb0d0fdbcc8eb6c",
+    "report.md": "a94a29253b825b8b1674f61142d8d04d9ca7dec483d98f384a3a76c2ad6eb2f4",
+    "selections.csv": "a1b066ef805133d512d78232bc2574330d463f7faeba07374da962d7903bda9b"
+  },
+  "manifest_sha256": "be31fdc7fbbe89545ce5afe9ec520418e56ba30d4b4182b6779380c2828ccb67",
+  "run_id": "components_summary_20261010_v1",
+  "source_runs": [
+    "components_20261010_v1",
+    "cadence_20261009_v1",
+    "tuning_20261009_v1",
+    "covariance_20261009_v1",
+    "sequence_20261010_v1",
+    "fusion_20261009_v1"
+  ]
+}

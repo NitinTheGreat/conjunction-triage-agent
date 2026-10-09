@@ -1,5 +1,43 @@
 # Research direction and paper roadmap
 
+## V02 component decision update - 10 October 2026
+
+**Continue the narrowed robustness-benchmark route.** The four component arms
+completed their fitting campaign and full [reconstruction/export](../results/components_2026-10-10/report.md). Removing
+age features produces small software loss improvements, but neither feature
+removal nor oracle lineage weighting establishes a general method advantage.
+The oracle improves software new-information loss over singleton in all three
+training subsets yet loses to latest-message metadata in all three. Under shared
+bias it worsens both heavy-overlap and new-information loss relative to singleton
+in all three. Its full-reference new-information threshold misses 189/326
+positives. A method-superiority or safe-workload claim is not supported.
+
+This result narrows the possible paper contribution: a controlled comparison of
+reuse, genuinely new information, observable metadata and estimator bias, with
+negative controls and explicit limits on what lineage weighting can fix. The
+existing real-data correction and separate state-fusion diagnostics can support
+that account. They do not, by themselves, establish sufficient novelty or
+publishability. State the known mechanisms and prior methods honestly, and retain
+adverse comparisons such as ignore-updates beating richer models in some cases.
+
+The [tuning and precision work plan](../execution/tuning_precision_plan.md) is the
+next executable research stage after the component audit. It expects:
+
+1. A complete tuning inventory and an explicit bounded-implementation versus
+   predeclared development-extension decision.
+2. One justified primary scientific contrast and practical precision target,
+   using paired scenarios and separate positive-case miss calculations.
+3. A design for evaluation, training and calibration uncertainty, with a bounded
+   anisotropy/noise/bias sensitivity study before scientific freeze.
+4. A concrete V03 protocol and realistic runtime/sample-size requirements, or a
+   further narrowing/stopping decision if the proposed claim is unsupported.
+
+Use the [root checklist](../../../RESEARCH_CHECKLIST.md) for completed evidence,
+run IDs, required local artifacts and exact commands. V02 remains open; V03 and
+independent A03 review remain unchecked. The scientific reservation is still
+ungenerated. Older schedules and pending component statements below are dated
+history superseded by this checkpoint.
+
 **V02 sequence follow-up, 10 October 2026.** The [bounded sequence adaptation and latest-only capacity control](../results/sequence_2026-10-10/report.md) completed 304 fits and 16 selected models. All 285,600 candidate OOF values and 224,000 new forecasts reconstruct from saved checkpoints; comparisons retain 88 archived controls. In all three overlapping training subsets, history LSTM loses to singleton/grouping on software heavy-overlap loss and to latest-message metadata and latest-only LSTM on software new-information loss. Both neural arms improve shared-bias new-information loss over latest-metadata, singleton, grouping and covariance controls, but the full-reference history model still misses 160/326 positives. All 16 selections reach 60 epochs; eight reach maximum width. These are bounded implementation tradeoffs, not a model-family ranking or operational guarantee. The [observable-provenance component plan](../execution/provenance_component_plan.md), tuning-adequacy decision and precision planning are next; V02 and scientific freeze remain open.
 
 **V02 state-fusion follow-up, 9 October 2026.** The [six-arm state-fusion/oracle diagnostic](../results/fusion_2026-10-09/report.md) is complete: 138,000 canonical messages and 126,000 state-estimate records reconstruct exactly. In software solution reissue, the Gaussian product has the same mean as latest/CI but an ellipse six times smaller, containing 386/1,000 latent states versus 947/1,000. CI does not repair omitted shared bias: cumulative-information inclusion is 290/1,000 versus 955/1,000 for the bias-aware information oracle. These are static, unweighted stress diagnostics and known reuse behaviors, separate from final-risk-class forecasts and operational guarantees. The [sequence-adaptation plan](../execution/sequence_adaptation_plan.md) is the next task; provenance-component ablations and precision work remain before scientific freeze.

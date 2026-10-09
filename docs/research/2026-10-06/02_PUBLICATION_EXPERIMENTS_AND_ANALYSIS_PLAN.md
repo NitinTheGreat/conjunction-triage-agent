@@ -1,5 +1,51 @@
 # Report 02 — Publication experiments and statistical analysis plan
 
+## V02 component methods update - 10 October 2026
+
+The [fixed component contract](../execution/component_contract.md) was committed
+before fitting. Its four new arms completed 608 fits and 32 selected models;
+full reconstruction and the [compact export](../results/components_2026-10-10/report.md)
+are complete. This update supersedes earlier component
+implementation placeholders while retaining the prospective scientific design
+below as unfrozen.
+
+The common summary has 122 columns. `grouped_no_age` removes eight age bins from
+latest/mean/variance/missingness blocks, leaving 90 columns; existing groups use
+OD and time, not age. `grouped_no_od_readout` leaves 74 columns but retains OD
+for grouping. `fixed_no_od` uses time-only partitions and the same 74-column
+readout. All use common full-record canonicalization before removal: raw OD can
+still affect deduplication or equal-time ordering. Avoid an unconditional claim
+that this last arm is independent of OD. Existing singleton and fixed controls
+are reused, not relabelled as additional new models.
+
+The oracle changes only singleton mean/variance weights. Each visible observation
+allocates one unit equally among containing messages, normalized by the visible
+union size. It excludes observation IDs 60-79, uses no IDs or union-size predictor,
+and preserves latest features, span, canonical count and missingness. Uniform
+allocations use exact archived arithmetic. This is descriptive privileged
+weighting, not posterior fusion or an optimal performance bound. Burst time/age
+and count changes can still affect predictions.
+
+All arms use six C values, three whole-scenario inner folds, two regimes and four
+training trials. Every scenario has total objective weight one over variants and
+partitions. Each ablation is retuned, so differences also include changes in C
+and coefficients. Selected OOF scores serve tuning, monotone calibration and the
+nominal 95% training-recall threshold; no independent miss certification follows.
+
+The planned combined analysis retains 13 archived control arms and four new arms,
+with paired absolute and no-reuse-relative loss/Brier/review/miss differences.
+Miss differences use positive scenarios as their denominator. The 1,904,000
+combined scores reuse 1,000 cases per evaluation bank; they are not independent
+sample size. Ranges over the three overlapping training subsets are descriptive.
+
+The [next work plan](../execution/tuning_precision_plan.md) requires a documented
+tuning decision, a selected scientific contrast, paired precision calculations,
+separate training/calibration uncertainty and exposed simulator sensitivity.
+Fourteen new selections reach the upper C boundary; all 16 prior neural selections
+reached their maximum epoch budget. Successful execution does not establish
+optimal tuning. Do not generate the reserved scientific bank until V03 fixes
+these decisions, including multiplicity and failure rules.
+
 **V02 sequence follow-up, 10 October 2026.** The [bounded sequence adaptation and latest-only capacity control](../results/sequence_2026-10-10/report.md) completed 304 fits and 16 selected models. All 285,600 candidate OOF values and 224,000 new forecasts reconstruct from saved checkpoints; comparisons retain 88 archived controls. In all three overlapping training subsets, history LSTM loses to singleton/grouping on software heavy-overlap loss and to latest-message metadata and latest-only LSTM on software new-information loss. Both neural arms improve shared-bias new-information loss over latest-metadata, singleton, grouping and covariance controls, but the full-reference history model still misses 160/326 positives. All 16 selections reach 60 epochs; eight reach maximum width. These are bounded implementation tradeoffs, not a model-family ranking or operational guarantee. The [observable-provenance component plan](../execution/provenance_component_plan.md), tuning-adequacy decision and precision planning are next; V02 and scientific freeze remain open.
 
 **V02 state-fusion follow-up, 9 October 2026.** The [six-arm state-fusion/oracle diagnostic](../results/fusion_2026-10-09/report.md) is complete: 138,000 canonical messages and 126,000 state-estimate records reconstruct exactly. In software solution reissue, the Gaussian product has the same mean as latest/CI but an ellipse six times smaller, containing 386/1,000 latent states versus 947/1,000. CI does not repair omitted shared bias: cumulative-information inclusion is 290/1,000 versus 955/1,000 for the bias-aware information oracle. These are static, unweighted stress diagnostics and known reuse behaviors, separate from final-risk-class forecasts and operational guarantees. The [sequence-adaptation plan](../execution/sequence_adaptation_plan.md) is the next task; provenance-component ablations and precision work remain before scientific freeze.

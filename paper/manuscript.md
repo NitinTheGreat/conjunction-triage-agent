@@ -42,7 +42,7 @@ Dependence-aware and idempotent evidence combination predates this project. Exac
 
 Overlapping Covariance Intersection also provides recent prior art for fusion with partial structural covariance knowledge. Its required covariance bounds are not supplied by public observation-age metadata; a simulation comparison needs an explicit input mapping. [Pedroso et al., v2, October 2026](https://arxiv.org/html/2603.16768v2)
 
-**Development update:** V02 now includes a diagonal-volume weighting approximation and direct-weighting ablation on exposed simulation banks. They are not reproductions of the published evidence-theory method. Separate static state-fusion/oracle diagnostics are also complete on exposed banks. The bounded sequence adaptation and latest-only capacity control are now complete on these exposed banks. **Pending:** class-forecast provenance-component ablations, a tuning-adequacy decision, precision planning and an explicit account of what the completed study adds beyond prior work. See V01 for versioned sources and remaining access limits.
+**Development update:** V02 now includes a diagonal-volume weighting approximation and direct-weighting ablation on exposed simulation banks. They are not reproductions of the published evidence-theory method. Separate static state-fusion/oracle diagnostics are also complete on exposed banks. The bounded sequence adaptation and latest-only capacity control are now complete on these exposed banks. The four provenance-component arms have completed fitting and full checkpoint reconstruction. **Pending:** a tuning-adequacy decision, simulator sensitivity, precision planning and an explicit account of what the completed study adds beyond prior work. See V01 for versioned sources and remaining access limits.
 
 ## 3. Task, data and information boundary
 
@@ -195,7 +195,30 @@ ignore-updates control has lower bias-stress new-information loss than latest-on
 LSTM in all three subsets and than history LSTM in one. All 16 neural
 selections use the maximum epoch budget and eight use maximum width. This
 bounded adaptation does not establish model-family superiority or inferiority.
-The component, tuning-adequacy and precision work remains before scientific freeze.
+The tuning-adequacy, simulator-sensitivity and precision work remains before
+scientific freeze.
+
+The four provenance-component arms complete 608 fits under the common scenario
+design; all 448,000 new forecasts reconstruct bitwise from saved checkpoints
+(`components_summary_20261010_v1`). Across the three overlapping
+matched-training subsets, removing age readout features improves software
+heavy-overlap loss by 0.000285 to 0.001471 and new-information loss by 0.000322
+to 0.001888 relative to grouping. Removing OD readout instead worsens software
+heavy-overlap and solution-reissue loss in all three subsets, lowers loss in
+no-reuse, exact-replay, burst-reissue and 50%-overlap conditions in all three,
+and has mixed new-information effects.
+These are descriptive ranges from retuned models, not confidence intervals or
+causal field effects in a fixed predictor.
+
+Oracle lineage weighting improves software new-information loss over singleton
+by 0.000258 to 0.002404 across those subsets, but remains worse than latest-message
+metadata in all three. Under shared bias it worsens heavy-overlap and
+new-information loss relative to singleton in all three. The full-reference
+matched oracle has shared-bias new-information loss 1.867092 and misses 189/326
+positives. More privileged weighting does not resolve this stress failure.
+Fourteen of 32 component selections reach the maximum C despite optimizer
+convergence. These findings retain the bounded benchmark direction; a scientific
+contrast and its precision still need justification.
 
 ## 6. Discussion and limitations
 

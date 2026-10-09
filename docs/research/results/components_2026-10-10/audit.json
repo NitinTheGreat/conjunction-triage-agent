@@ -1,0 +1,88 @@
+{
+  "all_candidate_selections_calibration_thresholds_reconstructed": true,
+  "all_combined_metrics_labels_and_case_ids_verified": true,
+  "all_preprocessors_and_readout_scalers_reconstructed": true,
+  "canonical_message_lineage_rows": 138000,
+  "combined_prediction_rows": 1904000,
+  "compatibility": {
+    "covariance_run": {
+      "archived_sources_verified": 81,
+      "artifacts_verified": 83,
+      "inputs_verified": 29,
+      "run_id": "covariance_20261009_v1",
+      "status": "complete"
+    },
+    "fusion_run": {
+      "archived_sources_verified": 84,
+      "artifacts_verified": 13,
+      "inputs_verified": 17,
+      "run_id": "fusion_20261009_v1",
+      "status": "complete"
+    },
+    "legacy_history_ast_unchanged": true,
+    "reuse_scope": "All nine archived control arms; no control refitting or new tuning.",
+    "same_cadence_inputs": true,
+    "sequence_run": {
+      "archived_sources_verified": 88,
+      "artifacts_verified": 959,
+      "inputs_verified": 27,
+      "run_id": "sequence_20261010_v1",
+      "status": "complete"
+    },
+    "source_runs": [
+      {
+        "archived_sources_verified": 74,
+        "artifacts_verified": 13,
+        "inputs_verified": 14,
+        "run_id": "cadence_20261009_v1",
+        "status": "complete"
+      },
+      {
+        "archived_sources_verified": 77,
+        "artifacts_verified": 306,
+        "inputs_verified": 10,
+        "run_id": "tuning_20261009_v1",
+        "status": "complete"
+      }
+    ],
+    "unchanged_shared_modules": [
+      "models.py",
+      "simulation_regimes.py",
+      "tuning_stability.py",
+      "data.py",
+      "metrics.py",
+      "evaluate.py"
+    ]
+  },
+  "lineage_diagnostic_cases": 21000,
+  "new_predictions_bitwise_reconstructed": 448000,
+  "oracle_no_reuse_singleton_equivalences": [
+    {
+      "seed": 20261022,
+      "singleton_equivalence": "pass"
+    },
+    {
+      "seed": 20261031,
+      "singleton_equivalence": "pass"
+    },
+    {
+      "seed": 20261032,
+      "singleton_equivalence": "pass"
+    },
+    {
+      "seed": 20261033,
+      "singleton_equivalence": "pass"
+    }
+  ],
+  "reconstructed_candidate_oof_rows": 571200,
+  "reconstructed_fits": 608,
+  "scientific_bank_opened": false,
+  "scope": "Same-workflow reconstruction, not independent A03 review or frozen scientific confirmation.",
+  "source_run": {
+    "archived_sources_verified": 91,
+    "artifacts_verified": 1905,
+    "inputs_verified": 27,
+    "run_id": "components_20261010_v1",
+    "status": "complete"
+  }
+}

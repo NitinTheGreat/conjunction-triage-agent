@@ -1,5 +1,49 @@
 # Report 1 — Evidence audit and current research results
 
+## V02 component follow-up - 10 October 2026
+
+The four-arm provenance-component campaign completed **608 fits, 32 selected
+models and 448,000 new forecasts**, using the same exposed scenario banks,
+folds and training regimes as the earlier controls. Full reconstruction
+`components_summary_20261010_v1` is complete: all 608 checkpoints, 571,200
+candidate OOF values and 448,000 new forecasts reconstruct, and the
+[compact export](../results/components_2026-10-10/report.md) passes its checksums.
+This update supersedes older statements below that component fitting remains pending.
+
+The following matched-training differences are component minus named comparator,
+using only the three overlapping 800-scenario training subsets. Negative favors
+the component. Ranges are descriptive training sensitivity, not confidence
+intervals or independent replications.
+
+| Component / comparator | Bank / condition | Loss-difference range | Lower loss in subsets |
+|---|---|---:|---:|
+| No age / grouped | Software / heavy overlap | -0.001471 to -0.000285 | 3/3 |
+| No age / grouped | Software / new information | -0.001888 to -0.000322 | 3/3 |
+| No age / grouped | Shared bias / new information | -0.021140 to -0.016379 | 3/3 |
+| No OD readout / grouped | Software / heavy overlap | +0.001607 to +0.002615 | 0/3 |
+| No OD readout / grouped | Shared bias / heavy overlap | +0.000453 to +0.044823 | 0/3 |
+| Oracle weighting / singleton | Software / new information | -0.002404 to -0.000258 | 3/3 |
+| Oracle weighting / singleton | Shared bias / new information | +0.022914 to +0.095371 | 0/3 |
+
+Oracle weighting still loses to latest-message metadata on software new-information
+loss in every subset, and to ignore-updates on software heavy overlap in every
+subset. Removing age does not uniformly help shared-bias heavy overlap. Removing
+OD readout has mixed new-information effects and is condition dependent: it lowers
+software loss in no-reuse, exact-replay, burst-reissue and 50%-overlap conditions
+in all three subsets but raises it in 90% overlap and solution reissue in all
+three. These retuned comparisons do not
+isolate a causal feature effect in a fixed classifier or establish a universally
+better method.
+
+The full-reference matched oracle has software new-information loss 0.063212
+and misses 8/194 positives. Under shared-bias new information, its loss is
+1.867092 and it misses 189/326. Privileged lineage weights therefore do not solve
+the stress failure. Fourteen of 32 new selections reach C=1000 despite successful
+optimizer convergence (maximum 235 iterations). Tuning adequacy, precision and
+simulator sensitivity remain open; see the
+[next work plan](../execution/tuning_precision_plan.md). Scientific outcomes are
+still reserved and ungenerated. V02/V03/A03 are not completed by these fits.
+
 **V02 sequence follow-up, 10 October 2026.** The [bounded sequence adaptation and latest-only capacity control](../results/sequence_2026-10-10/report.md) completed 304 fits and 16 selected models. All 285,600 candidate OOF values and 224,000 new forecasts reconstruct from saved checkpoints; comparisons retain 88 archived controls. In all three overlapping training subsets, history LSTM loses to singleton/grouping on software heavy-overlap loss and to latest-message metadata and latest-only LSTM on software new-information loss. Both neural arms improve shared-bias new-information loss over latest-metadata, singleton, grouping and covariance controls, but the full-reference history model still misses 160/326 positives. All 16 selections reach 60 epochs; eight reach maximum width. These are bounded implementation tradeoffs, not a model-family ranking or operational guarantee. The [observable-provenance component plan](../execution/provenance_component_plan.md), tuning-adequacy decision and precision planning are next; V02 and scientific freeze remain open.
 
 **V02 state-fusion follow-up, 9 October 2026.** The [six-arm state-fusion/oracle diagnostic](../results/fusion_2026-10-09/report.md) is complete: 138,000 canonical messages and 126,000 state-estimate records reconstruct exactly. In software solution reissue, the Gaussian product has the same mean as latest/CI but an ellipse six times smaller, containing 386/1,000 latent states versus 947/1,000. CI does not repair omitted shared bias: cumulative-information inclusion is 290/1,000 versus 955/1,000 for the bias-aware information oracle. These are static, unweighted stress diagnostics and known reuse behaviors, separate from final-risk-class forecasts and operational guarantees. The [sequence-adaptation plan](../execution/sequence_adaptation_plan.md) is the next task; provenance-component ablations and precision work remain before scientific freeze.

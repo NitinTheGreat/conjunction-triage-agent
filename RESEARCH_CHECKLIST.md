@@ -10,19 +10,19 @@ This is the live execution record. Update it as work happens. Checked preparatio
 
 | Field | Current checkpoint — replace after each work session |
 |---|---|
-| NOW | Component campaign components_20261010_v1 RUNNING under committed contract 31eb1f8 and runner 49dcb49. All 24 component implementation/audit tests pass. |
-| NEXT | Finish component campaign and reconstruction, update reports, then address tuning adequacy and precision planning. |
-| Active task / owner | V02 IN PROGRESS. Component feature/lineage tests pass; campaign and audit remain. Tuning adequacy and precision follow. |
+| NOW | Component milestone COMPLETE: components_20261010_v1 (608 fits) and components_summary_20261010_v1 (all 448,000 forecasts reconstruct; 7 bundles pass). Tuning-adequacy work (plan §1) is starting. |
+| NEXT | Execute §1 of the [tuning and precision plan](docs/research/execution/tuning_precision_plan.md): tuning inventory, candidate-profile analysis, dated tuning decision. Then §2 precision. |
+| Active task / owner | V02 IN PROGRESS. Components complete; tuning adequacy, primary contrast, precision and simulator sensitivity remain. |
 | Selected direction | **Track R, narrowed:** controlled robustness/measurement benchmark. Grouping remains a candidate and may be discarded if simpler controls explain results. |
 | Conditional extension | **Track E:** independent real-data efficacy, only after access and statistical requirements pass. |
 | Research blockers | None preventing V01/V02 preparation. Full methods for some close papers and independent operational data remain unavailable; no novelty or real efficacy claim is established. |
 | Current machine | Windows, PowerShell; repository at `F:\conjunction-triage`; Python environment at `.venv\Scripts\python.exe`. Paths elsewhere in this file are relative to the repository root. |
 | HEAD when this checklist was created | `89d7f2efb8bf135e02fa51760e0ed3bb33a105c9`; working tree contains pre-existing modifications and untracked files. |
-| Latest validation | 24 component tests passed in 5.77s; full regression suite about to run. |
-| New scientific runs | Completed development/reconstruction runs sequence_preflight_20261009_v1, sequence_20261010_v1 and sequence_summary_20261010_v1, plus earlier runs. No frozen scientific evaluation. |
+| Latest validation | 26 component/export tests passed in 9.24s after reconstruction; full suite 434 passed / 1 skipped (78.18s) on identical code. 7 bundles / 66 artifacts pass checksums; 12 raw, 45 historical and 8 frozen files unchanged. |
+| New scientific runs | Completed development/reconstruction runs components_20261010_v1 and components_summary_20261010_v1, plus earlier sequence and other runs. No frozen scientific evaluation. |
 | Scientific holdout status | Seed 20261012 / scientific:00000..04999 reserved **but not generated**. Candidate anisotropic configuration and sample size still need V03 freeze. Kelvins and all pilot banks are exposed. |
-| Running jobs / processes | components_20261010_v1 active. Inspect its manifest/progress and docs/research/execution/components_campaign_20261010.local.log; do not start a duplicate. |
-| Next executable command | After campaign completes: .venv\Scripts\python.exe -m research.summarize_components --source processed/research/components_20261010_v1 --run-id components_summary_20261010_v1 --export docs/research/results/components_2026-10-10 |
+| Running jobs / processes | None. Both component runs are complete; do not rerun them under the same IDs. |
+| Next executable command | `.\.venv\Scripts\python.exe -m research.verify_exports --root docs/research/results` (passes). No tuning-inventory CLI exists yet; see the plan before implementing one. |
 
 ### Copy this into the next assistant
 
@@ -629,3 +629,54 @@ separate age readout, OD readout and OD grouping interventions accordingly.
 Run label-free construction checks and commit the component budget before fitting.
 A03 independent review and V03 scientific freeze remain unchecked. Seed 20261012
 and scientific:00000..04999 remain reserved but ungenerated. No milestone job is active.
+
+### V02 provenance-component milestone - 10 October 2026
+
+- [x] Commit the component contract before fitting (`31eb1f8`); implement label-free feature/lineage construction with 24 test items.
+- [x] Complete 608 fits / 32 selections / 448,000 forecasts with no failed fit (`components_20261010_v1`, runner `49dcb49`).
+- [x] Reconstruct all checkpoints, 571,200 candidate OOF values, selections, calibration, thresholds and forecasts (`components_summary_20261010_v1`, `6e90b79`/`ad60140`).
+- [x] Export, verify, and update reports, manuscript and handoff.
+- [ ] Tuning adequacy, primary contrast, precision and simulator sensitivity; V02 remains open.
+
+Evidence: [results](docs/research/results/components_2026-10-10/report.md),
+[audit](docs/research/results/components_2026-10-10/audit.json),
+[contract](docs/research/execution/component_contract.md),
+[verification](docs/research/execution/components_verification.json),
+[commands and interpretation](docs/research/execution/v02_development.md).
+Campaign 19:46-20:00 UTC (PID 28728); reconstruction 20:00-20:16 UTC (PID 24056);
+both manifests are `complete` and their code hashes match the committed tree.
+
+Commands executed from `F:\conjunction-triage` with process-local
+`LOKY_MAX_CPU_COUNT`, `OMP_NUM_THREADS` and `MKL_NUM_THREADS` set to 2:
+
+```powershell
+.\.venv\Scripts\python.exe -m research.component_campaign --run-id components_20261010_v1
+.\.venv\Scripts\python.exe -m research.summarize_components --source processed/research/components_20261010_v1 --run-id components_summary_20261010_v1 --export docs/research/results/components_2026-10-10
+.\.venv\Scripts\python.exe -m pytest tests/test_research_components.py tests/test_research_exports.py -q --tb=short --no-showlocals -p no:cacheprovider
+.\.venv\Scripts\python.exe -m research.verify_exports --root docs/research/results
+```
+
+Results, matched training, 1,000 paired scenarios per exposed bank: removing age
+readout lowers software heavy-overlap and new-information loss relative to grouping
+in all three overlapping subsets (ranges -0.001471 to -0.000285 and -0.001888 to
+-0.000322). OD-readout removal is condition dependent: worse in software 90% overlap
+and solution reissue (3/3), better in no-reuse/replay/burst/50% overlap (3/3).
+Oracle lineage weighting beats singleton on software new information (3/3) but
+loses to latest metadata there (0/3) and to ignore-updates on software heavy
+overlap (0/3). It worsens shared-bias heavy-overlap and new-information loss
+relative to singleton (0/3 each); its full-reference shared-bias/new-information
+threshold misses 189/326 positives. Fourteen of 32 selections reach C=1000. These
+are retuned development contrasts on exposed banks, not causal fixed-model field
+effects, a deployable method or confirmation. NARROW remains the route.
+
+Validation: full suite 434 passed / 1 skipped (78.18 s) on code identical to HEAD;
+26 component/export test items passed after reconstruction. Seven bundles / 66
+artifact files pass. The 12 raw, 45 historical and 8 frozen files were rechecked
+against `workspace_snapshot_2026-10-09.json` after export; `requirements.txt` is
+unchanged. No paid inference, external contact, push or scientific-bank access.
+
+Session note: at the start of this session an orphaned system-Python process
+(PID 836, `timeout 400 python -` reading a script from stdin; its launching shell
+was already gone) was observed from the interrupted previous session. It was not
+started by this session, was not killed, exited by itself within minutes, and
+wrote no repository files (checked by modification time). Nothing depends on it.

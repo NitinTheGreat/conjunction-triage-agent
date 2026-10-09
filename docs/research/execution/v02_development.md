@@ -73,7 +73,8 @@ its limited controls remain preserved and distinct from this informed revision.
 - [x] Artifact reconstruction and compact, hash-preserving result export.
 - [x] Common expanded tuning grid and descriptive training-subset/fold sensitivity (remaining boundary choices recorded).
 - [x] Covariance-proxy comparator and direct-weighting ablation on exposed simulation banks.
-- [ ] Sequence adaptation and provenance-component ablations.
+- [x] Sequence adaptation and latest-only capacity control.
+- [x] Provenance-component ablations, oracle lineage-weighting control, full reconstruction and compact export.
 - [x] Separate state-fusion / visible-observation-union oracle diagnostics on exposed banks (not the class-forecast provenance ablations).
 - [ ] Precision planning and justified primary comparison.
 
@@ -338,3 +339,80 @@ This artifact audit is not independent A03 review. Next implement the
 [observable-provenance component ablations](provenance_component_plan.md), then
 resolve tuning adequacy and precision before V03. Reserved scientific seed
 20261012 remains ungenerated, and V02 remains unchecked.
+
+## Provenance-component campaign - 10 October 2026
+
+Run `components_20261010_v1` completed all 608 fits, 32 selected models and
+448,000 new forecasts. Reconstruction `components_summary_20261010_v1` is also
+complete: see the [result report](../results/components_2026-10-10/report.md),
+[audit](../results/components_2026-10-10/audit.json) and
+[verification record](components_verification.json).
+The [fixed contract](component_contract.md) and machine-readable settings were
+committed before study fitting. The new implementation, campaign and reconstruction
+are in `research/components.py`, `research/component_campaign.py` and
+`research/summarize_components.py`.
+
+The new arms remove categorical-age readout (122 to 90 columns), remove OD
+readout while retaining OD/time groups (74 columns), remove OD readout with
+time-only fixed groups (74), or change only singleton mean/variance weights using
+privileged visible lineage (122). Existing singleton/fixed controls are reused.
+Age is not a grouping input. All arms retain common full-record canonicalization,
+so `fixed_no_od` is an exclusion conditional on canonicalization. Unused base
+preprocessing columns cannot affect retained columns; the final readout scaler
+is fitted anew. See the contract for the exact weighting and failure rules.
+
+Preflight validates 21,000 scenario/condition lineage cases and 138,000 canonical
+messages. Only visible observation IDs 0-59 may enter weights; publication time,
+window contents and canonical order are checked. Uniform allocations cover
+no reuse, exact replay and solution reissue; partial overlap, new information
+and burst reissue have nonuniform allocations. No physical-state or optimal-oracle
+interpretation follows from these weights. Burst time/age/count effects remain.
+
+All new fits converged without a dropped candidate, with maximum observed
+iterations 235. Fourteen selections reach C=1000. The matched-subset results
+show small software gains from removing age in heavy overlap and new information
+(3/3 subsets each; 1-2/3 in the other software conditions), adverse heavy-overlap
+effects from removing OD readout, and no uniform gain from privileged lineage weights.
+OD-readout removal is condition dependent: it lowers software loss in no-reuse,
+exact-replay, burst-reissue and 50%-overlap conditions in all three subsets, but
+raises it in 90% overlap and solution reissue in all three.
+Oracle weighting improves software new-information loss over singleton in all
+three subsets, but loses to latest metadata in all three and worsens shared-bias
+heavy-overlap and new-information loss relative to singleton in all three.
+Its full-reference bias/new-information threshold misses 189/326 positives.
+These are retuned implementation contrasts on exposed stress data; retain their
+negative results and avoid causal fixed-model or operational claims.
+
+Commands executed successfully (both run IDs now exist; use new unique IDs for
+any rerun):
+
+```powershell
+$env:OMP_NUM_THREADS='2'
+$env:MKL_NUM_THREADS='2'
+$env:LOKY_MAX_CPU_COUNT='2'
+.\.venv\Scripts\python.exe -m research.component_campaign --run-id components_20261010_v1
+.\.venv\Scripts\python.exe -m research.summarize_components --source processed/research/components_20261010_v1 --run-id components_summary_20261010_v1 --export docs/research/results/components_2026-10-10
+.\.venv\Scripts\python.exe -m pytest -q
+```
+
+Full suite: **434 passed, 1 skipped in 78.18 seconds**. The 24 component tests
+cover feature/lineage boundaries, objective weighting, whole-scenario folds,
+candidate failure retention, reconstruction and paired endpoints. The skip is
+the existing credential-presence check; no paid inference is part of this work.
+All 57 raw/historical and eight frozen files, and historical requirements, remain
+unchanged. Model/checkpoint/prediction data and local logs stay outside Git.
+
+The reconstruction (git head `ad60140`, 15.6 minutes) re-derived all 608 fold and
+refit checkpoints, prefix preprocessors and final readout scalers, 571,200
+candidate OOF values, every selected C, calibration and threshold, and all
+448,000 new forecasts bitwise. All 1,904,000 combined prediction rows have
+verified labels/case IDs, and all four no-reuse oracle trials reproduce the
+saved singleton exactly. Both run manifests' code hashes match the committed
+`research/` and `tests/` files. Seven compact bundles (66 artifact files,
+including ten component files) pass `research.verify_exports`; the protected
+65-file hash check was rerun after the export. This is same-workflow artifact
+verification, not independent A03 review.
+
+Next: [tuning adequacy, precision and sensitivity](tuning_precision_plan.md).
+V02 remains open. The scientific bank remains reserved and ungenerated; artifact
+reconstruction does not complete independent A03 scientific review.

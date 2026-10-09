@@ -1,0 +1,90 @@
+{
+  "date": "2026-10-10",
+  "full_suite": {
+    "passed": 434,
+    "skipped": 1,
+    "seconds": 78.18,
+    "exit_code": 0,
+    "command": ".venv/Scripts/python.exe -m pytest -q",
+    "log": "docs/research/execution/verification_components_20261010.local.log",
+    "scope": "Full suite after the component reconstruction commit 6e90b79; research/ and tests/ are unchanged since (both run manifests' code hashes match the working tree).",
+    "skip_reason": "Existing credential-presence test"
+  },
+  "post_reconstruction_tests": {
+    "passed": 26,
+    "seconds": 9.24,
+    "exit_code": 0,
+    "command": ".venv/Scripts/python.exe -m pytest tests/test_research_components.py tests/test_research_exports.py -q --tb=short --no-showlocals -p no:cacheprovider"
+  },
+  "thread_environment": {
+    "LOKY_MAX_CPU_COUNT": "2",
+    "OMP_NUM_THREADS": "2",
+    "MKL_NUM_THREADS": "2"
+  },
+  "completed_runs": [
+    {
+      "run_id": "components_20261010_v1",
+      "status": "complete",
+      "started_utc": "2026-10-09T19:46:03.714928+00:00",
+      "finished_utc": "2026-10-09T20:00:34.697154+00:00",
+      "command": [
+        "F:\\conjunction-triage\\.venv\\Scripts\\python.exe",
+        "F:\\conjunction-triage\\research\\component_campaign.py",
+        "--run-id",
+        "components_20261010_v1"
+      ],
+      "git_head": "49dcb49806d1d25bc2c416d9a5700b4300d9e515"
+    },
+    {
+      "run_id": "components_summary_20261010_v1",
+      "status": "complete",
+      "started_utc": "2026-10-09T20:00:46.325054+00:00",
+      "finished_utc": "2026-10-09T20:16:22.919083+00:00",
+      "command": [
+        "F:\\conjunction-triage\\.venv\\Scripts\\python.exe",
+        "F:\\conjunction-triage\\research\\summarize_components.py",
+        "--source",
+        "processed/research/components_20261010_v1",
+        "--run-id",
+        "components_summary_20261010_v1",
+        "--export",
+        "docs/research/results/components_2026-10-10"
+      ],
+      "git_head": "ad6014023f1b53c14337cdb5cdee0b9dcd4c9757"
+    }
+  ],
+  "code_hashes_match_working_tree": {
+    "components_20261010_v1": 91,
+    "components_summary_20261010_v1": 92
+  },
+  "artifact_audit": "docs/research/results/components_2026-10-10/audit.json",
+  "audited_training_fits": 608,
+  "audited_candidate_oof_rows": 571200,
+  "reconstructed_new_predictions": 448000,
+  "combined_prediction_rows": 1904000,
+  "lineage_diagnostic_cases": 21000,
+  "canonical_message_lineage_rows": 138000,
+  "oracle_no_reuse_singleton_equivalence_trials_passed": 4,
+  "upper_C_selections": "14/32",
+  "maximum_observed_iterations": 235,
+  "export_checks": [
+    {"bundle": "components_2026-10-10", "status": "pass", "artifacts_verified": 10, "bytes_verified": 3930536},
+    {"bundle": "covariance_2026-10-09", "status": "pass", "artifacts_verified": 10, "bytes_verified": 787628},
+    {"bundle": "fusion_2026-10-09", "status": "pass", "artifacts_verified": 6, "bytes_verified": 202818},
+    {"bundle": "pilot_2026-10-09", "status": "pass", "artifacts_verified": 15, "bytes_verified": 56746},
+    {"bundle": "sequence_2026-10-10", "status": "pass", "artifacts_verified": 9, "bytes_verified": 1646781},
+    {"bundle": "tuning_2026-10-09", "status": "pass", "artifacts_verified": 9, "bytes_verified": 400800},
+    {"bundle": "v02_2026-10-09", "status": "pass", "artifacts_verified": 7, "bytes_verified": 156670}
+  ],
+  "protected_files_unchanged": {
+    "raw_files": 12,
+    "historical_artifacts": 45,
+    "frozen_files": 8,
+    "reference": "docs/research/execution/workspace_snapshot_2026-10-09.json",
+    "rechecked_after_export": true
+  },
+  "historical_requirements_unchanged": true,
+  "running_milestone_jobs": [],
+  "scientific_bank_opened": false,
+  "independent_scientific_review_complete": false
+}

@@ -57,28 +57,41 @@ reuse; do not invent a distinct label to inflate the comparison count.
 
 ## Construction and training requirements
 
-- [ ] Audit the current full-report findings and choose the minimal component
+- [x] Audit the current full-report findings and choose the minimal component
   design that answers the remaining mechanism question; save a dated contract.
-- [ ] Canonicalize full visible records before feature removal. Otherwise an
+  Evidence: [component contract](component_contract.md), committed in `31eb1f8`
+  before fitting.
+- [x] Canonicalize full visible records before feature removal. Otherwise an
   ablation could change exact-replay deduplication as an unintended intervention.
-- [ ] Test exact removed-column mappings, unknown/missing-age handling, and the
+- [x] Test exact removed-column mappings, unknown/missing-age handling, and the
   distinction between OD readout removal and OD partition removal.
-- [ ] Use label-free fixtures to demonstrate which design rows change and which
+- [x] Use label-free fixtures to demonstrate which design rows change and which
   remain identical. Include age-bin changes with identical OD values, equal OD
   values with changed time gaps, repeated solutions and new-information windows.
-- [ ] For oracle weights, validate source lineage against canonical message
+- [x] For oracle weights, validate source lineage against canonical message
   order and publication availability; reject observation IDs 60–79, empty windows,
   invalid IDs and duplicates within a window. Test no-reuse, exact replay,
   solution reissue and unequal cumulative windows analytically. Mutating future
   observations must have no effect. Keep oracles separately labelled.
-- [ ] Use the existing four scenario trials, two regimes and common folds;
+  Evidence for the three construction items above: `research/components.py` and
+  24 tests in `tests/test_research_components.py`; preflight validated 21,000
+  lineage cases and 138,000 canonical messages.
+- [x] Use the existing four scenario trials, two regimes and common folds;
   training-only imputation/scaling, scenario weight one and selected-OOF
   calibration/threshold limits remain. Save every candidate score, failure and
   fitted model. Preserve compatibility with all archived controls.
-- [ ] Reconstruct all forecasts and paired loss/Brier/review/miss endpoints for
+  Evidence: run `components_20261010_v1` (608 fits, 32 selections, no failed fit).
+- [x] Reconstruct all forecasts and paired loss/Brier/review/miss endpoints for
   every condition and bias bank; retain collapsed arms and negative findings.
-- [ ] Export compact evidence, update the three reports and root checklist, and
-  commit completed stages under the requested identity.
+  Evidence: run `components_summary_20261010_v1`; 448,000 forecasts reconstruct
+  bitwise and four no-reuse oracle trials exactly reproduce singleton.
+- [x] Export compact evidence, update the three reports and root checklist, and
+  commit completed stages under the requested identity. Evidence:
+  [results](../results/components_2026-10-10/report.md) and
+  [verification](components_verification.json).
+
+**Status, 10 October 2026: complete.** Precision planning and the tuning-adequacy
+decision below now continue in the [tuning and precision plan](tuning_precision_plan.md).
 
 Implement new components in separate research modules where practical. Changing
 shared historical feature code requires a narrow equivalence audit before reusing
