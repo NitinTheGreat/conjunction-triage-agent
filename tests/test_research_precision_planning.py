@@ -95,3 +95,10 @@ def test_reconciliation_fails_when_an_export_disagrees(tmp_path, monkeypatch):
     pd.DataFrame([{**exported, 'log_loss_degradation_paired_sd': rows.sd[1] + 1e-6}]).to_csv(tmp_path / 'b' / 'paired_contrasts.csv', index=False)
     with pytest.raises(ValueError, match='disagrees'):
         pp.reconcile(rows, tmp_path)
+
+
+def test_case_identity_names_the_scenario_set_independent_of_order():
+    a = pp.case_identity(['s2', 's0', 's1'])
+    assert a == pp.case_identity(['s0', 's1', 's2'])
+    assert (a['case_ids_first'], a['case_ids_last']) == ('s0', 's2')
+    assert a['case_ids_sha256'] != pp.case_identity(['s0', 's1', 's3'])['case_ids_sha256']

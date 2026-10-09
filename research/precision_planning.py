@@ -10,6 +10,7 @@ distribution; they are planning approximations, not scientific inference.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -162,11 +163,19 @@ def load_predictions(runs: dict[str, Path]) -> pd.DataFrame:
     return predictions[predictions.regime == REGIME]
 
 
+def case_identity(ids) -> dict:
+    """Name the exact scenario set behind a row without copying every identifier."""
+    ordered = sorted(map(str, ids))
+    return {'case_ids_first': ordered[0], 'case_ids_last': ordered[-1],
+            'case_ids_sha256': hashlib.sha256('\n'.join(ordered).encode('utf-8')).hexdigest()}
+
+
 def planning_table(predictions: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     rows, cache = [], {}
     for (seed, bank), group in predictions.groupby(['seed', 'bank']):
         pivots = paired_frames(group)
         cache[(seed, bank)] = pivots
+        identity = case_identity(pivots['y'].index)
         arms = sorted(group.arm.unique())
         for comparator in COMPARATORS:
             for arm in arms:
@@ -175,7 +184,7 @@ def planning_table(predictions: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
                 for condition in CONDITIONS:
                     for estimand in ('absolute', 'degradation'):
                         rows.append({'seed': seed, 'regime': REGIME, 'bank': bank, 'arm': arm, 'comparator': comparator,
-                                     'condition': condition, 'estimand': estimand, 'positives': int(pivots['y'].sum()),
+                                     'condition': condition, 'estimand': estimand, 'positives': int(pivots['y'].sum()), **identity,
                                      **describe(contrast(pivots, arm, comparator, condition, estimand)),
                                      **discordance(pivots, arm, comparator, condition)})
     return pd.DataFrame(rows), cache
@@ -373,6 +382,8 @@ reconciles:
 
 {table(checks, ['bundle', 'estimand', 'rows', 'max_mean_difference', 'max_sd_difference', 'max_miss_difference'])}
 
+Each row records its exact scenario set by first/last ID and a SHA-256 of the
+sorted IDs ({rows.case_ids_sha256.nunique()} distinct scenario sets for {rows.bank.nunique()} banks).
 Each bank has 1,000 evaluation scenarios, the independent unit. The three
 800-scenario training subsets overlap the full-reference cohort; the four trials
 describe training sensitivity, not independent replication.
@@ -429,6 +440,10 @@ The Clopper-Pearson column is the one-sided 95% upper bound at the development
 rate; the last columns give the probability that it falls below each margin.
 
 {table(miss, ['id', 'endpoint', 'development_new_misses', 'development_recovered_misses', 'planned_scenarios', 'expected_positives', 'expected_upper_bound_at_development_rate', 'p_upper_bound_below_0.01', 'p_upper_bound_below_0.05'])}
+
+The bound is the exact one-sided Clopper-Pearson limit, `Beta^-1(0.95; k+1, n-k)`
+(Clopper and Pearson, Biometrika 26:404-413, 1934), as specified in Report 2
+§7.2. The tests check its zero-failure identity, `1 - 0.05^(1/n)`.
 
 These are not noninferiority endpoints. Reuse produces new misses in development,
 so the informative quantity is the estimated reuse-induced miss rate and its
