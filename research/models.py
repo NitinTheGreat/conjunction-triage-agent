@@ -17,7 +17,12 @@ class ProbabilityModel:
         self.arm,self.parameter,self.seed=arm,parameter,seed
         self.history = None
 
-    def fit(self, X, y, events, prepared=None):
+    def fit(self, X, y, events, prepared=None, event_weights=None):
+        if event_weights is not None:
+            event_weights = np.asarray(event_weights, dtype=float)
+            if (event_weights.shape != (len(y),) or not np.isfinite(event_weights).all()
+                    or np.any(event_weights <= 0)):
+                raise ValueError('Expected one finite positive weight per event variant')
         owners = np.arange(len(y)); weights = np.ones(len(y))
         if prepared is not None:
             self.history,X,owners,weights=prepared
@@ -25,10 +30,12 @@ class ProbabilityModel:
             self.history=HistoryTransformer(self.arm).fit(events)
             X,owners,weights=self.history.transform(events)
         elif self.arm=='latest':X=X[:,[0]]
+        if event_weights is not None:
+            weights = weights * event_weights[owners]
         if self.arm=='causal_gbm':
             self.model=HistGradientBoostingClassifier(max_iter=100,max_leaf_nodes=7,l2_regularization=self.parameter,
                                                       early_stopping=False,random_state=self.seed)
-            self.model.fit(X,y)
+            self.model.fit(X,y,sample_weight=weights)
         else:
             self.model=make_pipeline(SimpleImputer(strategy='median',add_indicator=True,keep_empty_features=True),
                 StandardScaler(),LogisticRegression(C=self.parameter,solver='lbfgs',max_iter=2000,random_state=self.seed))
