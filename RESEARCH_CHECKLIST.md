@@ -10,19 +10,19 @@ This is the live execution record. Update it as work happens. Checked preparatio
 
 | Field | Current checkpoint — replace after each work session |
 |---|---|
-| NOW | Sequence adaptation and latest-only capacity control complete: 304 fits, 285,600 candidate OOF values and 224,000 new forecasts audited. Three reports and manuscript updated. |
-| NEXT | Implement observable-provenance component ablations from docs/research/execution/provenance_component_plan.md; resolve tuning adequacy and precision before V03. |
-| Active task / owner | V02 IN PROGRESS. Sequence, covariance and separate state-fusion comparisons are complete on exposed banks. Component ablations, budget adequacy and precision remain. |
+| NOW | Provenance-component contract and four component transformers implemented; 20 construction tests pass. No component study fitting yet. |
+| NEXT | Implement and test the fixed 608-fit / 32-model component campaign, then reconstruct predictions and update reports. |
+| Active task / owner | V02 IN PROGRESS. Component feature/lineage tests pass; campaign and audit remain. Tuning adequacy and precision follow. |
 | Selected direction | **Track R, narrowed:** controlled robustness/measurement benchmark. Grouping remains a candidate and may be discarded if simpler controls explain results. |
 | Conditional extension | **Track E:** independent real-data efficacy, only after access and statistical requirements pass. |
 | Research blockers | None preventing V01/V02 preparation. Full methods for some close papers and independent operational data remain unavailable; no novelty or real efficacy claim is established. |
 | Current machine | Windows, PowerShell; repository at `F:\conjunction-triage`; Python environment at `.venv\Scripts\python.exe`. Paths elsewhere in this file are relative to the repository root. |
 | HEAD when this checklist was created | `89d7f2efb8bf135e02fa51760e0ed3bb33a105c9`; working tree contains pre-existing modifications and untracked files. |
-| Latest validation | 410 passed / 1 skipped in 64.59s; three targeted audit tests passed after final metadata checks. Six compact bundles / 56 artifacts pass hashes. Original 57 raw/historical and 8 frozen files unchanged. |
+| Latest validation | 20 component tests passed in 2.35s; previous full suite 410 passed / 1 skipped. |
 | New scientific runs | Completed development/reconstruction runs sequence_preflight_20261009_v1, sequence_20261010_v1 and sequence_summary_20261010_v1, plus earlier runs. No frozen scientific evaluation. |
 | Scientific holdout status | Seed 20261012 / scientific:00000..04999 reserved **but not generated**. Candidate anisotropic configuration and sample size still need V03 freeze. Kelvins and all pilot banks are exposed. |
 | Running jobs / processes | None from this milestone. Campaign, reconstruction/watcher and tests exited successfully; manifests retain start/end records. |
-| Next executable command | Get-Content -Encoding UTF8 docs/research/execution/provenance_component_plan.md; fix the component contract and construction tests before study fitting. No component runner CLI exists yet. |
+| Next executable command | Read docs/research/execution/component_contract.md and component_contract.json; implement the campaign against this fixed contract. |
 
 ### Copy this into the next assistant
 
