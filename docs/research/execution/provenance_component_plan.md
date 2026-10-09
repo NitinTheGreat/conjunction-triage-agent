@@ -1,4 +1,4 @@
-# Next V02 step: observable-provenance component ablations
+# V02 observable-provenance component ablations
 
 Prepared 10 October 2026 while the fixed sequence campaign runs. **Design work
 only; no component-ablation fit or scientific outcome access.** Read the audited
@@ -32,11 +32,13 @@ describe it otherwise in the paper.
    construction but remove their twelve predictor columns and corresponding
    missingness summaries. Name this limited intervention explicitly: OD still
    influences groups, so it is not a complete OD-information removal.
-4. **Remove OD entirely:** use a time-only partition family and exclude the OD
+4. **Remove OD after canonicalization:** use a time-only partition family and exclude the OD
    predictor/missingness columns. Compare with both the fixed/time-only control
    and the readout-only ablation. This distinguishes grouping inputs from
-   classifier inputs. Keep dimensions/preprocessing choices explicit rather
-   than silently reusing fitted coefficients.
+   classifier inputs conditional on the common canonical prefix. Raw OD fields
+   still affect upstream full-record deduplication and equal-time ordering; do
+   not claim unconditional independence from OD. Keep dimensions/preprocessing
+   choices explicit rather than silently reusing fitted coefficients.
 5. **Oracle-lineage weighting control:** on simulation only, consider allocation
    of each unique visible observation equally among messages containing it.
    With visible union U and multiplicity m(i), message weight is

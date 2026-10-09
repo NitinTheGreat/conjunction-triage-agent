@@ -89,6 +89,27 @@ It is an adaptation, not a reproduction or a claim of best current performance.
 The [fixed contract](../docs/research/execution/sequence_contract.md) records
 optimizer details, seeds, CPU settings, candidate selection and failure policy.
 
+Four component arms examine the existing logistic representation. Removing the
+eight age bins from latest, mean, variance and missingness blocks reduces 122
+columns to 90; the current OD/time grouping rule does not use these age bins.
+Removing twelve OD fields from those blocks leaves 74 columns, either retaining
+OD/time groups or using the existing time-only fixed family. Full-record
+canonicalization precedes removal, so the latter is an OD exclusion conditional
+on the common canonical prefix, not independence from all raw OD metadata.
+Each component is retuned with the same folds, candidate grid and scenario
+weights; differences include changes in fitted coefficients and selected C.
+
+A simulation-only lineage oracle changes just singleton mean/variance weights.
+Each unique visible observation divides one unit equally among the messages
+containing it; message allocations are normalized by the visible union size.
+Latest features, span, canonical count and missingness summaries remain fixed.
+Observation IDs determine weights but are not predictor columns. This rule is
+a descriptive privileged control, not physical posterior fusion or a bound on
+attainable forecast performance. Uniform allocations use the archived singleton
+arithmetic exactly. Changed time/age/count features mean burst invariance is not
+implied. The [component contract](../docs/research/execution/component_contract.md)
+specifies exclusions, canonicalization and failure checks.
+
 ### 4.2 Development versus scientific evaluation
 
 The first real-data pilot uses five stratified outer folds and three inner folds at the event level. Preprocessing and tuning remain within training folds. Inner out-of-fold predictions support calibration and nominal recall thresholds; outer predictions measure performance. The pilot does not establish independence across unidentified shared objects or missions.
