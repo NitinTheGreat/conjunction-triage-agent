@@ -1,0 +1,46 @@
+{
+  "frozen_files_unchanged": 8,
+  "metrics_reconstructed": true,
+  "outer_inner_event_disjoint": true,
+  "partition_max_reconstructed": true,
+  "raw_and_historical_files_unchanged": 57,
+  "real_prediction_rows": 91223,
+  "runs": [
+    {
+      "archived_sources_verified": 68,
+      "artifacts_verified": 173,
+      "inputs_verified": 4,
+      "run_id": "cv_20261009_v2",
+      "status": "complete"
+    },
+    {
+      "archived_sources_verified": 67,
+      "artifacts_verified": 10,
+      "inputs_verified": 11,
+      "run_id": "data_20261009_v2",
+      "status": "complete"
+    },
+    {
+      "archived_sources_verified": 70,
+      "artifacts_verified": 14,
+      "inputs_verified": 2,
+      "run_id": "two_stage_20261009_v1",
+      "status": "complete"
+    },
+    {
+      "archived_sources_verified": 68,
+      "artifacts_verified": 15,
+      "inputs_verified": 0,
+      "run_id": "simulation_20261009_v1",
+      "status": "complete"
+    },
+    {
+      "archived_sources_verified": 70,
+      "artifacts_verified": 20,
+      "inputs_verified": 10,
+      "run_id": "mechanism_20261009_v1",
+      "status": "complete"
+    }
+  ],
+  "scientific_reserved_outcomes_opened": false
+}

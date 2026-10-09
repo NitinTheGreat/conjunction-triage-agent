@@ -1,0 +1,17 @@
+{
+  "decision": "NARROW",
+  "next_falsifiable_claim": "With fixed final labels and matched latest messages, increasing observation reuse degrades a history model more than latest-only prediction; grouping must be assessed against absolute loss and distinct thinning/time controls.",
+  "next_tasks": [
+    "V01 closest-work compatibility review",
+    "V02 nondegenerate cadence controls, matched new-information training, oracle lineage ablation, and precision planning"
+  ],
+  "no_claims": [
+    "operational efficacy",
+    "physical collision probability prediction",
+    "one-percent miss guarantee",
+    "novelty established",
+    "scientific confirmation"
+  ],
+  "reason": "Mixed pilot performance, indistinguishable synthetic controls, and new-information distribution shift preclude a method-superiority claim.",
+  "route": "Track R robustness/measurement benchmark; proposed method remains a candidate"
+}

@@ -1,0 +1,5 @@
+bank,unique_observations,mean_squared_state_error,population
+software,10,0.017640404880333783,unweighted enriched stress scenarios
+software,60,0.003181757475306767,unweighted enriched stress scenarios
+bias_stress,10,0.03925584782732314,unweighted enriched stress scenarios
+bias_stress,60,0.02342421431838035,unweighted enriched stress scenarios

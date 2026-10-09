@@ -1,0 +1,121 @@
+{
+  "runs": [
+    {
+      "artifacts": {
+        "synthesis_20261009_v1__control_equivalence.json": {
+          "sha256": "af7c10fc6ac53d7cdb6c6761c4cf085c4b8e5fcf75395bef9ca48a65f2618958",
+          "source_artifact": "control_equivalence.json"
+        },
+        "synthesis_20261009_v1__feasibility.json": {
+          "sha256": "334e196992c83538bfa4eaeef076b6b977c52cce715ef1b85a684435a335c17f",
+          "source_artifact": "feasibility.json"
+        },
+        "synthesis_20261009_v1__integrity_audit.json": {
+          "sha256": "da7fb84a7c3b5a0960a5b7ade2c384f5a3c94be4a54754334127962a4dcf9929",
+          "source_artifact": "integrity_audit.json"
+        },
+        "synthesis_20261009_v1__new_information_state_check.csv": {
+          "sha256": "15b92de2d998edeb92c46ca00a442f0be26e4b2935c56e03bd193e38fa886a34",
+          "source_artifact": "new_information_state_check.csv"
+        },
+        "synthesis_20261009_v1__real_cv_metrics.csv": {
+          "sha256": "51eb1ec17b9710dcd84348daa13cc72b9ee3e5143594905e919c57ca06f76822",
+          "source_artifact": "real_cv_metrics.csv"
+        },
+        "synthesis_20261009_v1__real_paired_loss_differences.json": {
+          "sha256": "23f7b6031ef9ebc371480151aea020cbf333cd21636d3f50dfbfdbe6482ae4ba",
+          "source_artifact": "real_paired_loss_differences.json"
+        },
+        "synthesis_20261009_v1__simulation_contrasts.json": {
+          "sha256": "4486bcab1339f2826cdcbd046deb2ec7c6fcdd0b54d237cf8feb33721a0dccdf",
+          "source_artifact": "simulation_contrasts.json"
+        },
+        "synthesis_20261009_v1__simulation_metrics.csv": {
+          "sha256": "9fb6ba986bfce0dae721a5df77f1420e91b1932494d1b43ea9e222bcae66dcd2",
+          "source_artifact": "simulation_metrics.csv"
+        },
+        "synthesis_20261009_v1__two_stage_metrics.csv": {
+          "sha256": "71098382dbad6380b7069a50d4c21f700461e1d7191a8409d28a32b7a370eea1",
+          "source_artifact": "two_stage_metrics.csv"
+        }
+      },
+      "kind": "pilot_synthesis_and_integrity_audit",
+      "original_git_head": "89d7f2efb8bf135e02fa51760e0ed3bb33a105c9",
+      "original_manifest_sha256": "ecc960f4ab92ea2707f950c3fb49f1a5a59d00b9aa4fcab7e8d1e0f4e8485ae7",
+      "run_id": "synthesis_20261009_v1",
+      "scientific_status": "development_or_reconstruction_not_confirmation",
+      "source_archive_sha256": "c2aa545808e548c0f7821126ddba75929d5b7c1f32ffb192bf7d81dcb4bcc5cd",
+      "status": "complete"
+    },
+    {
+      "artifacts": {
+        "data_20261009_v2__crosswalk_summary.json": {
+          "sha256": "a5c397a8b3bca9a02dd604be824ea4accf933a32d4a2224e1b49ae7ac1a9118f",
+          "source_artifact": "crosswalk_summary.json"
+        },
+        "data_20261009_v2__data_summary.json": {
+          "sha256": "0dd0d36cc4bc7ef31a77ca7ce97cd6ed01bfceeb4a09ba98b7aa9a4a07f1f170",
+          "source_artifact": "data_summary.json"
+        }
+      },
+      "kind": "data_preparation",
+      "original_git_head": "89d7f2efb8bf135e02fa51760e0ed3bb33a105c9",
+      "original_manifest_sha256": "dc2ab070ae7b68e5c9ae06fffe60880ac43c2e27182f64117c081cae0463edb5",
+      "run_id": "data_20261009_v2",
+      "scientific_status": "development_or_reconstruction_not_confirmation",
+      "source_archive_sha256": "0be9d59161f5fb40db61906ba56d8429de2e48cb175e25428cfb0840eb4ee2e9",
+      "status": "complete"
+    },
+    {
+      "artifacts": {
+        "cv_20261009_v2__historical_anchors.json": {
+          "sha256": "8d197b41dec6e44a81d86124d20e1399a426a02f6e5d5759426ec901cbbcf21f",
+          "source_artifact": "historical_anchors.json"
+        }
+      },
+      "kind": "nested_development_evaluation",
+      "original_git_head": "89d7f2efb8bf135e02fa51760e0ed3bb33a105c9",
+      "original_manifest_sha256": "2b31aad5a179bd6b63800ca015ddb5560f4ffed99650995f17190a2936d2668c",
+      "run_id": "cv_20261009_v2",
+      "scientific_status": "development_or_reconstruction_not_confirmation",
+      "source_archive_sha256": "02479c6ecc60e4457fcc0ce457646279876f9210c59c93b20a24caeca27a1d15",
+      "status": "complete"
+    },
+    {
+      "artifacts": {
+        "simulation_20261009_v1__reservation.json": {
+          "sha256": "3eb391765516d87bafbce1d7ed9d27bb24c4ceef2a2fbd346f698c8354709753",
+          "source_artifact": "reservation.json"
+        },
+        "simulation_20261009_v1__validation.json": {
+          "sha256": "bb3e87469b06ee45aae35715fbf9b2a409372075cc988afe6f3a5a6469e652bc",
+          "source_artifact": "validation.json"
+        }
+      },
+      "kind": "simulation_software_pilot",
+      "original_git_head": "89d7f2efb8bf135e02fa51760e0ed3bb33a105c9",
+      "original_manifest_sha256": "7416baf5f37e686ca3cba2b5066f4a41be606616d84d462a5f83836338231890",
+      "run_id": "simulation_20261009_v1",
+      "scientific_status": "development_or_reconstruction_not_confirmation",
+      "source_archive_sha256": "e90eb1aa6529862057986fd44f9768d12e74e2bdc3631f03bc1694ab110c545d",
+      "status": "complete"
+    },
+    {
+      "artifacts": {
+        "verify_two_stage_20261009_v1__verification.json": {
+          "sha256": "474fbf170c44a8e35af95d099d2306c22895e36f4dcc228c94b58f34c68bbbca",
+          "source_artifact": "verification.json"
+        }
+      },
+      "kind": "two_stage_reconstruction",
+      "original_git_head": "89d7f2efb8bf135e02fa51760e0ed3bb33a105c9",
+      "original_manifest_sha256": "2e175bbf521567589d95d5cedc034cf70704de914b9359fe95d09cca8deb2769",
+      "run_id": "verify_two_stage_20261009_v1",
+      "scientific_status": "development_or_reconstruction_not_confirmation",
+      "source_archive_sha256": "181cf1bc897ddbcab745aba5f0e00007f4e2fe3893637b6918778541bd22dc65",
+      "status": "complete"
+    }
+  ],
+  "schema_version": 1,
+  "scope": "Compact development evidence; source predictions, models and source archives remain in local ignored run directories."
+}

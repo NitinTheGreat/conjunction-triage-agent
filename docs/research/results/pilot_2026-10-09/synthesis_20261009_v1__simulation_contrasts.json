@@ -1,0 +1,442 @@
+{
+  "bias_stress/new_information/grouped_minus_fixed": {
+    "ci95_percentile": [
+      0.04020515026650472,
+      0.09942365023835506
+    ],
+    "mean": 0.06834967408798127,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "bias_stress/new_information/grouped_minus_latest": {
+    "ci95_percentile": [
+      -0.6387680076072679,
+      -0.32423371580195876
+    ],
+    "mean": -0.47766344484445417,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "bias_stress/new_information/grouped_minus_random": {
+    "ci95_percentile": [
+      0.0013515967029588312,
+      0.08351718050548788
+    ],
+    "mean": 0.04098058703482941,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "bias_stress/new_information/grouped_minus_singleton": {
+    "ci95_percentile": [
+      0.0402051502703584,
+      0.09942365024336412
+    ],
+    "mean": 0.0683496740927537,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "bias_stress/new_information/grouped_minus_thin": {
+    "ci95_percentile": [
+      0.0402051502703584,
+      0.09942365024336412
+    ],
+    "mean": 0.0683496740927537,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "bias_stress/overlap_50/grouped_minus_fixed": {
+    "ci95_percentile": [
+      -0.0016044456051079843,
+      0.04273881072029628
+    ],
+    "mean": 0.020477980985045007,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "bias_stress/overlap_50/grouped_minus_latest": {
+    "ci95_percentile": [
+      -0.058135246572338525,
+      0.047479651591480224
+    ],
+    "mean": -0.005300066789153766,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "bias_stress/overlap_50/grouped_minus_random": {
+    "ci95_percentile": [
+      -0.02241650996270657,
+      0.03791291106508451
+    ],
+    "mean": 0.008363029164548706,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "bias_stress/overlap_50/grouped_minus_singleton": {
+    "ci95_percentile": [
+      -0.0016044456052353342,
+      0.04273881072081266
+    ],
+    "mean": 0.02047798098535266,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "bias_stress/overlap_50/grouped_minus_thin": {
+    "ci95_percentile": [
+      -0.0016044456052353342,
+      0.04273881072081266
+    ],
+    "mean": 0.02047798098535266,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "bias_stress/overlap_90/grouped_minus_fixed": {
+    "ci95_percentile": [
+      0.04572860029599997,
+      0.10256208637915393
+    ],
+    "mean": 0.0743517874944755,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "bias_stress/overlap_90/grouped_minus_latest": {
+    "ci95_percentile": [
+      -0.17120014871610184,
+      0.035447559062462844
+    ],
+    "mean": -0.0699255422637922,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "bias_stress/overlap_90/grouped_minus_random": {
+    "ci95_percentile": [
+      -0.09018406086089036,
+      -0.011014673816682252
+    ],
+    "mean": -0.04889362763497282,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "bias_stress/overlap_90/grouped_minus_singleton": {
+    "ci95_percentile": [
+      0.045728600299181424,
+      0.10256208638340517
+    ],
+    "mean": 0.07435178749806405,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "bias_stress/overlap_90/grouped_minus_thin": {
+    "ci95_percentile": [
+      0.045728600299181424,
+      0.10256208638340517
+    ],
+    "mean": 0.07435178749806405,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "bias_stress/solution_reissue/grouped_minus_fixed": {
+    "ci95_percentile": [
+      0.07364916486341529,
+      0.12523876180568128
+    ],
+    "mean": 0.09873091525636013,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "bias_stress/solution_reissue/grouped_minus_latest": {
+    "ci95_percentile": [
+      -0.22654624956478314,
+      -0.01011601679122657
+    ],
+    "mean": -0.1189684497970946,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "bias_stress/solution_reissue/grouped_minus_random": {
+    "ci95_percentile": [
+      -0.13060334156815495,
+      -0.05429934349000034
+    ],
+    "mean": -0.09070865035210089,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "bias_stress/solution_reissue/grouped_minus_singleton": {
+    "ci95_percentile": [
+      0.07364916486774481,
+      0.12523876181121107
+    ],
+    "mean": 0.09873091526156477,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "bias_stress/solution_reissue/grouped_minus_thin": {
+    "ci95_percentile": [
+      0.07364916486774481,
+      0.12523876181121107
+    ],
+    "mean": 0.09873091526156477,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "software/new_information/grouped_minus_fixed": {
+    "ci95_percentile": [
+      -0.01422335954498602,
+      0.0007954915251793951
+    ],
+    "mean": -0.006699772539037787,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "software/new_information/grouped_minus_latest": {
+    "ci95_percentile": [
+      0.09120839962027705,
+      0.15644084494807617
+    ],
+    "mean": 0.1230803337849519,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "software/new_information/grouped_minus_random": {
+    "ci95_percentile": [
+      -0.03588152443799172,
+      -0.00893214035915445
+    ],
+    "mean": -0.022798620846299127,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "software/new_information/grouped_minus_singleton": {
+    "ci95_percentile": [
+      -0.014223359544598317,
+      0.0007954915258008869
+    ],
+    "mean": -0.00669977253849197,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "software/new_information/grouped_minus_thin": {
+    "ci95_percentile": [
+      -0.014223359544598317,
+      0.0007954915258008869
+    ],
+    "mean": -0.00669977253849197,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "software/overlap_50/grouped_minus_fixed": {
+    "ci95_percentile": [
+      -0.009291983307285201,
+      0.003754850432226206
+    ],
+    "mean": -0.002821270000960977,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "software/overlap_50/grouped_minus_latest": {
+    "ci95_percentile": [
+      0.020714217931372302,
+      0.05710080516463037
+    ],
+    "mean": 0.03829136366797537,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "software/overlap_50/grouped_minus_random": {
+    "ci95_percentile": [
+      -0.007878305286528242,
+      0.014830166555081225
+    ],
+    "mean": 0.002806448986773959,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "software/overlap_50/grouped_minus_singleton": {
+    "ci95_percentile": [
+      -0.009291983307615173,
+      0.003754850432000203
+    ],
+    "mean": -0.0028212700012653115,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "software/overlap_50/grouped_minus_thin": {
+    "ci95_percentile": [
+      -0.009291983307615173,
+      0.003754850432000203
+    ],
+    "mean": -0.0028212700012653115,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "software/overlap_90/grouped_minus_fixed": {
+    "ci95_percentile": [
+      -0.03007344358492331,
+      -0.0075396942819202705
+    ],
+    "mean": -0.01840456091350415,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "software/overlap_90/grouped_minus_latest": {
+    "ci95_percentile": [
+      0.10371668713253264,
+      0.18146358654844266
+    ],
+    "mean": 0.14140489196578448,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "software/overlap_90/grouped_minus_random": {
+    "ci95_percentile": [
+      -0.04793729592777519,
+      -0.018016385032244953
+    ],
+    "mean": -0.03286033061131684,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "software/overlap_90/grouped_minus_singleton": {
+    "ci95_percentile": [
+      -0.030073443585694803,
+      -0.007539694282015506
+    ],
+    "mean": -0.018404560913935365,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "software/overlap_90/grouped_minus_thin": {
+    "ci95_percentile": [
+      -0.030073443585694803,
+      -0.007539694282015506
+    ],
+    "mean": -0.018404560913935365,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "software/solution_reissue/grouped_minus_fixed": {
+    "ci95_percentile": [
+      -0.024152094710172257,
+      -0.0028110937967802674
+    ],
+    "mean": -0.013146411280441434,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "software/solution_reissue/grouped_minus_latest": {
+    "ci95_percentile": [
+      0.1525620392985805,
+      0.2565656425778053
+    ],
+    "mean": 0.2042796784138095,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "software/solution_reissue/grouped_minus_random": {
+    "ci95_percentile": [
+      -0.06034938849549628,
+      -0.03002067889357265
+    ],
+    "mean": -0.045161916830580635,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "software/solution_reissue/grouped_minus_singleton": {
+    "ci95_percentile": [
+      -0.024152094710916543,
+      -0.0028110937967422054
+    ],
+    "mean": -0.013146411280730502,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  },
+  "software/solution_reissue/grouped_minus_thin": {
+    "ci95_percentile": [
+      -0.024152094710916543,
+      -0.0028110937967422054
+    ],
+    "mean": -0.013146411280730502,
+    "n_independent_units_assumed": 1000,
+    "resamples": 2000,
+    "scope": "descriptive paired event/scenario bootstrap; not a rare-event risk certificate",
+    "seed": 20261009
+  }
+}

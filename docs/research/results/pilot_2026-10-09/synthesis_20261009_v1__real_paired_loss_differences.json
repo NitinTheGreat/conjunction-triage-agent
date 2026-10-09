@@ -1,0 +1,15 @@
+{
+  "grouped_minus_comparator": {
+    "causal_gbm": 0.005646056146488545,
+    "causal_logistic": 0.002283881280036915,
+    "change": 0.0003392984463756123,
+    "fixed": 0.0004483430860944187,
+    "ignore_updates": -0.006759138556895354,
+    "latest": 0.002669208282683813,
+    "latest_metadata": 0.0033601235852945294,
+    "random": 0.00024002553510211452,
+    "singleton": 0.00034195372417926667,
+    "thin": 0.00036975979312994393
+  },
+  "uncertainty": "Point estimates only; no independent-event confidence claim from overlapping training folds."
+}

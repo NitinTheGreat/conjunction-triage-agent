@@ -1,0 +1,19 @@
+{
+  "development": {
+    "ids": "development:00000..00999",
+    "seed": 20261010
+  },
+  "rule": "whole latent scenarios; all message/window variants stay in the same bank",
+  "scientific_reserved": {
+    "candidate_unseen_configuration": "anisotropic observation noise variance ratio 4, rotated 30 degrees",
+    "generated": false,
+    "ids": "scientific:00000..04999",
+    "sample_size_and_configuration_freeze": "V03 still required before generation/evaluation",
+    "seed": 20261012
+  },
+  "software_validation": {
+    "ids": "software:00000..00999",
+    "seed": 20261011
+  },
+  "written_before_generation": true
+}

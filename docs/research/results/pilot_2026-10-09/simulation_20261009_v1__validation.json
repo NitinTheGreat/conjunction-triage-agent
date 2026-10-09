@@ -1,0 +1,42 @@
+{
+  "banks": {
+    "bias_stress": {
+      "messages": 48000,
+      "positives": 326,
+      "scenarios": 1000
+    },
+    "development": {
+      "messages": 48000,
+      "positives": 180,
+      "scenarios": 1000
+    },
+    "software": {
+      "messages": 48000,
+      "positives": 194,
+      "scenarios": 1000
+    }
+  },
+  "integration_checks": [
+    {
+      "absolute_difference": 3.8163916471489756e-17,
+      "independent": 0.019606254160979046,
+      "main": 0.019606254160979008
+    },
+    {
+      "absolute_difference": 1.2265037076242269e-18,
+      "independent": 6.203091050965984e-06,
+      "main": 6.20309105096721e-06
+    },
+    {
+      "absolute_difference": 2.7755575615628914e-17,
+      "independent": 0.01343729262653472,
+      "main": 0.013437292626534692
+    }
+  ],
+  "limitations": [
+    "No orbital dynamics validation",
+    "Simulated conditional mechanism only",
+    "Enriched synthetic prevalence"
+  ],
+  "scientific_bank_generated": false
+}
