@@ -7,6 +7,9 @@
 # Test fixtures are compared byte-for-byte and must never be rewritten.
 tests/fixtures/*.csv -text
 
+# Research exports preserve the exact bytes recorded in provenance hashes.
+docs/research/results/** -text
+
 # Binary
 *.pdf binary
 *.png binary
