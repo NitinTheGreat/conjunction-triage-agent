@@ -13,8 +13,9 @@ from research.history import HistoryTransformer
 
 
 class ProbabilityModel:
-    def __init__(self, arm: str, parameter: float, seed: int):
+    def __init__(self, arm: str, parameter: float, seed: int, max_iter: int = 2000):
         self.arm,self.parameter,self.seed=arm,parameter,seed
+        self.max_iter = max_iter
         self.history = None
 
     def fit(self, X, y, events, prepared=None, event_weights=None):
@@ -38,7 +39,7 @@ class ProbabilityModel:
             self.model.fit(X,y,sample_weight=weights)
         else:
             self.model=make_pipeline(SimpleImputer(strategy='median',add_indicator=True,keep_empty_features=True),
-                StandardScaler(),LogisticRegression(C=self.parameter,solver='lbfgs',max_iter=2000,random_state=self.seed))
+                StandardScaler(),LogisticRegression(C=self.parameter,solver='lbfgs',max_iter=self.max_iter,random_state=self.seed))
             self.model.fit(X,y[owners],logisticregression__sample_weight=weights)
         return self
 

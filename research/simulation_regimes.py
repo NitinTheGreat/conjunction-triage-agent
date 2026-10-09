@@ -5,10 +5,12 @@ import argparse
 import json
 from pathlib import Path
 import time
+import warnings
 
 import joblib
 import numpy as np
 import pandas as pd
+from sklearn.exceptions import ConvergenceWarning
 
 from research.artifacts import Run, read_table, sha256, write_json, write_table
 from research.evaluate import folds
@@ -59,10 +61,20 @@ def scenario_folds(frame, requested=3, seed=20261022):
     return result
 
 
-def fit_arm(frame, events, X, arm, splits, grid, seed):
+def fit_arm(frame, events, X, arm, splits, grid, seed, max_iter=2000, require_convergence=False):
     start = time.perf_counter()
     y, weights = frame.y.to_numpy(), frame.event_weight.to_numpy()
     oof = {c: np.full(len(y), np.nan) for c in grid}
+    iterations = []
+
+    def fit_model(c, model_seed, xx, yy, ee, ww, prepared=None):
+        with warnings.catch_warnings():
+            if require_convergence:
+                warnings.simplefilter('error', ConvergenceWarning)
+            fitted = ProbabilityModel(arm, c, model_seed, max_iter=max_iter).fit(
+                xx, yy, ee, prepared=prepared, event_weights=ww)
+        iterations.append(int(np.max(fitted.model[-1].n_iter_)))
+        return fitted
     for k, (fit, valid) in enumerate(splits):
         ef, ev = [events[i] for i in fit], [events[i] for i in valid]
         prepared = prepared_valid = None
@@ -71,8 +83,7 @@ def fit_arm(frame, events, X, arm, splits, grid, seed):
             prepared = (transform, *transform.transform(ef))
             prepared_valid = transform.transform(ev)
         for c in grid:
-            model = ProbabilityModel(arm, c, seed+k).fit(
-                X[fit], y[fit], ef, prepared=prepared, event_weights=weights[fit])
+            model = fit_model(c, seed+k, X[fit], y[fit], ef, weights[fit], prepared)
             oof[c][valid] = model.predict(X[valid], ev, prepared=prepared_valid)
     if any(not np.isfinite(q).all() for q in oof.values()):
         raise ValueError('Incomplete OOF coverage')
@@ -82,13 +93,14 @@ def fit_arm(frame, events, X, arm, splits, grid, seed):
     # equally weighted scenario/uniform-condition mixture for these two steps.
     calibration = MonotonePlatt().fit(oof[chosen], y)
     threshold = policy_threshold(calibration.predict(oof[chosen]), y, .95)
-    model = ProbabilityModel(arm, chosen, seed).fit(X, y, events, event_weights=weights)
+    model = fit_model(chosen, seed, X, y, events, weights)
     selection = {'arm': arm, 'C': chosen, 'inner_scores': {str(c): v for c, v in scores.items()},
         'calibration_slope': calibration.slope, 'calibration_intercept': calibration.intercept,
         'threshold95': threshold, 'seconds': time.perf_counter()-start,
         'training_scenarios': int(frame.series_id.nunique()), 'training_variant_rows': len(frame),
         'positive_training_scenarios': int(frame.drop_duplicates('series_id').y.sum()),
-        'objective_weight_sum': float(weights.sum())}
+        'objective_weight_sum': float(weights.sum()), 'max_iter': max_iter,
+        'maximum_observed_iterations': max(iterations), 'convergence_required': require_convergence}
     saved = {'model': model, 'calibration': calibration, 'threshold95': threshold}
     return saved, selection, oof[chosen]
 
