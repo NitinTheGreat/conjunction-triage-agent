@@ -10,19 +10,19 @@ This is the live execution record. Update it as work happens. Checked preparatio
 
 | Field | Current checkpoint — replace after each work session |
 |---|---|
-| NOW | V02 state-fusion/oracle diagnostics complete: 138,000 canonical messages and 126,000 state records reconstructed exactly. All three reports and manuscript status updated. |
-| NEXT | Start sequence-adaptation dependency and compute-budget preflight from docs/research/execution/sequence_adaptation_plan.md. Then complete sequence fits, observable-provenance component ablations and precision planning. |
-| Active task / owner | V02 remains IN PROGRESS. Covariance weighting and separate state-fusion/oracle diagnostics are complete on exposed banks. No sequence model has been trained; PyTorch is absent from the current environment. |
+| NOW | Sequence CPU/synthetic preflight and 12 boundary tests pass. Fixed six-candidate contract recorded before study fitting; see docs/research/execution/sequence_contract.md. |
+| NEXT | Complete sequence campaign runner and fold/calibration tests; run fixed 304-fit / 16-model campaign, reconstruct results, then provenance-component ablations and precision planning. |
+| Active task / owner | V02 IN PROGRESS. PyTorch 2.14.1+cpu installed; no sequence study fit yet. History/latest-only tensor model and synthetic preflight implemented. |
 | Selected direction | **Track R, narrowed:** controlled robustness/measurement benchmark. Grouping remains a candidate and may be discarded if simpler controls explain results. |
 | Conditional extension | **Track E:** independent real-data efficacy, only after access and statistical requirements pass. |
 | Research blockers | None preventing V01/V02 preparation. Full methods for some close papers and independent operational data remain unavailable; no novelty or real efficacy claim is established. |
 | Current machine | Windows, PowerShell; repository at `F:\conjunction-triage`; Python environment at `.venv\Scripts\python.exe`. Paths elsewhere in this file are relative to the repository root. |
 | HEAD when this checklist was created | `89d7f2efb8bf135e02fa51760e0ed3bb33a105c9`; working tree contains pre-existing modifications and untracked files. |
-| Latest validation | 392 passed, 1 skipped in 59.53s. Exact source reconstruction, replay/oracle identities and 21,000 CI weight vectors pass. Five compact bundles / 47 artifacts pass hashes; original 57 raw/historical and 8 frozen files unchanged. |
+| Latest validation | Sequence boundary tests: 12 passed in 16.93s; synthetic repeat-fit/padding bitwise pass; pip check passes before/after. Previous full suite: 392 passed / 1 skipped. |
 | New scientific runs | Completed development/reconstruction runs fusion_20261009_v1 and fusion_summary_20261009_v1, plus earlier covariance/tuning/regime/pilot runs. No frozen scientific evaluation. |
 | Scientific holdout status | Seed 20261012 / scientific:00000..04999 reserved **but not generated**. Candidate anisotropic configuration and sample size still need V03 freeze. Kelvins and all pilot banks are exposed. |
-| Running jobs / processes | None from this milestone. Fusion campaign, reconstruction and full tests exited successfully; manifests retain original process/start/end records. |
-| Next executable command | `Get-Content -Encoding UTF8 docs/research/execution/sequence_adaptation_plan.md`; inspect requirements.txt and verify a supported local CPU dependency/budget before implementation. No sequence runner CLI exists yet. |
+| Running jobs / processes | None. Installer, synthetic preflight and targeted tests exited successfully. |
+| Next executable command | Read docs/research/execution/sequence_contract.md and sequence_contract.json; finish campaign runner and tests before the first study fit. |
 
 ### Copy this into the next assistant
 
@@ -567,3 +567,12 @@ capacity from history information. No sequence CLI exists yet; do not invent one
 Observable-provenance component ablations and precision planning also remain.
 V02 stays unchecked; state-oracle diagnostics do not replace class-forecast
 component ablations.
+
+### Sequence preflight checkpoint - 9 October 2026
+
+- [x] Install optional CPU dependency and verify deterministic/masked synthetic training.
+- [x] Implement visible-prefix and latest-only LSTM with safe weight/preprocessor checkpoints.
+- [x] Fix widths 8/16/32 crossed with 20/60 epochs before study fitting.
+- [ ] Complete the 304-fit campaign and reconstruction; no study result exists at this checkpoint.
+
+Evidence: [contract](docs/research/execution/sequence_contract.md), [settings](docs/research/execution/sequence_contract.json), [synthetic environment/timing](docs/research/execution/sequence_preflight.json). Exact next step is runner/fold-audit implementation. Scientific reservation unopened; V02 remains open.

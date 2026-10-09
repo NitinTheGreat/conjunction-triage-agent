@@ -1,0 +1,4 @@
+# Optional CPU-only research dependency; install after requirements.txt.
+# python -m pip install -r requirements-sequence.txt
+--index-url https://download.pytorch.org/whl/cpu
+torch==2.14.1+cpu

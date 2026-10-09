@@ -1,6 +1,7 @@
 # Next V02 step: a bounded sequence-family adaptation
 
-Prepared 9 October 2026. **Planning only; no neural comparator has been trained.**
+Prepared 9 October 2026. **Preflight complete; no study-data neural comparator has been trained.**
+See [fixed implementation contract](sequence_contract.md) and [synthetic evidence](sequence_preflight.json).
 This follows the [V01 compatibility decision](closest_work_comparison.md).
 It adapts an accessible LSTM family to the final recorded-risk class; it will not
 reproduce Pinto's next-message MSE experiment or establish state-of-the-art status.
@@ -53,12 +54,12 @@ overlapping 800-scenario subsets. Retain all bias/reuse/new-information conditio
 
 ## Acceptance checklist
 
-- [ ] Record an exact compatible local dependency version and pass an import,
+- [x] Record an exact compatible local dependency version and pass an import,
   tensor and deterministic CPU smoke test without touching study outcomes.
-- [ ] Run the synthetic timing benchmark and commit the fixed training/budget
+- [x] Run the synthetic timing benchmark and commit the fixed training/budget
   contract before the first study fit. Record how its tuning budget differs
   from the logistic family, even if candidate counts match.
-- [ ] Implement history and latest-only tensor construction, chronological
+- [x] Implement history and latest-only tensor construction, chronological
   ordering, padding masks and training-only preprocessing.
 - [ ] Test padding invariance, exact replay/order invariance, future-message
   mutations, loss weighting, finite outputs, deterministic evaluation, and
@@ -76,5 +77,5 @@ overlapping 800-scenario subsets. Retain all bias/reuse/new-information conditio
 
 After this adaptation, complete observable-provenance component ablations and
 precision planning. State-fusion/oracle diagnostics do not replace those class
-forecasting experiments. There is no sequence runner CLI yet; the first action
-is dependency/budget preflight, not a guessed training command.
+forecasting experiments. The dependency/budget preflight is complete. Next implement and test the
+whole-scenario campaign runner against the committed contract before fitting.

@@ -1,0 +1,184 @@
+{
+  "benchmark": [
+    {
+      "epoch_training_loss": [
+        0.6936407370567321,
+        0.6927359294891358,
+        0.691746413230896
+      ],
+      "hidden": 8,
+      "initialization_seed": 20261050,
+      "maximum_length": 1,
+      "minibatch_seed": 21261050,
+      "parameters": 2825,
+      "seconds": 0.26738669991027564
+    },
+    {
+      "epoch_training_loss": [
+        0.6936756381988526,
+        0.6925447244644165,
+        0.6911666378974914
+      ],
+      "hidden": 8,
+      "initialization_seed": 20261050,
+      "maximum_length": 10,
+      "minibatch_seed": 21261050,
+      "parameters": 2825,
+      "seconds": 0.9963935000123456
+    },
+    {
+      "epoch_training_loss": [
+        0.6932000041007995,
+        0.6923357872962952,
+        0.6908106846809388
+      ],
+      "hidden": 16,
+      "initialization_seed": 20261050,
+      "maximum_length": 1,
+      "minibatch_seed": 21261050,
+      "parameters": 7185,
+      "seconds": 0.2688354999991134
+    },
+    {
+      "epoch_training_loss": [
+        0.6934352073669433,
+        0.6921612672805786,
+        0.6896110296249389
+      ],
+      "hidden": 16,
+      "initialization_seed": 20261050,
+      "maximum_length": 10,
+      "minibatch_seed": 21261050,
+      "parameters": 7185,
+      "seconds": 0.8213335999753326
+    },
+    {
+      "epoch_training_loss": [
+        0.693537112236023,
+        0.6913983564376831,
+        0.6870779790878296
+      ],
+      "hidden": 32,
+      "initialization_seed": 20261050,
+      "maximum_length": 1,
+      "minibatch_seed": 21261050,
+      "parameters": 20513,
+      "seconds": 0.29729140002746135
+    },
+    {
+      "epoch_training_loss": [
+        0.6933918933868408,
+        0.6907095003128052,
+        0.6836173892021179
+      ],
+      "hidden": 32,
+      "initialization_seed": 20261050,
+      "maximum_length": 10,
+      "minibatch_seed": 21261050,
+      "parameters": 20513,
+      "seconds": 1.0471704999217764
+    }
+  ],
+  "deterministic_algorithms": true,
+  "numpy_bridge": "pass",
+  "padding_invariance": "bitwise pass",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "python": "3.11.9",
+  "repeat_fit": "bitwise pass",
+  "study_data_opened": false,
+  "synthetic_only": true,
+  "threads": 2,
+  "timing_scope": "training loop only; initialization/preprocessing/checkpoint/evaluation excluded",
+  "torch_cuda_version": null,
+  "versions": {
+    "filelock": "3.32.3",
+    "fsspec": "2026.7.0",
+    "jinja2": "3.1.6",
+    "networkx": "3.6.1",
+    "numpy": "2.4.6",
+    "scikit-learn": "1.9.0",
+    "setuptools": "78.1.0",
+    "sympy": "1.14.0",
+    "torch": "2.14.1+cpu"
+  },
+  "source_run": "processed\\research\\sequence_preflight_20261009_v1",
+  "source_manifest_sha256": "4372557b28c163799ceca97cab6be93e855ae22bd004fc653a6864650af4ddd7",
+  "preflight_sha256": "2766fd05aaa449b8d6080c151c0954c3edeae2bc9b38c248c47a03fe43db83c4",
+  "pip_check_before": "No broken requirements found.",
+  "pip_check_after": "No broken requirements found.",
+  "boundary_tests": "12 passed in 16.93s",
+  "installed_wheels": [
+    {
+      "name": "torch",
+      "version": "2.14.1+cpu",
+      "url": "https://download-r2.pytorch.org/whl/cpu/torch-2.14.1%2Bcpu-cp311-cp311-win_amd64.whl",
+      "hashes": {
+        "sha256": "d14b0c8a66345b7ba43adfa86fc20d89087a0a92e440004755d49d2468ddc6e0"
+      }
+    },
+    {
+      "name": "fsspec",
+      "version": "2026.7.0",
+      "url": "https://files.pythonhosted.org/packages/fd/3c/6a2bf344106328fd04963664a60b9bb6496fc25df8e962fcdc1367285fb9/fsspec-2026.7.0-py3-none-any.whl",
+      "hashes": {
+        "sha256": "b57ddbafedfaef7018c1ecab32aa200a9d7ca26b77965f64e48b70061249d279"
+      }
+    },
+    {
+      "name": "networkx",
+      "version": "3.6.1",
+      "url": "https://files.pythonhosted.org/packages/9e/c9/b2622292ea83fbb4ec318f5b9ab867d0a28ab43c5717bb85b0a5f6b3b0a4/networkx-3.6.1-py3-none-any.whl",
+      "hashes": {
+        "sha256": "d47fbf302e7d9cbbb9e2555a0d267983d2aa476bac30e90dfbe5669bd57f3762"
+      }
+    },
+    {
+      "name": "setuptools",
+      "version": "78.1.0",
+      "url": "https://download.pytorch.org/whl/setuptools-78.1.0-py3-none-any.whl",
+      "hashes": {
+        "sha256": "3e386e96793c8702ae83d17b853fb93d3e09ef82ec62722e61da5cd22376dcd8"
+      }
+    },
+    {
+      "name": "sympy",
+      "version": "1.14.0",
+      "url": "https://files.pythonhosted.org/packages/a2/09/77d55d46fd61b4a135c444fc97158ef34a095e5681d0a6c10b75bf356191/sympy-1.14.0-py3-none-any.whl",
+      "hashes": {
+        "sha256": "e091cc3e99d2141a0ba2847328f5479b05d94a6635cb96148ccb3f34671bd8f5"
+      }
+    },
+    {
+      "name": "filelock",
+      "version": "3.32.3",
+      "url": "https://files.pythonhosted.org/packages/a7/8e/50f46a9c0ce8d2861a394c1347caae037ea0431d2f67d7feb151cbc4649a/filelock-3.32.3-py3-none-any.whl",
+      "hashes": {
+        "sha256": "7f0ca4bcc0e181c60dbbd8aa9ab5b120ebb99e4e064e83636340056f833a1f09"
+      }
+    },
+    {
+      "name": "Jinja2",
+      "version": "3.1.6",
+      "url": "https://download.pytorch.org/whl/jinja2-3.1.6-py3-none-any.whl",
+      "hashes": {
+        "sha256": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67"
+      }
+    },
+    {
+      "name": "MarkupSafe",
+      "version": "3.0.3",
+      "url": "https://download.pytorch.org/whl/markupsafe-3.0.3-cp311-cp311-win_amd64.whl",
+      "hashes": {
+        "sha256": "de8a88e63464af587c950061a5e6a67d3632e36df62b986892331d4620a35c01"
+      }
+    },
+    {
+      "name": "mpmath",
+      "version": "1.3.0",
+      "url": "https://files.pythonhosted.org/packages/43/e3/7d92a15f894aa0c9c4b49b8ee9ac9850d6e63b03c9c32c0367a13ae62209/mpmath-1.3.0-py3-none-any.whl",
+      "hashes": {
+        "sha256": "a0b2b9fe80bbcd81a6647ff13108738cfb482d481d826cc0e02f5b35e5c88d2c"
+      }
+    }
+  ]
+}
