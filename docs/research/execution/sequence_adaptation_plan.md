@@ -1,6 +1,6 @@
 # Next V02 step: a bounded sequence-family adaptation
 
-Prepared 9 October 2026. **Preflight complete; no study-data neural comparator has been trained.**
+Prepared 9 October 2026. **Preflight and implementation complete; the declared study campaign is running.**
 See [fixed implementation contract](sequence_contract.md) and [synthetic evidence](sequence_preflight.json).
 This follows the [V01 compatibility decision](closest_work_comparison.md).
 It adapts an accessible LSTM family to the final recorded-risk class; it will not
@@ -61,7 +61,7 @@ overlapping 800-scenario subsets. Retain all bias/reuse/new-information conditio
   from the logistic family, even if candidate counts match.
 - [x] Implement history and latest-only tensor construction, chronological
   ordering, padding masks and training-only preprocessing.
-- [ ] Test padding invariance, exact replay/order invariance, future-message
+- [x] Test padding invariance, exact replay/order invariance, future-message
   mutations, loss weighting, finite outputs, deterministic evaluation, and
   separation of fit/OOF/calibration cases. Save model metadata and checkpoints
   without pickling unaudited third-party source.
@@ -77,5 +77,7 @@ overlapping 800-scenario subsets. Retain all bias/reuse/new-information conditio
 
 After this adaptation, complete observable-provenance component ablations and
 precision planning. State-fusion/oracle diagnostics do not replace those class
-forecasting experiments. The dependency/budget preflight is complete. Next implement and test the
-whole-scenario campaign runner against the committed contract before fitting.
+forecasting experiments. The campaign CLI is `python -m research.sequence_campaign --run-id sequence_20261010_v1`.
+It is already running at this checkpoint: inspect its manifest/progress, do not
+launch a duplicate. After completion use `research.summarize_sequence` to audit
+all checkpoints and export the comparisons.

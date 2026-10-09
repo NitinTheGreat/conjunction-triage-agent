@@ -10,19 +10,19 @@ This is the live execution record. Update it as work happens. Checked preparatio
 
 | Field | Current checkpoint — replace after each work session |
 |---|---|
-| NOW | Sequence CPU/synthetic preflight and 12 boundary tests pass. Fixed six-candidate contract recorded before study fitting; see docs/research/execution/sequence_contract.md. |
+| NOW | Fixed-budget sequence campaign sequence_20261010_v1 is RUNNING. Contract bde47ec preceded study fitting; runner committed as 88ec87d. |
 | NEXT | Run the tested fixed 304-fit / 16-model sequence campaign, reconstruct results, then provenance-component ablations and precision planning. |
-| Active task / owner | V02 IN PROGRESS. PyTorch 2.14.1+cpu installed; no sequence study fit yet. History/latest-only tensor model and synthetic preflight implemented. |
+| Active task / owner | V02 IN PROGRESS. All 18 sequence implementation/audit tests pass; no completed or audited sequence study result yet. |
 | Selected direction | **Track R, narrowed:** controlled robustness/measurement benchmark. Grouping remains a candidate and may be discarded if simpler controls explain results. |
 | Conditional extension | **Track E:** independent real-data efficacy, only after access and statistical requirements pass. |
 | Research blockers | None preventing V01/V02 preparation. Full methods for some close papers and independent operational data remain unavailable; no novelty or real efficacy claim is established. |
 | Current machine | Windows, PowerShell; repository at `F:\conjunction-triage`; Python environment at `.venv\Scripts\python.exe`. Paths elsewhere in this file are relative to the repository root. |
 | HEAD when this checklist was created | `89d7f2efb8bf135e02fa51760e0ed3bb33a105c9`; working tree contains pre-existing modifications and untracked files. |
-| Latest validation | Sequence boundary tests: 12 passed in 16.93s; synthetic repeat-fit/padding bitwise pass; pip check passes before/after. Previous full suite: 392 passed / 1 skipped. |
+| Latest validation | 18 sequence implementation/audit tests passed in 10.49s. Full suite now running with CPU dependency installed. |
 | New scientific runs | Completed development/reconstruction runs fusion_20261009_v1 and fusion_summary_20261009_v1, plus earlier covariance/tuning/regime/pilot runs. No frozen scientific evaluation. |
 | Scientific holdout status | Seed 20261012 / scientific:00000..04999 reserved **but not generated**. Candidate anisotropic configuration and sample size still need V03 freeze. Kelvins and all pilot banks are exposed. |
-| Running jobs / processes | None. Installer, synthetic preflight and targeted tests exited successfully. |
-| Next executable command | Set OMP_NUM_THREADS, MKL_NUM_THREADS and LOKY_MAX_CPU_COUNT to 2; .venv\Scripts\python.exe -m research.sequence_campaign --run-id sequence_20261010_v1 |
+| Running jobs / processes | sequence_20261010_v1 campaign active; inspect processed/research/sequence_20261010_v1/manifest.json and progress.json. Full pytest validation also running; local logs under docs/research/execution/. |
+| Next executable command | Inspect sequence_20261010_v1 status. After complete: .venv\Scripts\python.exe -m research.summarize_sequence --source processed/research/sequence_20261010_v1 --run-id sequence_summary_20261010_v1 --export docs/research/results/sequence_2026-10-10 |
 
 ### Copy this into the next assistant
 
