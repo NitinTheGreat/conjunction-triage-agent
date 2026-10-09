@@ -9,6 +9,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import RobustScaler
 
 from research.data import RAW_FIELDS, OD_FIELDS, AGE_FIELDS
+from research.covariance_proxy import PROXY_ARMS, covariance_weights
 
 CONTINUOUS = tuple(c for c in RAW_FIELDS if c not in AGE_FIELDS)
 PHI_NAMES = (*CONTINUOUS, *(f'{r}_age_{b}' for r in ('t', 'c') for b in ('0_1', '1_2', '2_180', 'unknown')))
@@ -134,6 +135,8 @@ class HistoryTransformer:
                 for group in family:
                     counts = np.bincount(group)
                     w = 1./(len(counts)*counts[group])
+                    if self.mode in PROXY_ARMS:
+                        w, _ = covariance_weights(raw, self.mode)
                     mean = np.sum(z*w[:,None],axis=0)
                     variance = np.sum((z-mean)**2*w[:,None],axis=0)
                     design.append(np.r_[z[-1],mean,variance,raw[0,1]-raw[-1,1],len(counts),missing])
