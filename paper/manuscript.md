@@ -42,7 +42,7 @@ Dependence-aware and idempotent evidence combination predates this project. Exac
 
 Overlapping Covariance Intersection also provides recent prior art for fusion with partial structural covariance knowledge. Its required covariance bounds are not supplied by public observation-age metadata; a simulation comparison needs an explicit input mapping. [Pedroso et al., v2, October 2026](https://arxiv.org/html/2603.16768v2)
 
-**Development update:** V02 now includes a diagonal-volume weighting approximation and direct-weighting ablation on exposed simulation banks. They are not reproductions of the published evidence-theory method. Separate static state-fusion/oracle diagnostics are also complete on exposed banks. The bounded sequence adaptation and latest-only capacity control are now complete on these exposed banks. The four provenance-component arms have completed fitting and full checkpoint reconstruction. **Pending:** a tuning-adequacy decision, simulator sensitivity, precision planning and an explicit account of what the completed study adds beyond prior work. See V01 for versioned sources and remaining access limits.
+**Development update:** V02 now includes a diagonal-volume weighting approximation and direct-weighting ablation on exposed simulation banks. They are not reproductions of the published evidence-theory method. Separate static state-fusion/oracle diagnostics are also complete on exposed banks. The bounded sequence adaptation and latest-only capacity control are now complete on these exposed banks. The four provenance-component arms have completed fitting and full checkpoint reconstruction, and a tuning-adequacy decision restricts claims to the declared bounded implementations. **Pending:** simulator sensitivity, precision planning, a justified primary contrast and an explicit account of what the completed study adds beyond prior work. See V01 for versioned sources and remaining access limits.
 
 ## 3. Task, data and information boundary
 
@@ -195,8 +195,8 @@ ignore-updates control has lower bias-stress new-information loss than latest-on
 LSTM in all three subsets and than history LSTM in one. All 16 neural
 selections use the maximum epoch budget and eight use maximum width. This
 bounded adaptation does not establish model-family superiority or inferiority.
-The tuning-adequacy, simulator-sensitivity and precision work remains before
-scientific freeze.
+The simulator-sensitivity and precision work remains before scientific freeze;
+the tuning-adequacy decision below bounds how these neural results may be read.
 
 The four provenance-component arms complete 608 fits under the common scenario
 design; all 448,000 new forecasts reconstruct bitwise from saved checkpoints
@@ -219,6 +219,21 @@ positives. More privileged weighting does not resolve this stress failure.
 Fourteen of 32 component selections reach the maximum C despite optimizer
 convergence. These findings retain the bounded benchmark direction; a scientific
 contrast and its precision still need justification.
+
+A tuning-adequacy inventory of all 136 selected class-forecast models
+(`tuning_adequacy_20261010_v2`; no new fitting) separates grid limits from
+failures: no fit failed, and the largest L-BFGS iteration count was 262 of 10,000.
+Under matched training, 7/60 logistic selections reach C=1000. Their last-step
+inner-OOF gain is at most 0.000622, and C=1000 is better than C=100 in only 1/16
+component models with all candidates saved. Under no-reuse training, 40/60 reach
+C=1000, with last-step gains up to 0.009756. All 16 LSTM selections use the
+60-epoch maximum. Their 20-to-60-epoch gains have medians of 0.020 (matched) and
+0.150 (no reuse). No-reuse fits receive about 180 optimizer steps, whereas matched
+fits receive about 780. The comparison is therefore restricted to the declared
+bounded implementations ([decision](../docs/research/execution/tuning_decision.md)).
+Matched-training logistic comparisons are reported conditional on the grid.
+No-reuse within-regime differences below 0.01 nats and all neural family
+rankings are not interpreted.
 
 ## 6. Discussion and limitations
 

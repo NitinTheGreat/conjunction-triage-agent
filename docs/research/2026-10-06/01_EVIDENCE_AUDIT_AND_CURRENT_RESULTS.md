@@ -1,5 +1,29 @@
 # Report 1 — Evidence audit and current research results
 
+## V02 tuning-adequacy follow-up - 10 October 2026
+
+The [tuning-adequacy inventory](../results/tuning_adequacy_2026-10-10/report.md)
+(`tuning_adequacy_20261010_v2`, no fitting) covers all 17 class-forecast arms and
+136 selected models. All 816 candidate scores re-derive their selections. Scores
+are recomputed from saved OOF predictions for all candidates of 48 models and the
+selected candidate of the other 88; the largest difference is 5.6e-17. No fit
+failed: grid-edge selections are search limits, not optimizer failures.
+
+| Family / training | Selections at largest budget | Last-step inner-OOF gain |
+|---|---:|---|
+| Logistic / matched mixture | 7/60 at C=1000 | max 0.000622; C=1000 better than C=100 in 1/16 component models |
+| Logistic / no reuse only | 40/60 (24 distinct) | median at edge 0.004067, max 0.009756 |
+| LSTM / matched mixture | 8/8 at 60 epochs | 20-to-60-epoch median 0.020320 |
+| LSTM / no reuse only | 8/8 at 60 epochs | median 0.149803; about 180 optimizer steps per fit |
+
+The dated [tuning decision](../execution/tuning_decision.md) restricts the study to
+the declared bounded implementations. Matched-training logistic comparisons are
+reported conditional on the grid. No-reuse within-regime differences below 0.01
+nats are not interpreted as representation effects, and neither are neural
+family rankings. Whether wider budgets would change evaluation results is
+untested. The decision reopens if the primary contrast depends on no-reuse
+training or an LSTM arm.
+
 ## V02 component follow-up - 10 October 2026
 
 The four-arm provenance-component campaign completed **608 fits, 32 selected

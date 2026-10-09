@@ -1,0 +1,83 @@
+{
+  "date": "2026-10-10",
+  "full_suite": {
+    "passed": 442,
+    "skipped": 1,
+    "seconds": 58.53,
+    "exit_code": 0,
+    "command": ".venv/Scripts/python.exe -m pytest -q --tb=short --no-showlocals -p no:cacheprovider",
+    "log": "docs/research/execution/verification_tuning_adequacy_20261010.local.log",
+    "scope": "Full suite on committed code 12706f3 (research/ and tests/ clean); includes 8 tuning-adequacy tests.",
+    "skip_reason": "Existing credential-presence test"
+  },
+  "earlier_full_suite_on_43d7de4": {
+    "passed": 441,
+    "skipped": 1,
+    "seconds": 68.04,
+    "exit_code": 0
+  },
+  "thread_environment": {
+    "LOKY_MAX_CPU_COUNT": "2",
+    "OMP_NUM_THREADS": "2",
+    "MKL_NUM_THREADS": "2"
+  },
+  "completed_runs": [
+    {
+      "run_id": "tuning_adequacy_20261010_v2",
+      "status": "complete",
+      "role": "evidence of record",
+      "started_utc": "2026-10-09T22:37:14.240872+00:00",
+      "finished_utc": "2026-10-09T22:37:39.602980+00:00",
+      "command": [
+        "F:\\conjunction-triage\\.venv\\Scripts\\python.exe",
+        "-m",
+        "research.tuning_adequacy",
+        "--run-id",
+        "tuning_adequacy_20261010_v2",
+        "--export",
+        "docs/research/results/tuning_adequacy_2026-10-10"
+      ],
+      "git_head": "12706f3be286d8f1cafab6875f205890d34a5f4f"
+    },
+    {
+      "run_id": "tuning_adequacy_20261010_v1",
+      "status": "complete",
+      "role": "superseded: lacked per-fold scores; retained locally; its uncommitted export copy was byte-identical to the run files and was replaced before any commit",
+      "started_utc": "2026-10-09T22:31:42.039711+00:00",
+      "finished_utc": "2026-10-09T22:31:56.831236+00:00",
+      "git_head": "43d7de4ef4b8ada72bf483cb04155462146e936f"
+    }
+  ],
+  "artifact_audit": "docs/research/results/tuning_adequacy_2026-10-10/audit.json",
+  "source_runs_verified": ["tuning_20261009_v1", "covariance_20261009_v1", "components_20261010_v1", "sequence_20261010_v1"],
+  "selections": 136,
+  "candidate_profiles": 816,
+  "fit_records": 912,
+  "fold_score_rows": 1128,
+  "reconstructed_all_candidate_models": 48,
+  "reconstructed_selected_only_models": 88,
+  "max_abs_score_difference": 5.551115123125783e-17,
+  "fitting_performed": false,
+  "export_checks": [
+    {"bundle": "components_2026-10-10", "status": "pass", "artifacts_verified": 10, "bytes_verified": 3930536},
+    {"bundle": "covariance_2026-10-09", "status": "pass", "artifacts_verified": 10, "bytes_verified": 787628},
+    {"bundle": "fusion_2026-10-09", "status": "pass", "artifacts_verified": 6, "bytes_verified": 202818},
+    {"bundle": "pilot_2026-10-09", "status": "pass", "artifacts_verified": 15, "bytes_verified": 56746},
+    {"bundle": "sequence_2026-10-10", "status": "pass", "artifacts_verified": 9, "bytes_verified": 1646781},
+    {"bundle": "tuning_2026-10-09", "status": "pass", "artifacts_verified": 9, "bytes_verified": 400800},
+    {"bundle": "tuning_adequacy_2026-10-10", "status": "pass", "artifacts_verified": 12, "bytes_verified": 317017},
+    {"bundle": "v02_2026-10-09", "status": "pass", "artifacts_verified": 7, "bytes_verified": 156670}
+  ],
+  "protected_files_unchanged": {
+    "raw_files": 12,
+    "historical_artifacts": 45,
+    "frozen_files": 8,
+    "reference": "docs/research/execution/workspace_snapshot_2026-10-09.json"
+  },
+  "historical_requirements_unchanged": true,
+  "running_milestone_jobs": [],
+  "unrelated_processes_observed": "Three system-Python processes running scripts/phase6_0_baseline.py from F:\\Agentic BSN (a different project) under nohup, started 2026-10-10 03:50:55 local; not started by this work, not touched, and no file in this repository was written by them.",
+  "decision": "docs/research/execution/tuning_decision.md",
+  "scientific_bank_opened": false,
+  "independent_scientific_review_complete": false
+}

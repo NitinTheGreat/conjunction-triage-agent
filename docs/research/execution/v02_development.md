@@ -76,6 +76,7 @@ its limited controls remain preserved and distinct from this informed revision.
 - [x] Sequence adaptation and latest-only capacity control.
 - [x] Provenance-component ablations, oracle lineage-weighting control, full reconstruction and compact export.
 - [x] Separate state-fusion / visible-observation-union oracle diagnostics on exposed banks (not the class-forecast provenance ablations).
+- [x] Tuning-adequacy inventory, candidate-profile/trace analysis and dated decision (no fitting).
 - [ ] Precision planning and justified primary comparison.
 
 Commands already executed successfully (use **new unique IDs** for any rerun):
@@ -416,3 +417,46 @@ verification, not independent A03 review.
 Next: [tuning adequacy, precision and sensitivity](tuning_precision_plan.md).
 V02 remains open. The scientific bank remains reserved and ungenerated; artifact
 reconstruction does not complete independent A03 scientific review.
+
+## Tuning adequacy - 10 October 2026
+
+`research/tuning_adequacy.py` reads the four completed class-forecast runs after
+`audit_run` checks. It re-derives every selection and reconciles saved scores. It
+exports an arm inventory, candidate profiles, per-selection boundary/adjacent
+gaps, scenario-paired and per-fold budget steps, and neural training-trace
+summaries. It fits nothing. Eight focused tests cover profile rules and ties,
+scenario weighting, paired steps, fold membership, trace summaries,
+identical-profile grouping and fit-record naming.
+
+Run `tuning_adequacy_20261010_v2` (code `12706f3`) is the evidence of record:
+[report](../results/tuning_adequacy_2026-10-10/report.md),
+[decision](tuning_decision.md), [verification](tuning_adequacy_verification.json).
+The earlier complete `tuning_adequacy_20261010_v1` (code `43d7de4`) lacked
+per-fold scores; it is retained locally and superseded. Its uncommitted export
+copy was byte-identical to the retained run files and was replaced by the v2
+export at the same path before any commit.
+
+```powershell
+$env:OMP_NUM_THREADS='2'; $env:MKL_NUM_THREADS='2'; $env:LOKY_MAX_CPU_COUNT='2'
+.\.venv\Scripts\python.exe -m research.tuning_adequacy --run-id tuning_adequacy_20261010_v2 --export docs/research/results/tuning_adequacy_2026-10-10
+.\.venv\Scripts\python.exe -m research.verify_exports --root docs/research/results
+.\.venv\Scripts\python.exe -m pytest -q --tb=short --no-showlocals -p no:cacheprovider
+```
+
+Findings: matched-training logistic selections reach C=1000 in 7/60, with last-step
+gains at most 0.000622. In component models, C=1000 beats C=100 overall in 1/16
+and in all three folds in 1/16. No-reuse logistic selections reach C=1000 in 40/60
+(24 distinct models), with gains up to 0.009756. All 16 LSTM selections use 60
+epochs; 20-to-60-epoch gains have medians of 0.020 (matched) and 0.150 (no
+reuse). The latter regime has about 180 optimizer steps per fit versus 780.
+Decision: restrict to the declared bounded implementations with regime-specific
+claim boundaries. Reopen it if the primary contrast depends on no-reuse training
+or an LSTM arm.
+
+Validation: 8 tuning-adequacy tests; full suite **442 passed, 1 skipped in 58.53
+seconds**, exit 0, on committed code. Eight bundles pass checksum verification.
+No fitting, paid inference or scientific-bank access occurred.
+
+Next: §2 of the [plan](tuning_precision_plan.md). Choose the primary paired
+contrast and its adverse outcome, then compute the scenario-paired planning table
+and precision sensitivity. No precision CLI exists yet.

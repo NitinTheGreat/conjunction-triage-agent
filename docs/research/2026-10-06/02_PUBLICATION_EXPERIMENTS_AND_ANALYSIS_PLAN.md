@@ -1,5 +1,26 @@
 # Report 02 — Publication experiments and statistical analysis plan
 
+## V02 tuning decision and its design consequences - 10 October 2026
+
+The [tuning decision](../execution/tuning_decision.md), based on the
+[no-fit inventory](../results/tuning_adequacy_2026-10-10/report.md), fixes
+these development choices for the next stages. It is not a frozen protocol.
+
+- **Bounded implementations.** Results are conditional on C in {0.01, ..., 1000}
+  and LSTM widths {8, 16, 32} x {20, 60} epochs. No budget extension is run now.
+- **Primary-contrast scope.** The §2 primary contrast is planned among logistic
+  representations under matched-mixture training, where the C grid does not bind
+  materially (largest last-step gain 0.000622 on the training objective). If a
+  contrast depends on no-reuse training or an LSTM arm, reopen the decision. Then
+  commit an equal-opportunity extension contract before fitting.
+- **V03 consequences.** Keep the same six-value C grid for comparability, and
+  report grid-edge selections as a prespecified diagnostic separate from failures.
+  A neural arm included in V03 needs a budget in optimizer steps, since equal
+  epochs give about 180 steps under no-reuse and about 780 under matched training.
+- **Interpretation limits.** Do not interpret no-reuse within-regime differences
+  below 0.01 nats or neural family rankings. Flat-profile tolerances were chosen
+  after seeing exposed data and are not equivalence margins.
+
 ## V02 component methods update - 10 October 2026
 
 The [fixed component contract](../execution/component_contract.md) was committed

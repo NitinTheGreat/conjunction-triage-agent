@@ -23,13 +23,17 @@ Thus 47 of 120 logistic selections reach maximum C. Read each run's
 `selections.json` and `completion.json` for the underlying records. This boundary
 inventory does not replace the profile, optimization and runtime analysis below.
 
-- [ ] Assemble one development inventory for the 17 class-forecast arms: exact
+- [x] Assemble one development inventory for the 17 class-forecast arms: exact
   fields, partition family, capacity, candidate grid, fit count, selected
   settings, fold scores, optimization diagnostics and runtime. Keep the six
   state-estimation arms separate: they have a different target and endpoints.
   **Expected:** a machine-readable inventory and readable tuning report linked
   to existing run manifests; no new fitting is necessary for this first step.
-- [ ] Inspect complete OOF candidate profiles and neural training-loss traces.
+  **Evidence:** run `tuning_adequacy_20261010_v2`,
+  [report](../results/tuning_adequacy_2026-10-10/report.md), `inventory.csv`,
+  `fold_scores.csv` (1,128 rows; all candidates for 48 models, selected candidate
+  for 88 whose runs kept only selected OOF). No fitting.
+- [x] Inspect complete OOF candidate profiles and neural training-loss traces.
   Compare the best candidate with adjacent candidates, by training regime and
   subset. Count upper/lower grid selections separately from optimization failures.
   A converged optimizer at C=1000 can still have a limited hyperparameter search;
@@ -37,13 +41,22 @@ inventory does not replace the profile, optimization and runtime analysis below.
   also do not establish equivalence without a stated practical tolerance.
   **Expected:** evidence for which settings are budget-sensitive and where the
   current evidence cannot answer that question.
-- [ ] Record a dated decision: restrict the paper to the declared bounded
+  **Evidence:** `selection_adequacy.csv`, `paired_steps.csv`, `tolerance_counts.csv`,
+  `neural_traces.csv` in the same bundle. Budget binds for no-reuse logistic
+  (40/60 at C=1000) and both LSTM regimes; not materially for matched logistic
+  (7/60, largest last-step gain 0.000622). Unanswerable from saved artifacts:
+  whether wider budgets would change evaluation rankings.
+- [x] Record a dated decision: restrict the paper to the declared bounded
   implementations, or perform a further development-only budget extension.
   If extending, commit the candidate grid, included comparator families, folds,
   seeds, failure policy and compute budget before fitting. Apply a consistent
   opportunity to relevant controls; do not expand only a favored method.
   **Expected:** an explicit claim boundary and rationale, not a claim that an
   entire model family has been optimized or disproved.
+  **Evidence:** [tuning decision, 10 October 2026](tuning_decision.md): restrict
+  to the declared bounded implementations, with regime-specific claim boundaries;
+  no extension now. It is reopened if §2 picks a contrast depending on no-reuse
+  training or an LSTM arm.
 
 The current direction remains a controlled robustness benchmark. Do not promote
 grouping, feature removal, oracle weighting or a neural adaptation to a superior
@@ -140,7 +153,14 @@ verification command already exists:
 .\.venv\Scripts\python.exe -m research.verify_exports --root docs/research/results
 ```
 
-No tuning/precision analysis CLI exists at this planning checkpoint. Implement
-one only after checking the exported schemas and fixing its calculations; do
-not invent a command in a handoff. For another machine, transfer the ignored
+The §1 tuning inventory now exists and has run (use a new run ID and export
+path for any rerun; both `tuning_adequacy_20261010_v1` and `_v2` exist):
+
+```powershell
+.\.venv\Scripts\python.exe -m research.tuning_adequacy --run-id <new_id> --export docs/research/results/<new_bundle>
+```
+
+No precision or sensitivity CLI exists yet (§2-§4). Implement one only after
+checking the exported schemas and fixing its calculations; do not invent a
+command in a handoff. For another machine, transfer the ignored
 source run directories and input data as described in the root checklist.

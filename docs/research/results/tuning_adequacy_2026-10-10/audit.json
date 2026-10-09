@@ -1,0 +1,43 @@
+{
+  "candidate_profiles": 816,
+  "committed_exports_match": true,
+  "fit_records": 912,
+  "fitting_performed": false,
+  "fold_score_rows": 1128,
+  "max_abs_score_difference": 5.551115123125783e-17,
+  "reconstructed_all_candidate_models": 48,
+  "reconstructed_selected_only_models": 88,
+  "scientific_bank_opened": false,
+  "scope": "Same-workflow inventory of exposed development runs; not independent A03 review.",
+  "selections": 136,
+  "source_runs": [
+    {
+      "archived_sources_verified": 77,
+      "artifacts_verified": 306,
+      "inputs_verified": 10,
+      "run_id": "tuning_20261009_v1",
+      "status": "complete"
+    },
+    {
+      "archived_sources_verified": 81,
+      "artifacts_verified": 83,
+      "inputs_verified": 29,
+      "run_id": "covariance_20261009_v1",
+      "status": "complete"
+    },
+    {
+      "archived_sources_verified": 91,
+      "artifacts_verified": 1905,
+      "inputs_verified": 27,
+      "run_id": "components_20261010_v1",
+      "status": "complete"
+    },
+    {
+      "archived_sources_verified": 88,
+      "artifacts_verified": 959,
+      "inputs_verified": 27,
+      "run_id": "sequence_20261010_v1",
+      "status": "complete"
+    }
+  ]
+}

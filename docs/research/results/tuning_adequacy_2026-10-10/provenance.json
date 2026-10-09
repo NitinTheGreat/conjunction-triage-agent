@@ -1,0 +1,24 @@
+{
+  "artifacts": {
+    "audit.json": "536621ae2a0f449e1736e44b334ad6ece4466bd643f3124d26057d46ae669452",
+    "fold_scores.csv": "1ec66a47313d435b182a81755fab2205f0fe2cf70e5bf6ebe4b88e59e00acc8e",
+    "inventory.csv": "3d1bead84cfd4ff118bbd80c8a12b618dbc46ff1843e782e933235f61dab39f2",
+    "neural_traces.csv": "75c73bd6d119e4e8523e33b7ec16a0b4964ed292cea561c4d6ab668382794282",
+    "paired_steps.csv": "376993d7bfe6858f03b75f92f5e056940b3454d389593c1a0fe18616c6319031",
+    "paired_summary.csv": "e02dc7efcab32711ed091d2d43dfe0a13c02706021da123156e0adaac4427562",
+    "profiles.csv": "1c459586699f8e6a4cb0544878874a4c92e73fe7d773fbd046923b87da54efaf",
+    "regime_summary.csv": "215b9e3d33e946ebc0b76da84484a73721006050368cc040f4d9e10bb2b1302b",
+    "report.md": "a67866cf8923bd1dd38955aeab6d1d9dc68c2b6163342ca116a752313428dee6",
+    "selection_adequacy.csv": "4a4af011bcb9e1a94d145d504a06c7bf39525e04903dac392139ac718f89ac10",
+    "tolerance_counts.csv": "a6bdb2d4d99706a68f2bd86b4b767f22058d8a5c73c2283a83d32625488463a9",
+    "trace_summary.csv": "7e73358c03ac8665093a32122431a6ebca6f64601f5d2454fe34f893f6c18d7a"
+  },
+  "manifest_sha256": "9e16b46cfef2573f92e4a9398766a820e44fb9e97141767f92d2b6f16abb0f19",
+  "run_id": "tuning_adequacy_20261010_v2",
+  "source_runs": [
+    "tuning_20261009_v1",
+    "covariance_20261009_v1",
+    "components_20261010_v1",
+    "sequence_20261010_v1"
+  ]
+}

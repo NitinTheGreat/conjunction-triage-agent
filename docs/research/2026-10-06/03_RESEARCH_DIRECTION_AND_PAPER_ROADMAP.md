@@ -1,5 +1,23 @@
 # Research direction and paper roadmap
 
+## V02 tuning-adequacy decision - 10 October 2026
+
+**Restrict to the declared bounded implementations; continue the narrowed
+benchmark route.** The [no-fit tuning inventory](../results/tuning_adequacy_2026-10-10/report.md)
+shows the logistic C grid does not bind materially under matched training. It
+does bind under no-reuse training, and the 60-epoch LSTM budget binds in both
+regimes. The [decision](../execution/tuning_decision.md) therefore limits
+interpretation instead of spending CPU hours on an extension that would not
+change the planned primary contrast. That contrast is to be chosen among logistic
+representations under matched training. No neural-family or optimal-tuning
+claim is made.
+
+Next executable stage: §2 of the [tuning and precision plan](../execution/tuning_precision_plan.md).
+Choose one primary paired contrast with an explicit adverse outcome, then build
+the scenario-paired planning table and precision/sample-size sensitivity from
+audited predictions. The §3 uncertainty design and §4 exposed simulator
+sensitivity follow before V03.
+
 ## V02 component decision update - 10 October 2026
 
 **Continue the narrowed robustness-benchmark route.** The four component arms

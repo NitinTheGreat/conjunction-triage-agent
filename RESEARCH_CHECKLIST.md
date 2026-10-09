@@ -10,19 +10,19 @@ This is the live execution record. Update it as work happens. Checked preparatio
 
 | Field | Current checkpoint — replace after each work session |
 |---|---|
-| NOW | Component milestone COMPLETE: components_20261010_v1 (608 fits) and components_summary_20261010_v1 (all 448,000 forecasts reconstruct; 7 bundles pass). Tuning-adequacy work (plan §1) is starting. |
-| NEXT | Execute §1 of the [tuning and precision plan](docs/research/execution/tuning_precision_plan.md): tuning inventory, candidate-profile analysis, dated tuning decision. Then §2 precision. |
-| Active task / owner | V02 IN PROGRESS. Components complete; tuning adequacy, primary contrast, precision and simulator sensitivity remain. |
+| NOW | Tuning-adequacy §1 COMPLETE: no-fit inventory tuning_adequacy_20261010_v2 and dated [decision](docs/research/execution/tuning_decision.md): RESTRICT to declared bounded implementations, with regime-specific claim boundaries. Components milestone also complete. |
+| NEXT | §2 of the [tuning and precision plan](docs/research/execution/tuning_precision_plan.md): fix one primary paired contrast (logistic, matched training) with its adverse outcome, then build the scenario-paired planning table and precision sensitivity. |
+| Active task / owner | V02 IN PROGRESS. Remaining: primary contrast, precision/power (§2), uncertainty design (§3), exposed simulator sensitivity (§4). |
 | Selected direction | **Track R, narrowed:** controlled robustness/measurement benchmark. Grouping remains a candidate and may be discarded if simpler controls explain results. |
 | Conditional extension | **Track E:** independent real-data efficacy, only after access and statistical requirements pass. |
 | Research blockers | None preventing V01/V02 preparation. Full methods for some close papers and independent operational data remain unavailable; no novelty or real efficacy claim is established. |
 | Current machine | Windows, PowerShell; repository at `F:\conjunction-triage`; Python environment at `.venv\Scripts\python.exe`. Paths elsewhere in this file are relative to the repository root. |
 | HEAD when this checklist was created | `89d7f2efb8bf135e02fa51760e0ed3bb33a105c9`; working tree contains pre-existing modifications and untracked files. |
-| Latest validation | 26 component/export tests passed in 9.24s after reconstruction; full suite 434 passed / 1 skipped (78.18s) on identical code. 7 bundles / 66 artifacts pass checksums; 12 raw, 45 historical and 8 frozen files unchanged. |
-| New scientific runs | Completed development/reconstruction runs components_20261010_v1 and components_summary_20261010_v1, plus earlier sequence and other runs. No frozen scientific evaluation. |
+| Latest validation | Full suite 442 passed / 1 skipped (58.53s) on committed `12706f3`. 8 bundles / 78 artifacts pass checksums; 12 raw, 45 historical and 8 frozen files unchanged. |
+| New scientific runs | Completed development/analysis runs tuning_adequacy_20261010_v2 (evidence of record; v1 superseded), components_20261010_v1 and components_summary_20261010_v1, plus earlier runs. No frozen scientific evaluation. |
 | Scientific holdout status | Seed 20261012 / scientific:00000..04999 reserved **but not generated**. Candidate anisotropic configuration and sample size still need V03 freeze. Kelvins and all pilot banks are exposed. |
-| Running jobs / processes | None. Both component runs are complete; do not rerun them under the same IDs. |
-| Next executable command | `.\.venv\Scripts\python.exe -m research.verify_exports --root docs/research/results` (passes). No tuning-inventory CLI exists yet; see the plan before implementing one. |
+| Running jobs / processes | None for this project. Python processes running `F:\Agentic BSN\scripts\phase6_0_baseline.py` belong to a different project; leave them alone. |
+| Next executable command | `.\.venv\Scripts\python.exe -m research.verify_exports --root docs/research/results` (passes). No precision/power CLI exists yet; implement §2 after checking the paired-contrast export schemas. |
 
 ### Copy this into the next assistant
 
@@ -677,6 +677,61 @@ unchanged. No paid inference, external contact, push or scientific-bank access.
 
 Session note: at the start of this session an orphaned system-Python process
 (PID 836, `timeout 400 python -` reading a script from stdin; its launching shell
-was already gone) was observed from the interrupted previous session. It was not
-started by this session, was not killed, exited by itself within minutes, and
-wrote no repository files (checked by modification time). Nothing depends on it.
+was already gone) was observed. Later evidence indicates it belonged to a
+different project: `F:\Agentic BSN\scripts\phase6_0_baseline.py` was written two
+seconds before it started, and three further system-Python processes from that
+project ran under `nohup` from 03:50:55. None was started or touched by this work.
+PID 836 exited by itself, and no file in this repository was written by any of
+them (checked by modification time). Nothing here depends on them.
+
+### V02 tuning-adequacy milestone - 10 October 2026
+
+- [x] Implement a no-fit inventory/profile analysis with 8 focused tests (`research/tuning_adequacy.py`; commits `43d7de4`, `12706f3`).
+- [x] Re-derive all 136 selections from 816 candidate scores; reconcile all candidates for 48 models and the selected candidate for 88 (max difference 5.6e-17); 1,128 per-fold scores.
+- [x] Separate grid limits from failures; quantify boundary steps, paired/fold resolution and neural traces.
+- [x] Record the dated decision: RESTRICT to the declared bounded implementations ([decision](docs/research/execution/tuning_decision.md)).
+- [ ] §2 primary contrast and precision, §3 uncertainty design, §4 exposed simulator sensitivity; V02 remains open.
+
+Evidence: [report](docs/research/results/tuning_adequacy_2026-10-10/report.md),
+[decision](docs/research/execution/tuning_decision.md),
+[verification](docs/research/execution/tuning_adequacy_verification.json),
+[plan with ticked §1](docs/research/execution/tuning_precision_plan.md),
+[commands](docs/research/execution/v02_development.md). Run
+`tuning_adequacy_20261010_v2` (22:37:14-22:37:39 UTC, PID 9336, code `12706f3`)
+is the evidence of record. `tuning_adequacy_20261010_v1` (code `43d7de4`) is
+complete but lacked per-fold scores; it is retained locally and superseded. Its
+uncommitted export copy was byte-identical to its run files and was replaced by
+the v2 export at the same path before any commit.
+
+```powershell
+.\.venv\Scripts\python.exe -m research.tuning_adequacy --run-id tuning_adequacy_20261010_v2 --export docs/research/results/tuning_adequacy_2026-10-10
+.\.venv\Scripts\python.exe -m research.verify_exports --root docs/research/results
+.\.venv\Scripts\python.exe -m pytest -q --tb=short --no-showlocals -p no:cacheprovider
+```
+
+Findings: matched-training logistic, 7/60 at C=1000 with last-step inner-OOF gain
+at most 0.000622; C=1000 beats C=100 in 1/16 component models (z at most 1.06).
+No-reuse logistic, 40/60 at C=1000 (24 distinct), gains up to 0.009756. LSTM,
+16/16 at 60 epochs; 20-to-60-epoch median gain 0.020 (matched) and 0.150 (no reuse,
+about 180 versus 780 optimizer steps). No fit failed (max iterations 262/10,000).
+Claim boundaries: matched logistic comparisons are conditional on the grid;
+no-reuse within-regime differences below 0.01 nats and neural family rankings are
+not interpreted. Reopen if §2 picks a contrast depending on no-reuse training or
+an LSTM arm; then commit an equal-opportunity extension contract before fitting.
+
+Validation: full suite 442 passed / 1 skipped (58.53 s) on committed code; 8
+bundles / 78 artifacts pass; 12 raw, 45 historical and 8 frozen files unchanged.
+No fitting, paid inference, external contact, push or scientific-bank access.
+
+**Exact next step (§2):** fix and record one primary paired contrast among logistic
+representations under matched training, with its estimand (absolute loss or
+degradation relative to no reuse), condition, bank, clipping and an explicit
+adverse outcome. F01's falsifiable claim concerns reuse-induced degradation of a
+history model relative to latest-only prediction, so candidates include a history
+representation (singleton or grouped) versus latest-metadata under heavy overlap,
+with new-information and absolute-loss results kept as secondary. Then build the
+planning table: per-contrast paired mean and SD are already in each bundle's
+`paired_contrasts.csv` (1,000 scenarios per bank; the three overlapping subsets
+are not independent replications). Miss/review discordance counts are not
+exported; derive them from the source runs' `predictions.parquet` files. No
+precision CLI exists yet. Scientific seed 20261012 remains ungenerated.
