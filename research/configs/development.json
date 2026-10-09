@@ -1,0 +1,16 @@
+{
+  "version": "development-1",
+  "track": "R",
+  "scientific_status": "exploratory_development_not_registered",
+  "data": {"development_split": "train", "exposed_splits": ["train", "test", "raw"], "cohort": "historical_retrospective", "cutoff_days": 2.0, "positive_logrisk_threshold": -6.0, "raw_read_only": true},
+  "cv": {"outer_folds": 5, "inner_folds": 3, "seed": 20261009, "group": "whole_event", "split_repeats": 1},
+  "model": {"logistic_C": [0.01, 0.1, 1.0, 10.0], "class_weight": null, "partition_limit": 8, "distance_thresholds_iqr": [0.5, 2.0], "gap_caps_days": [0.25, 1.0]},
+  "calibration": {"method": "monotone_platt_on_training_oof", "epsilon": 0.000001},
+  "policy": {"nominal_recall": [0.9, 0.95, 0.99], "failure_action": "review", "threshold_fit": "training_only", "certified": false},
+  "arms": ["latest", "latest_metadata", "causal_logistic", "causal_gbm", "singleton", "fixed", "random", "thin", "change", "grouped", "ignore_updates"],
+  "simulation": {"type": "linear_gaussian_encounter_plane", "development_seed": 20261010, "software_validation_seed": 20261011, "development_scenarios": 1000, "software_validation_scenarios": 1000, "scientific_holdout_reserved": false},
+  "primary_future_contrast": "difference_between_methods_in_overlap_minus_no_overlap_binary_log_loss",
+  "required_artifacts": ["manifest.json", "cohort.parquet", "splits.parquet", "feature_lineage.json", "predictions.parquet", "metrics.json"],
+  "outcome": "final_recorded_high_risk_class_not_actual_collision",
+  "official_L": "only_for_separate_logrisk_predictions_never_log10_class_probability"
+}
