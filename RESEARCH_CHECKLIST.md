@@ -10,9 +10,9 @@ This is the live execution record. Update it as work happens. Checked preparatio
 
 | Field | Current checkpoint — replace after each work session |
 |---|---|
-| NOW | First research cycle complete: P01-P04, D01-D04, B01-B04, M01-M02, S01-S03, F01-F02; W01 manuscript skeleton exists. **Decision: NARROW**, not method superiority. |
-| NEXT | **V01 - closest-work compatibility review**, then V02: distinct simulation controls, latest-metadata comparator, matched new-information training, ablations and precision planning. |
-| Active task / owner | V01 in progress: primary-source methods/code retrieval and comparator compatibility review. |
+| NOW | First research cycle and V01 compatibility review complete: 27/42 numbered tasks. Five scoped commits preserve work. Track R remains narrowed to robustness/measurement. |
+| NEXT | **V02 - repair generator/control distinction**, then matched new-information training, covariance-proxy/sequence adaptations, state-fusion diagnostics and precision planning. See the V01 comparison document. |
+| Active task / owner | V02 ready. No active research job; revised generator code has not yet been implemented. |
 | Selected direction | **Track R, narrowed:** controlled robustness/measurement benchmark. Grouping remains a candidate and may be discarded if simpler controls explain results. |
 | Conditional extension | **Track E:** independent real-data efficacy, only after access and statistical requirements pass. |
 | Research blockers | None preventing V01/V02 preparation. Full methods for some close papers and independent operational data remain unavailable; no novelty or real efficacy claim is established. |
@@ -22,7 +22,7 @@ This is the live execution record. Update it as work happens. Checked preparatio
 | New scientific runs | Completed **development** runs: data v2, CV v2 (11 arms x 5 folds), two-stage v1, simulation v1, mechanism v1, synthesis v1 and two-stage reconstruction v1. No frozen confirmatory evaluation yet. |
 | Scientific holdout status | Seed 20261012 / scientific:00000..04999 reserved **but not generated**. Candidate anisotropic configuration and sample size still need V03 freeze. Kelvins and all pilot banks are exposed. |
 | Running jobs / processes | None from this session. Failed data v1 and CV v1 are retained with explicit failure reasons; all later named runs complete. |
-| Next executable command | `Get-Content -Encoding UTF8 docs/research/execution/feasibility_decision.md`, then inspect the dated primary-source ledger for V01. No V02 successor runner exists yet; implement and test it before launching. |
+| Next executable command | `Get-Content -Encoding UTF8 docs/research/execution/closest_work_comparison.md` then inspect `research/simulation.py` and `tests/test_research_simulation.py`. Implement the V02 generator/control distinction test first; no successor campaign CLI exists yet. |
 
 ### Copy this into the next assistant
 
@@ -155,7 +155,7 @@ The day ranges are planning estimates, not promised runtimes. Save partial progr
 
 V01–V04 and A01 describe the Track R study. Proceed with them when F02 retains a compatible claim; otherwise record their replacements or deferred status. A02 and A03 are shared requirements for every paper route. Adapt dependencies openly for a narrower claim rather than silently changing their meaning.
 
-- [ ] **V01 — resolve the closest-work comparison.** Depends on: F02; literature acquisition may start earlier. **Do:** inspect enough accessible full methods/code for the relevant Sánchez weighting/classification approach, a strong sequence/ensemble family, and applicable fusion alternatives. Track TimeQuery, Ouari, the TCN–Transformer, and AMOS fusion work without mixing their targets. **Expected:** compatibility table with dataset, label, horizon, split, inputs, calibration, metric, and reproduced/adapted/approximate/discussion-only status. **Done when:** the selected comparison is justified and remaining inaccessible details explicitly limit claims. Do not stall all local work while waiting for a paper.
+- [x] **V01 — resolve the closest-work comparison.** Depends on: F02; literature acquisition may start earlier. **Do:** inspect enough accessible full methods/code for the relevant Sánchez weighting/classification approach, a strong sequence/ensemble family, and applicable fusion alternatives. Track TimeQuery, Ouari, the TCN–Transformer, and AMOS fusion work without mixing their targets. **Expected:** compatibility table with dataset, label, horizon, split, inputs, calibration, metric, and reproduced/adapted/approximate/discussion-only status. **Done when:** the selected comparison is justified and remaining inaccessible details explicitly limit claims. Do not stall all local work while waiting for a paper.
 
 - [ ] **V02 — complete strong comparators, ablations, and precision planning.** Depends on: F02, B04, V01. **Do:** implement feasible close comparators; remove grouping/age/OD components separately; compare oracle versus observed provenance only where lineage is known. Use development results for sample-size and runtime planning. **Expected:** development comparison package, tuning budgets, simulator sensitivity plan, and precision/power report. **Done when:** the study size and primary comparator are justified, all arms share an honest evaluation, and ineffective complexity is not retained solely for a headline.
 
@@ -354,3 +354,11 @@ Completed commits: `9b441b1` (evidence/literature reports and erratum), `54bd4a3
 Validation before committing implementation: 12 research tests passed in 8.89 seconds; compact export succeeded. The prior full-suite result remains 349 passed / 1 skipped; it was not rerun merely for documentation/commit operations. Existing application edits and September PDF/rendering work are excluded. Local machine snapshots and logs remain available in this workspace, not staged.
 
 V01 has started: an accessible arXiv version of the Sanchez covariance-weighting method was located; publication-version equations and compatible sequence/fusion alternatives are being checked. Source access is not an experimental result and no reserved outcomes have been opened.
+
+### V01 completed and next implementation selected - 9 October 2026
+
+Evidence: [closest-work comparison](docs/research/execution/closest_work_comparison.md), [compatibility CSV](docs/research/execution/closest_work_comparison.csv), [source access/version ledger](docs/research/execution/closest_work_sources.json). Full final Sanchez ASR and AMOS papers and the Pinto sequence paper were retrieved; Kessler source inspected and revision recorded. OCI v2 (1 October 2026) and author repository add recent related work. Ouari/TimeQuery full-method limits remain explicit. No literature method has been numerically reproduced merely by this reading.
+
+V01 acceptance passes: targets, datasets, horizons, splits/calibration knowledge, metric compatibility and adaptation/approximation/discussion status are recorded. The selected V02 set includes a named covariance-proxy approximation, an accessible sequence-family adaptation, and separate fusion diagnostics. Strongest-current-method or field-wide novelty claims remain unsupported. V02 is open, beginning with irregular-cadence/control-distinction tests and a latest-metadata simulation comparator; reserve all scientific outcomes until V03.
+
+Additional completed commits: `5cde0d5` (small results, feasibility, manuscript and handoff), `de99a3d` (byte-exact evidence export across Git checkouts). All 15 evidence blobs were checked against source artifact SHA-256 values directly in the Git index. Source PDFs/code, local logs and machine snapshots stay out of Git. This V01 checkpoint is the next incremental commit; inspect `git log` for its hash. All new commits use the user's requested author and committer; no assistant trailer is added. No push performed.

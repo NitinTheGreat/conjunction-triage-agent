@@ -1,5 +1,7 @@
 # Research direction and paper roadmap
 
+**V01 follow-up, 9 October 2026.** The [closest-work compatibility review](../execution/closest_work_comparison.md) is complete. Final Sanchez/AMOS papers and sequence code are now accessible; OCI v2 adds recent prior art. Earlier access-limit statements below are dated history. Numerical reproductions and V02 design repairs remain pending.
+
 **Execution update, 9 October 2026 - NARROW.** The first research cycle supports continuing Track R as a controlled robustness/measurement benchmark; the candidate grouping method has not established superiority. It reduces overlap degradation relative to simple pooling in one synthetic regime, but latest-only has lower absolute heavy-overlap loss, shared bias changes the comparison, and several controls collapse in the initial generator. Real-data grouping also trails simpler predictors. V01 is the next ready task, followed by V02 design repair/comparators and V03 protocol freeze. Do not force a positive method paper. The [feasibility decision](../execution/feasibility_decision.md) records the falsifiable next claim and failed alternatives; a [manuscript skeleton](../../../paper/manuscript.md) now has explicit result placeholders. The [live checklist](../../../RESEARCH_CHECKLIST.md) is the authoritative continuation record. This update supersedes the original ten-day schedule where those tasks are now complete.
 
 **ConjunctionTriage — report 3 of 3 — 6 October 2026**

@@ -1,5 +1,7 @@
 # Report 1 — Evidence audit and current research results
 
+**V01 follow-up, 9 October 2026.** The [closest-work compatibility review](../execution/closest_work_comparison.md) is complete. Final Sanchez/AMOS papers and sequence code are now accessible; OCI v2 adds recent prior art. Earlier access-limit statements below are dated history. Numerical reproductions and V02 design repairs remain pending.
+
 **Execution update, 9 October 2026.** The first new research cycle is complete. The full-column crosswalk reconciles all 189,285 released rows across 102 non-ID fields, resolving the earlier 227 fingerprint mismatches as numerical representation/rounding sensitivity under the declared tolerances. Five-fold nested development evaluation now covers 11 arms on 8,293 events / 66 positives. Grouping class log loss is 0.032863, latest-risk-only 0.030194, and causal boosting 0.027217. The separate corrected official-score comparison gives B1 L=0.803753, B4 L=34.537411, and both-stage-cross-fitted B5 L=1.454757 on the training OOF cohort; these differ from the historical test cohort. Earlier contaminated claims remain superseded. See the [generated feasibility report and limitations](../execution/feasibility_decision.md), [data dictionary](../execution/data_dictionary.md), and [live checklist](../../../RESEARCH_CHECKLIST.md). The dated audit below is retained as historical context; statements that these pilot outputs do not yet exist are superseded by this update.
 
 **Project:** ConjunctionTriage Agent  

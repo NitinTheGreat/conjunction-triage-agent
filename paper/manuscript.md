@@ -30,17 +30,19 @@ Potential contributions, conditional on completed evidence:
 
 ## 2. Related work
 
-This draft uses the [6 October source ledger](../docs/research/2026-10-06/_support/primary_source_ledger.json) and [deep review](../docs/research/2026-10-06/_support/DEEP_LITERATURE_REVIEW.md). Their access levels are part of the evidence. V01 must finish the compatibility table before choosing the final comparison or asserting novelty.
+This draft uses the [6 October source ledger](../docs/research/2026-10-06/_support/primary_source_ledger.json) and [deep review](../docs/research/2026-10-06/_support/DEEP_LITERATURE_REVIEW.md). Their access levels are part of the evidence. The [V01 compatibility review](../docs/research/execution/closest_work_comparison.md) now selects candidate adaptations; V02 implementation and novelty assessment remain open.
 
 The Kelvins competition defines an early-information task based on the final recorded risk and a high-risk-weighted scoring rule. Its data filtering and latest-risk baseline provide the retrospective task context; different cohorts and targets must not be combined into a single leaderboard. [Uriot et al.](https://arxiv.org/html/2008.03069v2)
 
-Sánchez and colleagues study robust classification and epistemic uncertainty in conjunction assessment. The CEC work and the related ASR work have different evidence representations and labels from the binary final-risk task here. The earlier review inspected selected CEC methods, while the ASR/thesis weighting implementation remains insufficiently resolved for reproduction. A compatible adapted baseline must be distinguished from a faithful reproduction. [CEC manuscript](https://strathprints.strath.ac.uk/90331/7/Sanchez-etal-IEEE-CEC-2024-Robust-classification-with-belief-functions-and-deep-learning.pdf), [ASR institutional record](https://strathprints.strath.ac.uk/90580/)
+Sánchez and colleagues study robust classification and epistemic uncertainty in conjunction assessment. The CEC work and the related ASR work have different evidence representations and labels from the binary final-risk task here. The earlier review inspected selected CEC methods; V01 subsequently retrieved the final ASR paper and inspected its covariance-weighting method. Exact geometry/equation implementation still needs verification for reproduction. A compatible adapted baseline must be distinguished from a faithful reproduction. [CEC manuscript](https://strathprints.strath.ac.uk/90331/7/Sanchez-etal-IEEE-CEC-2024-Robust-classification-with-belief-functions-and-deep-learning.pdf), [ASR institutional record](https://strathprints.strath.ac.uk/90580/)
 
 Recent probabilistic ensemble and full-horizon sequence papers are close forecasting families. The available publisher previews do not establish identical splits, horizons, calibration units or leakage controls. They belong in the compatibility review; their reported scores cannot yet be used as directly comparable experimental baselines. [Ouari et al.](https://link.springer.com/article/10.1007/s10489-026-07494-6), [Zerrouki et al.](https://www.sciencedirect.com/science/article/abs/pii/S0094576526005357)
 
-Dependence-aware and idempotent evidence combination predates this project. Exact replay invariance alone is therefore not a novelty claim. An applicable fusion method should be compared where its mathematical inputs and target are compatible; otherwise the incompatibility must be explicit. Domain-specific AMOS fusion work also requires direct comparison in V01. [Denœux, 2008](https://www.hds.utc.fr/~tdenoeux/dokuwiki/_media/en/revues/aij3553_final.pdf), [Denœux, 2024](https://www.hds.utc.fr/~tdenoeux/dokuwiki/_media/en/publi/comb_grfn_v2.pdf)
+Dependence-aware and idempotent evidence combination predates this project. Exact replay invariance alone is therefore not a novelty claim. An applicable fusion method should be compared where its mathematical inputs and target are compatible; otherwise the incompatibility must be explicit. V01 also inspected the AMOS fusion method and its explicit unknown-correlation limitation; V02 selects separate state-fusion diagnostics. [Denœux, 2008](https://www.hds.utc.fr/~tdenoeux/dokuwiki/_media/en/revues/aij3553_final.pdf), [Denœux, 2024](https://www.hds.utc.fr/~tdenoeux/dokuwiki/_media/en/publi/comb_grfn_v2.pdf)
 
-**Pending:** final source verification, applicable AMOS formulation, sequence comparator selection, and an explicit account of what this study adds beyond existing weighting/fusion approaches.
+Overlapping Covariance Intersection also provides recent prior art for fusion with partial structural covariance knowledge. Its required covariance bounds are not supplied by public observation-age metadata; a simulation comparison needs an explicit input mapping. [Pedroso et al., v2, October 2026](https://arxiv.org/html/2603.16768v2)
+
+**Pending:** V02 implementation of the selected sequence/weighting adaptations and fusion diagnostics, and an explicit account of what the completed study adds beyond existing approaches. See V01 for versioned sources and remaining access limits.
 
 ## 3. Task, data and information boundary
 
@@ -116,4 +118,4 @@ E. Pilot deviations, identical controls, failed variants and revised design rati
 F. Frozen protocol, access ledger, complete secondary results and failures.  
 G. Reproduction commands, environment, checksums and independent review.
 
-Bibliography: [references.bib](references.bib), copied from the dated verified source ledger. Resolve remaining identities/access limits in V01 before final citation formatting.
+Bibliography: [references.bib](references.bib), copied from the dated verified source ledger. Use the V01 source ledger for updated access and comparator decisions; resolve remaining limitations before final citation formatting.

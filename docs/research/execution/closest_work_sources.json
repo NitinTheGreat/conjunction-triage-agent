@@ -1,0 +1,86 @@
+{
+  "date": "2026-10-09",
+  "status": "bounded compatibility review, not reproduction",
+  "downloads": [
+    {
+      "id": "sanchez_asr",
+      "url": "https://strathprints.strath.ac.uk/90580/13/Sanchez-etal-ASR-2024-Treatment-of-epistemic-uncertainty-in-conjunction-analysis.pdf",
+      "http_status": 200,
+      "final_url": "https://strathprints.strath.ac.uk/90580/13/Sanchez-etal-ASR-2024-Treatment-of-epistemic-uncertainty-in-conjunction-analysis.pdf",
+      "bytes": 15063704,
+      "sha256": "d334a0e91de565caa267b444fe86a3e7446cf4d61aa9602348453e7e973919a3",
+      "pages": 48,
+      "inspection": "Final journal version: sections 2, 3.1, equations (9)-(10), experiment/limitations passages. Full PDF retrieved; not every numerical case reproduced."
+    },
+    {
+      "id": "amos_agrawal",
+      "url": "https://amostech.com/TechnicalPapers/2025/Poster/Agrawal.pdf",
+      "http_status": 200,
+      "final_url": "https://amostech.com/TechnicalPapers/2025/Poster/Agrawal.pdf",
+      "bytes": 1254601,
+      "sha256": "a7f884f581974d74901d8195431ca0205b4c5753ba4b37ce0aadefcf6f4fa7cf",
+      "pages": 13,
+      "inspection": "Sections 4.1-4.3 and conclusions; full PDF retrieved."
+    },
+    {
+      "id": "pinto",
+      "url": "https://ai4earthscience.github.io/neurips-2020-workshop/papers/ai4earth_neurips_2020_41.pdf",
+      "http_status": 200,
+      "final_url": "https://ai4earthscience.github.io/neurips-2020-workshop/papers/ai4earth_neurips_2020_41.pdf",
+      "bytes": 361472,
+      "sha256": "1df228638deba71369b9495c50780d67b7f4a9454e5a9786c91617427d1523b6",
+      "pages": 7,
+      "inspection": "Sections 2-3, architecture, cleaning/split and evaluation; full PDF retrieved."
+    },
+    {
+      "id": "kessler_nn",
+      "url": "https://raw.githubusercontent.com/kesslerlib/kessler/master/kessler/nn.py",
+      "http_status": 200,
+      "final_url": "https://raw.githubusercontent.com/kesslerlib/kessler/master/kessler/nn.py",
+      "bytes": 13708,
+      "sha256": "c7d00a254527b610e37f9054bf58bc3b28fc6730ed66b1f216386ac8701326ea",
+      "inspection": "LSTMPredictor initialization, normalization, training/validation split and forward methods."
+    }
+  ],
+  "web_sources": [
+    {
+      "id": "oci2026",
+      "url": "https://arxiv.org/html/2603.16768v2",
+      "version": "v2, 1 October 2026",
+      "access": "Full HTML; problem formulation, covariance information requirements, method and code availability inspected.",
+      "code": "https://github.com/decenter2021/OCI",
+      "treatment": "Discussion plus conditional future simulation adaptation; not reproduced."
+    },
+    {
+      "id": "ouari2026",
+      "url": "https://link.springer.com/article/10.1007/s10489-026-07494-6",
+      "access": "Publisher subscription preview; full experimental protocol unavailable.",
+      "treatment": "Discussion only."
+    },
+    {
+      "id": "timequery2026",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/S0094576526005357",
+      "access": "Direct open failed; prior indexed primary abstract evidence retained from 6 October ledger.",
+      "treatment": "Discussion only."
+    },
+    {
+      "id": "tcn_transformer2026",
+      "url": "https://arxiv.org/abs/2609.13191",
+      "access": "Author abstract/metadata; full experimental methods not inspected in this task.",
+      "treatment": "Different dataset/next-update endpoint; discussion only."
+    }
+  ],
+  "code_revisions": {
+    "kesslerlib/kessler": {
+      "head": "cc9404a73d6e9719b1c1be317ab2271e9dedea45",
+      "date": "2025-04-24T21:52:24Z"
+    },
+    "decenter2021/OCI": {
+      "head": "c33865114d94b73a0bb93546964dde2b0a5b6f2e",
+      "date": "2026-05-19T10:52:33Z"
+    }
+  },
+  "local_download_directory": "processed/research/literature_v01_20261009",
+  "bulk_sources_committed": false,
+  "prior_sources": "docs/research/2026-10-06/_support/primary_source_ledger.json"
+}
