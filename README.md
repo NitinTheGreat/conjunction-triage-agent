@@ -66,7 +66,8 @@ python scripts/reproduce.py --with-agent   # re-run the LLM arm too (needs a key
 ```
 
 A pinned container is in [`Dockerfile`](Dockerfile). It carries the code and dependencies;
-the datasets are mounted at run time rather than baked in.
+the datasets are mounted at run time rather than baked in. See [Docker](#docker) below for
+the full container and Compose workflow.
 
 ---
 
@@ -97,6 +98,56 @@ explanation rather than showing a stale number.
 The MCP server exposes `fetch_conjunctions`, `compute_pc`, `get_object_metadata` and
 `triage_events` to any MCP client — see [`mcp_server/README.md`](mcp_server/README.md) for
 the Claude Desktop and Claude Code configuration.
+
+---
+
+## Docker
+
+```bash
+docker build -t conjunction-triage .   # the backend image (default target, unchanged by Compose below)
+docker run --rm conjunction-triage     # the offline 286-test suite — no data, no network, no credential
+```
+
+The full stack — the API, the live frontend, and the frozen viz snapshot — comes up together
+with Compose:
+
+```bash
+cp .env.example .env          # fill in a credential only if you want /triage to work
+docker compose up --build
+```
+
+| Service | Port | What it serves |
+|---|---|---|
+| `api` | `8000` | the FastAPI app (`api.main:app`); `/docs` for the interactive schema |
+| `frontend` | `8001` | the live dashboard, nginx |
+| `viz` | `8002` | the frozen Phase 3 snapshot, nginx |
+
+```bash
+docker compose run --rm api python -m pytest -q            # the offline suite, in-container
+docker compose run --rm api python scripts/reproduce.py    # needs dataset/ mounted
+docker compose down                                          # stop everything
+docker compose down -v                                       # also wipe the processed/cache volumes
+```
+
+The dataset is never baked into the image: `api`'s Compose mount is `./dataset:/app/dataset:ro`,
+the same pattern the plain `docker run -v` commands above use. `frontend/lib/` and `viz/lib/`
+vendor a byte-identical copy of three.js; the Dockerfile builds it once into a shared stage so
+neither the `frontend` nor the `viz` image pays for it twice. The `app` stage runs as a non-root
+user.
+
+The MCP server isn't a Compose service — it speaks stdio, not a port — so run it directly as the
+`command` an MCP client launches, in place of the `.venv` path in
+[`mcp_server/README.md`](mcp_server/README.md):
+
+```bash
+docker run -i --rm --env-file .env \
+  -v "$PWD/dataset:/app/dataset:ro" -v conjunction-triage-agent_processed:/app/processed \
+  conjunction-triage python -m mcp_server.server
+```
+
+One caveat: `api/provenance.py` reports the running git commit, but `.git/` is deliberately
+excluded from the build context (see `.dockerignore`), so `code_version` in `/health` and every
+response's `provenance` block reads `"unknown"` inside any container. That is expected, not a bug.
 
 ---
 
