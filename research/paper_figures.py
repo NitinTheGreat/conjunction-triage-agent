@@ -5,7 +5,9 @@ definition, so a clone regenerates every figure without local run directories.
 Writes PDF and PNG files, short captions and a provenance record with input
 hashes. Figures follow paper conventions: no titles inside the plots (captions
 in paper/main.tex carry them), embedded fonts, and descriptive file names that
-the LaTeX source uses unchanged. Evidence types stay separate: frozen scientific
+the LaTeX source uses unchanged. Each figure is drawn at its printed size in the
+IEEE two-column format (one column, or both for observation_windows), so text
+prints at its nominal 7-8 pt. Evidence types stay separate: frozen scientific
 (V04), exposed development simulation and exposed retrospective real data never
 share an axis.
 """
@@ -32,6 +34,8 @@ SURFACE, INK, INK2, MUTED, GRID, AXIS = '#ffffff', '#0b0b0b', '#52514e', '#8d8a8
 # Validated categorical slots (colour-vision safe): orange marks the history summary and reused
 # evidence, blue the latest message and new evidence, as on the web findings page.
 BLUE, ORANGE, AQUA = '#2a78d6', '#eb6834', '#1baf7a'
+# Printed widths in inches of an IEEEtran column (252 pt) and of the full text block (516 pt).
+COLUMN, TEXT = 252 / 72.27, 516 / 72.27
 CONDITION_ORDER = ['no_reuse', 'overlap_50', 'overlap_90', 'solution_reissue']
 CONDITION_LABEL = {'no_reuse': 'No reuse', 'overlap_50': '50% overlap', 'overlap_90': '90% overlap',
                    'solution_reissue': 'Solution\nreissue', 'new_information': 'New\ninformation'}
@@ -39,14 +43,15 @@ CONDITION_LABEL = {'no_reuse': 'No reuse', 'overlap_50': '50% overlap', 'overlap
 
 def style():
     plt.rcParams.update({
-        'font.family': 'sans-serif', 'font.sans-serif': ['DejaVu Sans'], 'font.size': 8.5,
+        'font.family': 'sans-serif', 'font.sans-serif': ['Arial', 'Liberation Sans', 'DejaVu Sans'], 'font.size': 8,
+        'axes.titlesize': 8, 'axes.labelsize': 8, 'xtick.labelsize': 7.5, 'ytick.labelsize': 7.5,
         'pdf.fonttype': 42, 'ps.fonttype': 42,
         'axes.facecolor': SURFACE, 'figure.facecolor': SURFACE, 'savefig.facecolor': SURFACE,
         'axes.edgecolor': AXIS, 'axes.linewidth': 0.8, 'axes.labelcolor': INK2,
         'axes.spines.top': False, 'axes.spines.right': False,
         'axes.grid': True, 'grid.color': GRID, 'grid.linewidth': 0.6, 'grid.linestyle': '-',
         'xtick.color': MUTED, 'ytick.color': MUTED, 'xtick.labelcolor': INK2, 'ytick.labelcolor': INK2,
-        'legend.frameon': False, 'legend.fontsize': 7.5, 'lines.linewidth': 1.5, 'lines.solid_capstyle': 'round'})
+        'legend.frameon': False, 'legend.fontsize': 7, 'lines.linewidth': 1.5, 'lines.solid_capstyle': 'round'})
 
 
 def read(name: str, inputs: dict) -> pd.DataFrame:
@@ -58,7 +63,7 @@ def read(name: str, inputs: dict) -> pd.DataFrame:
 def save(fig, out: Path, stem: str, written: list):
     for suffix in ('pdf', 'png'):
         target = out / f'{stem}.{suffix}'
-        fig.savefig(target, dpi=220, bbox_inches='tight', metadata={'CreationDate': None} if suffix == 'pdf' else None)
+        fig.savefig(target, dpi=300, metadata={'CreationDate': None} if suffix == 'pdf' else None)
         written.append(target.name)
     plt.close(fig)
 
@@ -82,8 +87,7 @@ def runs(ids):
 def fig_windows(out, written):
     """The design, from research.simulation.windows: new and reused observations of each message."""
     conditions = ['no_reuse', 'overlap_50', 'overlap_90', 'solution_reissue', 'new_information']
-    fig, axes = plt.subplots(1, len(conditions), figsize=(7.4, 2.35), sharey=True)
-    fig.subplots_adjust(wspace=0.28)
+    fig, axes = plt.subplots(1, len(conditions), figsize=(TEXT, 2.05), sharey=True, layout='constrained')
     for ax, condition in zip(axes, conditions):
         seen: set[int] = set()
         for j, ids in enumerate(w.tolist() for w in windows(condition)):
@@ -98,8 +102,8 @@ def fig_windows(out, written):
         ax.grid(axis='y', visible=False)
     axes[0].set_yticks(range(6), [f'm{6 - k}' for k in range(6)])
     fig.legend([Patch(color=BLUE), Patch(color=ORANGE)], ['New to the message', 'Used by an earlier message'],
-               loc='lower center', ncols=2, bbox_to_anchor=(0.5, -0.2))
-    fig.supxlabel('Observation identity (0-59 are visible to the messages)', fontsize=8, color=INK2, y=-0.07)
+               loc='outside upper center', ncols=2)
+    fig.supxlabel('Observation identity (0–59 are visible to the messages)', fontsize=8, color=INK2)
     save(fig, out, 'observation_windows', written)
     return ('observation_windows', 'Observation windows of the six messages m1-m6 under five conditions, from the simulator.')
 
@@ -108,7 +112,7 @@ def fig_overlap_response(inputs, out, written):
     """Frozen run: mean clipped log loss by reuse condition."""
     losses = read('track_r_scientific_2026-10-10/per_bank_losses.csv', inputs)
     order = list(CONDITION_ORDER)
-    fig, ax = plt.subplots(figsize=(5.0, 3.0))
+    fig, ax = plt.subplots(figsize=(COLUMN, 2.35), layout='constrained')
     x = list(range(len(order)))
     series = [('grouped', MUTED, 'Grouped and lineage-weighted history'), ('oracle_lineage_weight', MUTED, None),
               ('latest_metadata', BLUE, 'Latest message'), ('singleton', ORANGE, 'History summary')]
@@ -132,12 +136,12 @@ def fig_contrasts(inputs, out, written):
     """Frozen run: contrasts with bank-combined intervals, null values and the ten per-bank estimates."""
     d = read('track_r_scientific_2026-10-10/decisions.csv', inputs)
     banks = read('track_r_scientific_2026-10-10/bank_contrasts.csv', inputs)
-    labels = {'P1': 'P1  degradation, 90% overlap', 'S5': 'S5  degradation, reissue',
-              'S1': 'S1  advantage left, 90% overlap', 'S2': 'S2  grouped minus history',
-              'S3': 'S3  lineage weights minus history', 'S6': 'S6  history minus latest, reissue'}
+    labels = {'P1': 'P1 degradation, 90% overlap', 'S5': 'S5 degradation, reissue',
+              'S1': 'S1 advantage left, 90% overlap', 'S2': 'S2 grouped minus history',
+              'S3': 'S3 lineage minus history', 'S6': 'S6 history minus latest, reissue'}
     order = ['P1', 'S5', 'S1', 'S2', 'S3', 'S6']
     d = d.set_index('id').loc[order]
-    fig, ax = plt.subplots(figsize=(5.2, 3.0))
+    fig, ax = plt.subplots(figsize=(COLUMN, 2.45), layout='constrained')
     for i, cid in enumerate(order):
         row = d.loc[cid]
         y = len(order) - 1 - i
@@ -149,7 +153,7 @@ def fig_contrasts(inputs, out, written):
         if pd.notna(row['null']):
             ax.plot(row['null'], y, marker='|', color=ORANGE, markersize=11, markeredgewidth=1.8, zorder=2)
     ax.axvline(0, color=AXIS, linewidth=0.8, zorder=0)
-    ax.set_yticks(range(len(order)), [labels[c] for c in reversed(order)], fontsize=7.5)
+    ax.set_yticks(range(len(order)), [labels[c] for c in reversed(order)], fontsize=7)
     ax.set_xlabel('Difference in mean clipped log loss (nats)')
     ax.grid(axis='y', visible=False)
     save(fig, out, 'frozen_contrasts', written)
@@ -161,16 +165,17 @@ def fig_persistence(inputs, out, written):
     d = read('sensitivity_2026-10-10/bank_contrasts.csv', inputs)
     d = d[(d.id == 'P1') & (d.training_configuration == d.evaluation_configuration)]
     order = ['iso', 'aniso2', 'aniso8', 'noise2', 'bias']
-    names = {'iso': 'Isotropic', 'aniso2': 'Anisotropy 2', 'aniso8': 'Anisotropy 8', 'noise2': 'Doubled noise', 'bias': 'Shared bias'}
-    fig, ax = plt.subplots(figsize=(5.0, 2.9))
+    names = {'iso': 'Isotropic', 'aniso2': 'Anisotropic\nratio 2', 'aniso8': 'Anisotropic\nratio 8',
+             'noise2': 'Doubled\nnoise', 'bias': 'Shared\nbias'}
+    fig, ax = plt.subplots(figsize=(COLUMN, 2.3), layout='constrained')
     for i, cfg in enumerate(order):
         g = d[d.training_configuration == cfg].reset_index(drop=True)
         offsets = [(k - (len(g) - 1) / 2) * 0.09 for k in range(len(g))]
         ax.vlines([i + o for o in offsets], g.lower95, g.upper95, color=ORANGE, linewidth=0.9, alpha=0.6)
         ax.plot([i + o for o in offsets], g['mean'], 'o', color=ORANGE, markersize=4.2, markeredgecolor=SURFACE, markeredgewidth=0.8)
     ax.axhline(0.02, color=INK2, linewidth=0.9)
-    ax.text(-0.45, 0.0215, 'margin 0.02', fontsize=7.5, color=INK2, ha='left', va='bottom')
-    ax.set_xticks(range(len(order)), [names[c] for c in order])
+    ax.text(-0.45, 0.0215, 'margin 0.02', fontsize=7, color=INK2, ha='left', va='bottom')
+    ax.set_xticks(range(len(order)), [names[c] for c in order], fontsize=7)
     ax.set_ylabel('P1 per training bank (nats)')
     ax.set_ylim(0, 0.1)
     save(fig, out, 'development_banks', written)
@@ -182,8 +187,7 @@ def fig_real_contrasts(inputs, out, written):
     d = read('real_2026-10-10/contrasts.csv', inputs)
     labels = {'R1': 'R1  history summary\nminus latest message', 'R2': 'R2  grouped minus\nhistory summary',
               'R3': 'R3  latest message\nminus latest risk', 'R4': 'R4  gradient boosting\nminus latest message'}
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.9), sharey=True)
-    fig.subplots_adjust(bottom=0.27, wspace=0.12)
+    fig, axes = plt.subplots(2, 1, figsize=(COLUMN, 3.4), layout='constrained')
     for ax, (split, title) in zip(axes, [('training_oof', 'Training cohort, out of fold'), ('historical_test', 'Historical test split')]):
         g = d[d.split == split].set_index('id')
         for i, cid in enumerate(['R1', 'R2', 'R3', 'R4']):
@@ -198,11 +202,12 @@ def fig_real_contrasts(inputs, out, written):
         ax.axvline(0, color=AXIS, linewidth=0.8)
         ax.xaxis.set_major_locator(MaxNLocator(nbins=5, symmetric=True))
         ax.set_title(title, fontsize=8, color=INK)
+        ax.set_yticks(range(4), [labels[c] for c in ['R4', 'R3', 'R2', 'R1']], fontsize=7)
+        ax.set_ylim(-0.55, 3.55)
         ax.grid(axis='y', visible=False)
-    axes[0].set_yticks(range(4), [labels[c] for c in ['R4', 'R3', 'R2', 'R1']], fontsize=7.2)
+    axes[1].set_xlabel('Difference in mean clipped log loss (nats)')
     fig.legend([Line2D([], [], color=INK, linewidth=1.6), Line2D([], [], color=MUTED, linewidth=1.3)],
-               ['Event-level 95% interval', 'Mission-cluster 95% interval'], loc='lower center', ncols=2, bbox_to_anchor=(0.55, -0.02))
-    fig.supxlabel('Difference in mean clipped log loss (nats)', fontsize=8, color=INK2, y=0.08)
+               ['Event-level 95% interval', 'Mission-cluster 95% interval'], loc='outside lower center', ncols=2)
     save(fig, out, 'real_contrasts', written)
     return ('real_contrasts', 'Paired contrasts on the exposed Kelvins data with event-level and mission-cluster intervals.')
 
@@ -212,7 +217,7 @@ def fig_frontier(inputs, out, written):
     f = read('real_2026-10-10/frontiers.csv', inputs)
     m = read('real_2026-10-10/metrics.csv', inputs)
     f = f[f.split == 'training_oof']
-    fig, ax = plt.subplots(figsize=(5.0, 3.0))
+    fig, ax = plt.subplots(figsize=(COLUMN, 2.35), layout='constrained')
     series = [('latest', MUTED, 'Latest risk and grouped history'), ('grouped', MUTED, None),
               ('causal_gbm', AQUA, 'Gradient boosting'), ('latest_metadata', BLUE, 'Latest message'),
               ('singleton', ORANGE, 'History summary')]
