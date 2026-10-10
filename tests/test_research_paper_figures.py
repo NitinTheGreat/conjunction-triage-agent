@@ -13,8 +13,8 @@ def test_figures_regenerate_from_committed_bundles_with_provenance(tmp_path):
     finally:
         sys.argv = argv
     names = {p.name for p in out.iterdir()}
-    for stem in ('fig1_overlap_response', 'fig2_frozen_contrasts', 'fig3_development_persistence', 'fig4_observation_windows',
-                 'fig5_real_contrasts', 'fig6_real_frontier'):
+    for stem in ('observation_windows', 'overlap_response', 'frozen_contrasts', 'development_banks',
+                 'real_contrasts', 'real_frontier'):
         assert {f'{stem}.pdf', f'{stem}.png'} <= names
     provenance = json.loads((out / 'provenance.json').read_text())
     assert provenance['inputs_sha256'] and 'table3_cohort_flow.csv' in provenance['outputs']
