@@ -10,19 +10,19 @@ This is the live execution record. Update it as work happens. Checked preparatio
 
 | Field | Current checkpoint — replace after each work session |
 |---|---|
-| NOW | **V04 COMPLETE** (`track_r_scientific_20261010_v1`): P1 = 0.0628 nats (frozen bank-combined 95% interval 0.0526-0.0737; margin 0.02): material degradation confirmed. Holm rejects all four secondary nulls: S1 -0.0039, S5 0.0773, S2 +0.0007, S3 +0.0023. Exploratory S6 is +0.0106. A01 and A02 are complete. |
-| NEXT | A03: independent reproduction following the [guide](docs/research/execution/a03_reproduction_guide.md). It must be done by someone other than this assistant, so arrange a reviewer. Meanwhile, W02: scripted figures and tables from the committed bundles; then W03 results text mapped to register rows. |
-| Active task / owner | A03 needs an independent reviewer (user to arrange). W02 can proceed. |
+| NOW | **V04, A01, A02 and W02 COMPLETE; W03 drafted.** Frozen result: P1 = 0.0628 nats (95% CI 0.0526-0.0737 > 0.02 margin), material reuse degradation confirmed; Holm rejects S1/S5/S2/S3. Full manuscript draft with 47 regenerating register claims; six scripted figures. |
+| NEXT | (1) A03: an independent reviewer follows the [reproduction guide](docs/research/execution/a03_reproduction_guide.md) and logs discrepancies; this cannot be this assistant. (2) Authors: venue choice and its current requirements, authorship, disclosures, funding. (3) Supplement text. (4) W04 packaging after W03. |
+| Active task / owner | Blocked on people: A03 needs an independent reviewer; W03 author-only items need the authors. Assistant-doable next: supplement drafting. |
 | Selected direction | **Track R, narrowed:** controlled robustness/measurement benchmark. Grouping remains a candidate and may be discarded if simpler controls explain results. |
 | Conditional extension | **Track E:** independent real-data efficacy, only after access and statistical requirements pass. |
 | Research blockers | None preventing V01/V02 preparation. Full methods for some close papers and independent operational data remain unavailable; no novelty or real efficacy claim is established. |
 | Current machine | Windows, PowerShell; repository at `F:\conjunction-triage`; Python environment at `.venv\Scripts\python.exe`. Paths elsewhere in this file are relative to the repository root. |
 | HEAD when this checklist was created | `89d7f2efb8bf135e02fa51760e0ed3bb33a105c9`; working tree contains pre-existing modifications and untracked files. |
-| Latest validation | After V04: full suite 490 passed / 1 skipped (103.34 s). 16 bundles / 129 artifacts pass. Claim register: 35 claims (33 regenerated, 2 documented). 12 raw, 45 historical and 8 frozen files unchanged. |
-| New scientific runs | Development runs this session: tuning_adequacy_20261010_v2, precision_planning_20261010_v2, interval_validation_20261010_v1/v2, sensitivity_preflight_20261010_v1, sensitivity_20261010_v1, sensitivity_summary_20261010_v1 and bank_interval_validation_20261010_v1. No frozen scientific evaluation. |
+| Latest validation | Session end: full suite 491 passed / 1 skipped (106.65 s). 16 bundles / 129 artifacts pass. Claim register 47 claims (45 regenerated, 2 documented). Frozen protocol accepted. 12 raw, 45 historical and 8 frozen files and `requirements.txt` unchanged. |
+| New scientific runs | This session: tuning_adequacy_20261010_v2, precision_planning_20261010_v2, interval_validation_20261010_v1/v2, sensitivity_20261010_v1 (+ preflight and summary), bank_interval_validation_20261010_v1, real_retrospective_20261010_v1, real_summary_20261010_v2, real_quality_20261010_v1, **track_r_scientific_20261010_v1 (V04)** and track_r_report_20261010_v1. Failed and retained: real_summary_20261010_v1. Superseded: tuning_adequacy v1, precision_planning v1. |
 | Scientific holdout status | **Consumed by V04** under the frozen protocol (authorized 10 October 2026). Any further use of these banks is post-hoc analysis, not confirmation. |
 | Running jobs / processes | None for this project. |
-| Next executable command | `.\.venv\Scripts\python.exe -m research.claim_register` (35 claims regenerate or are documented) and `python -m research.verify_exports --root docs/research/results`. |
+| Next executable command | `.\.venv\Scripts\python.exe -m research.claim_register`; `python -m research.verify_exports --root docs/research/results`; `python -m research.paper_figures --force` to regenerate figures (needs `requirements-figures.txt`). |
 
 ### Copy this into the next assistant
 
