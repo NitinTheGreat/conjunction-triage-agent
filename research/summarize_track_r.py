@@ -84,6 +84,35 @@ def bank_contrast_table(labelled: pd.DataFrame, protocol: dict) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def build(source: Path, protocol: dict, post_hoc_seed: int, run_id: str):
+    """Verify, reconstruct and tabulate one completed scientific run; returns tables, audit and report text."""
+    commit = json.loads((source / 'phase2_commit.json').read_text(encoding='utf-8'))
+    if sha256(source / 'predictions_unlabeled.parquet') != commit['predictions_sha256']:
+        raise ValueError('Unlabelled predictions changed after the phase-2 commit')
+    labelled = read_table(source / 'predictions_labelled.parquet')
+    recorded = json.loads((source / 'analysis.json').read_text(encoding='utf-8'))
+    if not same(json.loads(json.dumps(reconstruct(labelled, protocol))), recorded):
+        raise ValueError('analysis.json does not reconstruct from the labelled predictions')
+    tables = descriptive(labelled)
+    tables['bank_contrasts.csv'] = bank_contrast_table(labelled, protocol)
+    tables['decisions.csv'] = pd.DataFrame([{k: v for k, v in r.items() if not isinstance(v, dict)} for r in recorded.values()])
+    files = sorted(source.glob('selection_*.json'))
+    selections = [json.loads(f.read_text(encoding='utf-8')) for f in files]
+    tables['selections.csv'] = pd.DataFrame([{'file': f.name, 'arm': s['arm'], 'C': s['C'], 'at_upper_C': s['C'] == max(protocol['C']),
+                                              'maximum_iterations': s.get('maximum_observed_iterations', s.get('maximum_iterations'))}
+                                             for f, s in zip(files, selections)])
+    matrix, _ = bank_matrix(labelled, 'singleton', 'latest_metadata', 'overlap_90', 'degradation')
+    parts = components_from(matrix)
+    post = pd.DataFrame(validate(parts, matrix.shape[1], matrix.shape[0], POST_HOC_REPLICATES, np.random.default_rng(post_hoc_seed)))
+    tables['post_hoc_coverage.csv'] = post.assign(id='P1', note='post hoc; simulated from observed scientific components')
+    integration = json.loads((source / 'integration.json').read_text(encoding='utf-8'))
+    text = report(recorded, tables, protocol, parts, run_id, source.name, integration)
+    audit = {'phase2_commit_verified': True, 'analysis_reconstructed_exactly': True, 'labelled_rows': len(labelled),
+             'scientific_components_P1': {k: v for k, v in parts.items() if k not in ('scenario_effects', 'residuals')},
+             'independent_pre_run_check': 'waived by the user for V04 (see track_r_authorization.json)'}
+    return tables, audit, text
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source', type=Path, required=True)
@@ -98,30 +127,11 @@ def main():
     source_audit = audit_run(source)
     protocol = json.loads(args.protocol.read_text(encoding='utf-8'))
     with Run(args.run_id, 'track_r_scientific_report', {'source': str(source)}, [source / 'manifest.json', args.protocol]) as run:
-        commit = json.loads((source / 'phase2_commit.json').read_text(encoding='utf-8'))
-        if sha256(source / 'predictions_unlabeled.parquet') != commit['predictions_sha256']:
-            raise ValueError('Unlabelled predictions changed after the phase-2 commit')
-        labelled = read_table(source / 'predictions_labelled.parquet')
-        recorded = json.loads((source / 'analysis.json').read_text(encoding='utf-8'))
-        rebuilt = json.loads(json.dumps(reconstruct(labelled, protocol)))
-        if not same(rebuilt, recorded):
-            raise ValueError('analysis.json does not reconstruct from the labelled predictions')
-        tables = descriptive(labelled)
-        tables['bank_contrasts.csv'] = bank_contrast_table(labelled, protocol)
-        decisions = pd.DataFrame([{k: v for k, v in r.items() if not isinstance(v, dict)} for r in recorded.values()])
-        tables['decisions.csv'] = decisions
-        matrix, _ = bank_matrix(labelled, 'singleton', 'latest_metadata', 'overlap_90', 'degradation')
-        parts = components_from(matrix)
-        k, n = matrix.shape[1], matrix.shape[0]
-        post = pd.DataFrame(validate(parts, k, n, POST_HOC_REPLICATES, np.random.default_rng(args.post_hoc_seed)))
-        tables['post_hoc_coverage.csv'] = post.assign(id='P1', note='post hoc; simulated from observed scientific components')
+        tables, audit, report_text = build(source, protocol, args.post_hoc_seed, args.run_id)
         for name, frame in tables.items():
             frame.to_csv(run.path / name, index=False)
-        write_json(run.path / 'audit.json', {'source_run': source_audit, 'phase2_commit_verified': True,
-                   'analysis_reconstructed_exactly': True, 'labelled_rows': len(labelled),
-                   'scientific_components_P1': {k2: v for k2, v in parts.items() if k2 not in ('scenario_effects', 'residuals')},
-                   'independent_pre_run_check': 'waived by the user for V04 (see track_r_authorization.json)'})
-        (run.path / 'report.md').write_text(report(recorded, tables, protocol, parts, args.run_id, source.name), encoding='utf-8')
+        write_json(run.path / 'audit.json', {'source_run': source_audit, **audit})
+        (run.path / 'report.md').write_text(report_text, encoding='utf-8')
     args.export.mkdir(parents=True, exist_ok=False)
     names = ('audit.json', *sorted(tables), 'report.md')
     provenance = {'run_id': args.run_id, 'source_runs': [source.name], 'manifest_sha256': sha256(run.path / 'manifest.json'), 'artifacts': {}}
@@ -132,11 +142,12 @@ def main():
     print('EXPORTED', args.export, flush=True)
 
 
-def report(recorded, tables, protocol, parts, run_id, source) -> str:
+def report(recorded, tables, protocol, parts, run_id, source, integration) -> str:
     p1 = recorded['P1']
     family = protocol['analysis']['confirmatory_secondary']
     secondary = tables['decisions.csv'][tables['decisions.csv'].id.isin(family)][['id', 'arm', 'comparator', 'condition', 'estimand', 'null', 'mean', 'lower', 'upper', 'p_value', 'holm_rejected']]
-    explore = tables['decisions.csv'][tables['decisions.csv'].role == 'exploratory'][['id', 'arm', 'comparator', 'condition', 'estimand', 'mean', 'lower', 'upper', 'scenario_lower', 'scenario_upper']]
+    exploratory = [c['id'] for c in protocol['analysis']['contrasts'] if c.get('role') == 'exploratory' or c.get('null') is None]
+    explore = tables['decisions.csv'][tables['decisions.csv'].id.isin(exploratory)][['id', 'arm', 'comparator', 'condition', 'estimand', 'mean', 'lower', 'upper', 'scenario_lower', 'scenario_upper']]
     misses = p1['reuse_misses_pooled_over_banks']
     losses = tables['losses.csv']
     focus = losses[losses.condition.isin(['no_reuse', 'overlap_90', 'solution_reissue', 'new_information'])]
@@ -189,6 +200,15 @@ bank-scenario pairs. The new-miss rate is {misses['new_miss_rate']:.4f}, with an
 exact 95% interval of [{misses['new_miss_rate_lower95']:.4f}, {misses['new_miss_rate_upper95']:.4f}] and an
 exact McNemar p of {misses['exact_mcnemar_p']:.3g}. Banks share scenarios, so the pooled count
 is descriptive.
+
+## Prespecified diagnostics
+
+- **Integration check** (label-free) on the scientific noise covariance: worst
+  relative difference {integration['max_rel_difference']:.2e}.
+- **Grid-edge selections** (C = {max(protocol['C']):g}; a search limit, not a failure):
+  {int(tables['selections.csv'].at_upper_C.sum())} of {len(tables['selections.csv'])} models.
+  The largest observed iteration count was {int(tables['selections.csv'].maximum_iterations.max())} against a cap of
+  {protocol['max_iter']:,}.
 
 ## Absolute losses (mean over banks and scenarios)
 

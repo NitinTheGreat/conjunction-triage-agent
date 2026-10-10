@@ -126,3 +126,14 @@ def test_report_reconstructs_analysis_exactly_and_detects_tampering(completed):
     tables = descriptive(labelled)
     assert {'losses.csv', 'calibration.csv', 'per_bank_losses.csv'} == set(tables)
     assert len(bank_contrast_table(labelled, p)) == len(p['analysis']['contrasts']) * 2
+
+
+def test_report_build_runs_end_to_end_on_a_development_run(completed, tmp_path):
+    from research.artifacts import write_json
+    from research.summarize_track_r import build
+    p, run, _, _ = completed
+    write_json(run.path / 'integration.json', {'max_rel_difference': 1e-8})
+    tables, audit, text = build(run.path, p, 3, 'report_test')
+    assert audit['analysis_reconstructed_exactly'] and 'Decision:' in text and 'Grid-edge selections' in text
+    assert {'decisions.csv', 'selections.csv', 'post_hoc_coverage.csv', 'bank_contrasts.csv', 'losses.csv'} <= set(tables)
+    assert len(tables['selections.csv']) == 2 * 4
