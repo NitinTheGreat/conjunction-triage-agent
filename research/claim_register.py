@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pandas as pd
 
-STATISTICS = {'value', 'min', 'max', 'mean', 'count', 'sum'}
+STATISTICS = {'value', 'min', 'max', 'mean', 'count', 'sum', 'std'}
 EVIDENCE_TYPES = {'exposed development simulation', 'exposed retrospective real data', 'protocol', 'pending scientific evaluation',
                   'frozen scientific simulation'}
 
