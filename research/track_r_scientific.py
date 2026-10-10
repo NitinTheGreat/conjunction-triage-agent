@@ -33,6 +33,11 @@ LATEST_ARMS = ('latest', 'latest_metadata')
 REUSE_CONDITIONS = ('overlap_50', 'overlap_90', 'solution_reissue', 'burst_reissue')
 
 
+def blob_id(path: Path) -> str:
+    """Git blob id after the repository's line-ending normalization (portable across OSes)."""
+    return subprocess.check_output(['git', 'hash-object', str(Path(path).resolve())], cwd=ROOT, text=True).strip()
+
+
 def protocol_hash(path: Path) -> str:
     """Hash of the canonical JSON content, independent of line endings."""
     content = json.loads(Path(path).read_text(encoding='utf-8'))
@@ -51,8 +56,8 @@ def load_protocol(path: Path = PROTOCOL, freeze: Path = FREEZE, require_frozen: 
         record = json.loads(Path(freeze).read_text(encoding='utf-8'))
         if record.get('protocol_sha256') != protocol_hash(path):
             raise ValueError('Freeze record does not match the protocol')
-        for module, expected in protocol['code_sha256'].items():
-            if sha256(ROOT / module) != expected:
+        for module, expected in protocol['code_blob_ids'].items():
+            if blob_id(ROOT / module) != expected:
                 raise ValueError(f'Frozen code changed: {module}')
     noise_covariance(protocol['configuration']['eigenvalues'], protocol['configuration']['rotation_degrees'])
     banks = [b['bank'] for b in protocol['training_banks']] + [protocol['evaluation_bank']['bank']]

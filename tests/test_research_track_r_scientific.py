@@ -30,7 +30,7 @@ def protocol():
             'inner_folds': 3, 'max_iter': 10000, 'integration_seed': 20261499,
             'analysis': {'primary': 'P1', 'margin': .02, 'alpha': .05, 'bootstrap_resamples': 199, 'bootstrap_seed': 5,
                          'contrasts': contrasts, 'confirmatory_secondary': ['S1', 'S5', 'S2', 'S3']},
-            'code_sha256': {}}
+            'code_blob_ids': {}}
 
 
 def write_protocol(tmp_path, value):
@@ -92,3 +92,22 @@ def test_frozen_protocol_requirements_and_reserved_identities(tmp_path):
     bad['independent_training_banks'] = 3
     with pytest.raises(ValueError, match='inconsistent'):
         tr.load_protocol(write_protocol(tmp_path, bad), require_frozen=False)
+
+
+def test_blob_ids_match_committed_git_objects():
+    import subprocess
+    from research.artifacts import ROOT
+    committed = subprocess.check_output(['git', 'rev-parse', 'HEAD:research/metrics.py'], cwd=ROOT, text=True).strip()
+    assert tr.blob_id(ROOT / 'research/metrics.py') == committed
+
+
+def test_freeze_builder_matches_the_runner_and_reservation():
+    from research.freeze_track_r import build_protocol
+    from research.sensitivity_banks import RESERVED_PREFIXES, RESERVED_SEEDS
+    p = build_protocol('0' * 40, {}, 'b' * 40)
+    assert p['status'] == 'frozen' and p['independent_training_banks'] == 10 and p['evaluation_scenarios'] == 5000
+    assert {b['seed'] for b in p['training_banks']} | {p['evaluation_bank']['seed']} <= RESERVED_SEEDS
+    assert all(b['bank'].startswith(RESERVED_PREFIXES) for b in p['training_banks'])
+    ids = {c['id'] for c in p['analysis']['contrasts']}
+    assert set(p['analysis']['confirmatory_secondary']) <= ids and p['analysis']['primary'] in ids
+    assert [c for c in p['analysis']['contrasts'] if c['id'] == 'S6'][0]['null'] is None
