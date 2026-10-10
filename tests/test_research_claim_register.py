@@ -21,6 +21,7 @@ def root(tmp_path):
 def test_regenerated_claims_must_match_the_bundle(root):
     assert cr.verify(register(), root)[0]['status'] == 'regenerated'
     assert cr.verify(register(statistic='count', expected=2.0), root)[0]['actual'] == 2.0
+    assert cr.verify(register(statistic='sum', expected=3.0), root)[0]['actual'] == 3.0
     with pytest.raises(ValueError, match='differs'):
         cr.verify(register(expected=1.5), root)
     with pytest.raises(ValueError, match='exactly one'):

@@ -198,7 +198,11 @@ All results are labelled exposed and are separate from simulation. Main result: 
 - Two regenerations are byte-identical. Renderings are git-ignored; captions, tables and provenance are committed.
 - matplotlib 3.10.7 is recorded in `requirements-figures.txt`; no existing package changed.
 
-- [ ] **W03 — finish results, limitations, and the submission draft.** Depends on: W01–W02, A03. **Do:** write only supported results; reconcile abstract, conclusion, supplement, README-facing claims, and errata while preserving frozen history. Choose a venue by the actual contribution and verify its current author requirements. **Expected:** complete manuscript and supplement, limitations, data/code availability, and disclosure statements. **Done when:** reviewers can distinguish retrospective, simulated, and independently confirmed findings, and no placeholder or unsupported novelty/performance claim remains.
+- [ ] **W03 — finish results, limitations, and the submission draft.** Depends on: W01–W02, A03. **Do:** write only supported results; reconcile abstract, conclusion, supplement, README-facing claims, and errata while preserving frozen history. Choose a venue by the actual contribution and verify its current author requirements. **Expected:** complete manuscript and supplement, limitations, data/code availability, and disclosure statements. **Done when:** reviewers can distinguish retrospective, simulated, and independently confirmed findings, and no placeholder or unsupported novelty/performance claim remains. **IN PROGRESS (10 October 2026):** a full [draft manuscript](paper/manuscript.md) exists. It covers the abstract, methods, frozen V04 results, development and exposed real-data evidence, limitations, the novelty boundary and the conclusion. Every estimate cites a [claim-register](docs/research/claims/claim_evidence.csv) row (47 claims, all regenerating or documented). Still open:
+- A03 independent review;
+- author-only items (authors, venue choice and its current requirements, disclosures, funding);
+- the supplement text;
+- final citation formatting.
 
 - [ ] **W04 — prepare the reproducibility and submission package.** Depends on: W03. **Do:** package permitted code/configs/predictions, checksums, environment instructions, citations, and generated figures; prepare author/venue checklist and cover letter. **Expected:** reviewable release/submission bundle and a final handoff checkpoint. **Done when:** a clean reconstruction path is documented, redistribution permissions are respected, and human authors have a concrete package to review. External upload/submission is a separate action requiring the user's instruction; acceptance is not a checkbox under our control.
 
@@ -896,4 +900,12 @@ layout collisions fixed before commit. Evidence types never share an axis.
 Next:
 - A03 needs an independent reviewer; the [guide](docs/research/execution/a03_reproduction_guide.md) is ready.
 - W03 (results, limitations and novelty account) can be drafted. Every quantitative sentence must map to a claim-register row.
+
+### W03 draft - 10 October 2026
+
+The manuscript was rewritten from skeleton to full draft. Evidence types are
+labelled throughout: confirmatory simulation (V04), exposed development, exposed
+retrospective real data. Register rows were added (V11-V15, D17-D18, R08-R12),
+and `research.claim_register` gained a `sum` statistic. W03 stays unchecked until
+A03 and the author-only items are done.
 

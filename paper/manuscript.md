@@ -1,329 +1,398 @@
-# Observation reuse and the limits of history-based conjunction-risk forecasting
+# Observation reuse limits history-based forecasting of conjunction risk: a controlled benchmark with a frozen confirmatory evaluation
 
-**Working manuscript skeleton — 10 October 2026. Not submission-ready.**
+**Draft manuscript — 10 October 2026.** Every estimate and count cites a row of the
+[claim register](../docs/research/claims/claim_evidence.csv), written as [ID], and
+each row regenerates from a committed result bundle. Two derived descriptive
+quantities instead cite their source report: the label-shift percentages and the
+sealed-prediction count. Independent reproduction
+(A03) has not yet been performed. Do not submit before it is.
 
-Authors, affiliations, venue, disclosures and funding: **TO BE COMPLETED BY AUTHORS**.
-
-The title is provisional. The selected route is a controlled robustness and measurement study, with a candidate grouping method. Method superiority, operational efficacy and novelty remain unestablished. The first pilot is reported separately in [the feasibility decision](../docs/research/execution/feasibility_decision.md); it must not be promoted to a frozen scientific evaluation.
+Authors, affiliations, venue, funding, conflicts and AI-assistance disclosure:
+**AUTHORS TO COMPLETE.**
 
 ## Abstract
 
-**INCOMPLETE — write after A02/A03.**
+Sequences of conjunction data messages (CDMs) can republish orbit-determination
+solutions built from overlapping observations, so a longer history need not carry
+proportionally more information. We ask whether such observation reuse measurably
+degrades history-based forecasts of the final recorded risk class, and whether
+observable metadata, or even known observation lineage, repairs the damage.
 
-Motivation: sequences of conjunction data messages may incorporate overlapping observations, so additional messages need not represent proportionally more information. Question: under specified observation reuse and noise assumptions, how does reuse affect forecasts of final reported risk, and how do history summaries compare with simple controls? Approach: retrospective event-level evaluation of exposed Kelvins data, plus a controlled two-dimensional Gaussian model with known observation lineage and paired variants. Results: **PENDING FROZEN SCIENTIFIC EVALUATION**. Conclusion: **PENDING CLAIM REVIEW**.
+In a static two-dimensional encounter-plane simulator with known observation
+identities, we froze the analysis before generating a held-out configuration
+(10 independent training banks, 5,000 evaluation scenarios). The latest message
+and the label were held fixed. Ninety per cent observation overlap then increased
+the clipped log loss of a history-summary logistic forecaster by 0.063 nats
+relative to a reuse-invariant latest-message comparator (95% interval 0.053 to
+0.074; prespecified margin 0.02) [V01-V03]. The history model kept essentially
+none of its no-reuse advantage [V04, V11-V13], and solution reissue degraded it
+by 0.077 [V05]. Neither label-free grouping nor privileged lineage weighting
+reduced the degradation by more than 0.01 [V06, V07].
 
-Do not insert expected gains, collision-prevention claims or a claim that the method predicts physical collision probability.
+In exposed retrospective Kelvins data, history summaries were likewise worse
+than latest-message metadata: +0.003 nats out of fold and +0.026 on the historical
+test split [R01, R03]. That agrees in direction but cannot establish the cause.
+The results bound what history representations gain from reuse-contaminated CDM
+sequences. They do not establish operational efficacy, collision outcomes or
+analyst workload.
 
 ## 1. Introduction
 
-Conjunction data messages describe evolving estimates of an encounter. Forecasting the final recorded risk class is useful as a well-defined research task, but it differs from estimating actual collision occurrence or determining whether a maneuver is necessary. A sequence can contain exact retransmissions, revised solutions based on overlapping observation sets, and solutions incorporating new observations. These cases require different interpretations.
+A CDM sequence reports evolving estimates of a single close approach. A
+forecasting model may summarize that history to predict whether the final
+recorded risk will be high. Here "high" means a final log10 risk of at least -6,
+the class used in the Kelvins competition [Uriot et al.]. This class is a
+well-defined research target. It is not the probability of an actual collision,
+nor a statement that a maneuver is needed.
 
-The research question is whether observation reuse creates a measurable failure mode for history-based final-risk forecasting, and whether an explicit treatment of plausible reuse improves behavior relative to matched simple controls. Public metadata does not generally identify individual observations. We therefore separate a retrospective real-data comparison from a simulation where observation identity is known by construction.
+Successive messages can relate to each other in different ways:
+- an exact retransmission;
+- a revised solution built largely from the same observations;
+- a solution that adds genuinely new observations.
 
-Potential contributions, conditional on completed evidence:
+These cases carry very different amounts of new information. A model that pools
+history as if every message added independent evidence may be misled when
+messages mostly reuse observations. Public CDM metadata do not identify
+individual observations, so the effect cannot be measured directly on real data.
 
-1. An auditable comparison that separates final-class forecasts from official log-risk scoring and keeps all model fitting inside the declared information boundary.
-2. A paired, known-lineage mechanism benchmark that distinguishes replay, overlap, solution reissue and genuinely new information.
-3. A measured advantage, null result or limitation of candidate history representations against justified comparators.
+We therefore combine two kinds of evidence that are never pooled:
+1. **A controlled simulation** with known observation lineage, paired variants
+   of each scenario, and a frozen confirmatory protocol.
+2. **An exposed retrospective analysis** of the public Kelvins data under the
+   same analysis choices.
 
-**Do not claim these as completed scientific contributions until V04/A01/A02 pass.**
+**Contributions** (each bounded by Section 6):
+1. A paired, known-lineage benchmark. It separates exact replay, partial and
+   heavy overlap, solution reissue and genuinely new information while holding
+   the latest message and the label fixed. It includes matched simple controls
+   and a reuse-invariant comparator.
+2. A frozen, confirmatory estimate of reuse-induced degradation of a
+   history-based forecaster in a held-out simulator configuration. The analysis
+   propagates training-bank variability, which development evidence showed
+   cannot be ignored.
+3. Bounded null results:
+   - label-free metadata grouping does not remove the degradation;
+   - nor does a privileged rule that knows observation lineage;
+   - corroborating exposed real-data evidence that history summaries do not beat
+     the latest message.
 
 ## 2. Related work
 
-This draft uses the [6 October source ledger](../docs/research/2026-10-06/_support/primary_source_ledger.json) and [deep review](../docs/research/2026-10-06/_support/DEEP_LITERATURE_REVIEW.md). Their access levels are part of the evidence. The [V01 compatibility review](../docs/research/execution/closest_work_comparison.md) now selects candidate adaptations; V02 implementation and novelty assessment remain open.
+The Kelvins collision-avoidance challenge defines an early-information task on
+final recorded risk, with a high-risk-weighted official score [Uriot et al.].
+Sánchez and colleagues study robust classification and epistemic uncertainty
+in conjunction assessment with belief functions [CEC manuscript; ASR record].
+Recent probabilistic-ensemble and sequence-forecasting papers are close in
+spirit [Ouari et al.; Zerrouki et al.]. The previews available to us do not
+establish matching splits, horizons or calibration units, so their scores are
+not used as comparators here (V01 compatibility review).
 
-The Kelvins competition defines an early-information task based on the final recorded risk and a high-risk-weighted scoring rule. Its data filtering and latest-risk baseline provide the retrospective task context; different cohorts and targets must not be combined into a single leaderboard. [Uriot et al.](https://arxiv.org/html/2008.03069v2)
-
-Sánchez and colleagues study robust classification and epistemic uncertainty in conjunction assessment. The CEC work and the related ASR work have different evidence representations and labels from the binary final-risk task here. The earlier review inspected selected CEC methods; V01 subsequently retrieved the final ASR paper and inspected its covariance-weighting method. Exact geometry/equation implementation still needs verification for reproduction. A compatible adapted baseline must be distinguished from a faithful reproduction. [CEC manuscript](https://strathprints.strath.ac.uk/90331/7/Sanchez-etal-IEEE-CEC-2024-Robust-classification-with-belief-functions-and-deep-learning.pdf), [ASR institutional record](https://strathprints.strath.ac.uk/90580/)
-
-Recent probabilistic ensemble and full-horizon sequence papers are close forecasting families. The available publisher previews do not establish identical splits, horizons, calibration units or leakage controls. They belong in the compatibility review; their reported scores cannot yet be used as directly comparable experimental baselines. [Ouari et al.](https://link.springer.com/article/10.1007/s10489-026-07494-6), [Zerrouki et al.](https://www.sciencedirect.com/science/article/abs/pii/S0094576526005357)
-
-Dependence-aware and idempotent evidence combination predates this project. Exact replay invariance alone is therefore not a novelty claim. An applicable fusion method should be compared where its mathematical inputs and target are compatible; otherwise the incompatibility must be explicit. V01 also inspected the AMOS fusion method and its explicit unknown-correlation limitation; V02 selects separate state-fusion diagnostics. [Denœux, 2008](https://www.hds.utc.fr/~tdenoeux/dokuwiki/_media/en/revues/aij3553_final.pdf), [Denœux, 2024](https://www.hds.utc.fr/~tdenoeux/dokuwiki/_media/en/publi/comb_grfn_v2.pdf)
-
-Overlapping Covariance Intersection also provides recent prior art for fusion with partial structural covariance knowledge. Its required covariance bounds are not supplied by public observation-age metadata; a simulation comparison needs an explicit input mapping. [Pedroso et al., v2, October 2026](https://arxiv.org/html/2603.16768v2)
-
-**Development update:** V02 now includes a diagonal-volume weighting approximation and direct-weighting ablation on exposed simulation banks. They are not reproductions of the published evidence-theory method. Separate static state-fusion/oracle diagnostics are also complete on exposed banks. The bounded sequence adaptation and latest-only capacity control are now complete on these exposed banks. The four provenance-component arms have completed fitting and full checkpoint reconstruction, and a tuning-adequacy decision restricts claims to the declared bounded implementations. **Pending:** simulator sensitivity, precision planning, a justified primary contrast and an explicit account of what the completed study adds beyond prior work. See V01 for versioned sources and remaining access limits.
+Combining correlated evidence without double counting is well studied in
+evidence theory [Denœux 2008, 2024] and in covariance-intersection fusion,
+including recent overlapping-information variants [Pedroso et al.]. Our
+state-fusion diagnostics (Section 5.2) reproduce that known double-counting
+behavior and are not claimed as new. The contribution here is
+measurement-oriented. We quantify how much a class-forecasting pipeline loses
+under controlled reuse, against matched controls and with frozen inference. We
+also show that two plausible repairs do not recover it.
 
 ## 3. Task, data and information boundary
 
-Let an event's visible history contain only messages with `time_to_tca >= 2` days. The binary outcome is whether its final recorded log-risk is at least -6. A forecast `q` refers to this class. Official-score experiments instead predict final log-risk and use the separate Kelvins loss.
+**Task.** An event's visible history contains only messages at least two days
+before the time of closest approach. The binary outcome is whether the final
+recorded log-risk is at least -6. A forecast q refers to this class. Official
+log-risk scoring is reported separately and is never derived from q.
 
-The exposed retrospective training cohort has 8,293 eligible events and 66 positives; the historical test has 2,167 and 150. The raw archive overlaps these event populations and is not an external holdout. All 189,285 released input/label rows were reconciled to raw rows over 102 non-ID fields under the saved tolerances. Cohort eligibility remains retrospective even when input features obey the cutoff.
+**Data.** The exposed retrospective training cohort has 8,293 eligible events
+with 66 positives [R08, R09], and the historical test split has 2,167 with
+150 [R10, R07]. Cohort flow is in `paper/figures/table3_cohort_flow.csv`.
+- **Eligibility:** it uses future records and is therefore retrospective.
+- **Raw archive:** it overlaps these events and is not an external holdout.
+- **Censoring:** 6,838 of 8,293 training events (82.5%) sit at the -30 risk
+  floor and are treated as censored [R12].
+- **Provenance fields:** orbit-determination (OD) signatures and coarse
+  observation-age intervals are proxies, not observation identities.
 
-OD signatures and coarse observation-age intervals are proxies. Unknown age remains a category; the interval [2,180] is not converted to an assumed exact age. Missing provenance is not a count of independent measurements.
+## 4. Methods
 
-**Table 1 — cohort flow and source mapping:** artifact source `processed/research/data_20261009_v2/{crosswalk_summary.json,data_summary.json,cohort.parquet}`. Final paper formatting and exclusion/censoring discussion: **PENDING A01/W02**.
+### 4.1 Forecasters and controls
 
-## 4. Methods and evaluation
+All class forecasters share one recipe:
+- a calibrated logistic readout over a declared feature summary;
+- selection by minimum inner out-of-fold (OOF) clipped log loss over the C grid
+  {0.01, 0.1, 1, 10, 100, 1000};
+- monotone Platt calibration on the selected inner OOF predictions;
+- a training-only threshold at nominal 95% recall.
 
-### 4.1 Reference predictors and candidate history model
+The arms:
+- `latest` uses the latest message's risk.
+- `latest_metadata` uses all fields of the latest message plus missingness
+  flags. In the simulator it is invariant to reuse by construction, because
+  every condition shares the same latest window.
+- `singleton` (the history summary) pools all canonical visible messages into
+  latest, mean, variance, span, count and missingness features.
+- `grouped` takes the maximum calibrated score over at most eight label-free
+  partitions formed from OD fields and publication-time gaps.
+- `oracle_lineage_weight` reweights the singleton summary using known
+  observation lineage. Each unique visible observation is shared equally among
+  the messages that contain it. This privileged descriptive rule is available
+  only in simulation; it is neither posterior fusion nor a performance bound.
 
-Include latest-risk, latest-message metadata, causal logistic/boosting, singleton pooling, time grouping, random grouping, thinning, change-based selection and ignore-update controls. The candidate constructs at most eight label-free partitions, summarizes each with group-normalized weights, fits one shared regularized logistic model with total event weight one, and calibrates the maximum partition score. A range across partition scores is a sensitivity measure, not a confidence or coverage interval.
+Development studies also examined thinning, change-based selection, random and
+time-only grouping, ignore-updates, covariance-volume weighting, and a bounded
+LSTM adaptation with a latest-only capacity control. Section 5.2 summarizes
+them, and the supplement documents them.
 
-The initial design is implemented in `research/history.py` and `research/models.py`. V02 may revise it in new versioned runs. Report all candidate changes and failed controls; do not rewrite the pilot as the final protocol.
+### 4.2 Controlled observation-lineage simulator
 
-The V02 weighting controls use `(t_sigma_r**2+c_sigma_r**2)*(t_sigma_t**2+c_sigma_t**2)`
-as a radial/tangential diagonal-volume proxy, either through inverse fitted
-log-linear time trend or direct inverse volume. They preserve singleton summary
-features and the common calibrated logistic readout. Missing/invalid precision
-inputs and degenerate time/volume histories have declared fallback behavior.
-Normal uncertainty, cross-covariance and real encounter-plane geometry are not
-reconstructed. See the [implementation contract](../docs/research/execution/covariance_proxy_plan.md).
+Each latent scenario draws a two-dimensional relative position at a common
+encounter plane and 80 noisy observations, each with an immutable identity and
+availability time. A message is the Gaussian posterior from an explicit window of
+visible observation identities (Figure 4). Its collision probability over a fixed
+disk becomes the message's risk. Two independent quadratures verify the
+integration.
 
-The sequence adaptation compares a history LSTM with a latest-message-only LSTM
-of the same architecture family. Each has two unidirectional layers, dropout 0.2
-between layers, and a linear binary-class readout from the last valid hidden
-state. Widths 8/16/32 crossed with 20/60 fixed epochs give six candidates per arm;
-there is no early stopping. Packed lengths exclude padding from recurrence.
-Training-prefix-only median imputation and robust scaling are shared policies
-across arms, followed by per-message missingness flags and categorical age bins.
-The latest-only arm uses training-history distribution statistics for this
-preprocessing but receives no earlier messages from an evaluation event.
+**Label.** The final label uses the full unique-observation bank, so all reuse
+variants of a scenario share one label.
 
-Both arms use BCE, Adam, scenario weight one across variants, common scenario
-folds and the same four training subsets as the earlier controls. Selected inner
-OOF scores also fit monotone calibration and the nominal recall threshold; this
-reuse supplies no independent risk certification. The model is smaller than
-the reviewed next-CDM sequence family and changes its prediction target and loss.
-It is an adaptation, not a reproduction or a claim of best current performance.
-The [fixed contract](../docs/research/execution/sequence_contract.md) records
-optimizer details, seeds, CPU settings, candidate selection and failure policy.
+**Conditions** (each with the same latest window):
+- no reuse;
+- 50% and 90% identity overlap between successive windows;
+- solution reissue: the same window republished;
+- exact replay and burst reissue;
+- new information: cumulative windows.
 
-Four component arms examine the existing logistic representation. Removing the
-eight age bins from latest, mean, variance and missingness blocks reduces 122
-columns to 90; the current OD/time grouping rule does not use these age bins.
-Removing twelve OD fields from those blocks leaves 74 columns, either retaining
-OD/time groups or using the existing time-only fixed family. Full-record
-canonicalization precedes removal, so the latter is an OD exclusion conditional
-on the common canonical prefix, not independence from all raw OD metadata.
-Each component is retuned with the same folds, candidate grid and scenario
-weights; differences include changes in fitted coefficients and selected C.
+**Training.** Models train on a matched mixture of conditions with one objective
+unit per scenario and whole-scenario folds.
 
-A simulation-only lineage oracle changes just singleton mean/variance weights.
-Each unique visible observation divides one unit equally among the messages
-containing it; message allocations are normalized by the visible union size.
-Latest features, span, canonical count and missingness summaries remain fixed.
-Observation IDs determine weights but are not predictor columns. This rule is
-a descriptive privileged control, not physical posterior fusion or a bound on
-attainable forecast performance. Uniform allocations use the archived singleton
-arithmetic exactly. Changed time/age/count features mean burst invariance is not
-implied. The [component contract](../docs/research/execution/component_contract.md)
-specifies exclusions, canonicalization and failure checks.
+The model is static and two-dimensional. It is a controlled geometry, not a
+validated orbit-determination or propagation system.
 
-### 4.2 Development versus scientific evaluation
+### 4.3 Frozen confirmatory protocol
 
-The first real-data pilot uses five stratified outer folds and three inner folds at the event level. Preprocessing and tuning remain within training folds. Inner out-of-fold predictions support calibration and nominal recall thresholds; outer predictions measure performance. The pilot does not establish independence across unidentified shared objects or missions.
+Development used only exposed banks. Before any reserved scenario existed, we
+froze the protocol: a machine-readable file with code pinned by git blob id
+(canonical SHA-256 69040e6b...) [X01, X02].
 
-**Scientific protocol: PENDING V03.** Prespecify the claim, primary comparator, noise/overlap condition, scenario count, training repetitions, clipping, inference, multiplicity, failure policy and source hashes before accessing reserved outcomes. Existing exposed data cannot become a fresh test through resplitting.
+| Element | Frozen choice |
+|---|---|
+| Held-out configuration | Anisotropic observation noise, variance ratio 4, rotated 30 degrees; never generated during development |
+| Training | 10 independent training banks of 1,000 scenarios |
+| Evaluation | 5,000 shared scenarios |
+| Primary contrast P1 | Scenario-mean change in clipped log loss (probabilities clipped at 1e-6) of `singleton` between 90% overlap and no reuse, minus the same change for `latest_metadata`; averaged over banks |
+| Decision rule | Material degradation confirmed if the lower 95% bound exceeds 0.02 nats; not material if the upper bound falls below 0.02; otherwise inconclusive |
+| Margin rationale | 0.02 is about a quarter of the development no-reuse history advantage |
+| Interval | Studentized bootstrap over scenarios of bank-averaged contrasts (B = 9,999), combined in quadrature with a t(9) training-bank term |
+| Secondary family (Holm, familywise one-sided 0.05) | S1: remaining history advantage at 90% overlap, H0 <= -0.02. S5: solution-reissue degradation, H0 <= 0.02. S2: grouped minus singleton degradation, H0 <= -0.01. S3: lineage-weighted minus singleton degradation, H0 <= -0.01 |
+| Exploratory | S6: absolute history-versus-latest loss under solution reissue |
 
-### 4.3 Controlled observation-lineage experiment
+Development evidence determined these choices:
+- Across independent training banks, the SD of P1 was 0.008 [D10], about 3.6
+  times the spread implied by overlapping training subsets (precision report).
+- Intervals that condition on one fitted model under-covered in simulation, as
+  low as 66% [D11]. The combined interval covered at least 95% [D12].
+- The bootstrap-t corrects the right-skew asymmetry of the t interval
+  [D13; interval reports].
 
-Use a static two-dimensional Gaussian encounter-plane model with immutable observation IDs. Pair all variants by latent scenario and keep the complete unique-observation bank and final label fixed. Distinguish physical latent geometry from final reported-risk labels. The biased case uses a correctly specified final oracle with mean-noise covariance `R/n + B`, while an experimental estimator may omit shared bias.
+**Information flow.** Labels were sealed: 1,400,000 label-free predictions and
+the model hashes were committed before any evaluation label was read (V04 record). A
+label-permutation test confirms that predictions are label-independent.
 
-The pilot exposed two required revisions: distinct time/thinning controls need a richer cadence, and the new-information condition needs a matched training regime to separate information gain from classifier extrapolation. Include a latest-message metadata comparator so access to additional fields does not masquerade as a history benefit. Check observable-proxy versus oracle-lineage ablations only in simulation.
+The user who owns the study authorized the run (V04 record). Report 2 also asks
+for an independent analysis owner to reproduce the decision rule on
+boundary-null cases before the run. That pre-run check was waived; it is a
+limitation (Section 6).
 
-Subsequent V02 runs implement those cadence/training controls and a separate
-state-estimation diagnostic. The latter compares latest, Gaussian products with
-and without repeated prior precision, basic precision-weighted CI and unique
-visible-observation oracles. It reconstructs message means/covariances from known
-lineage in common static coordinates. Only the oracles receive observation IDs;
-the bias-aware oracle additionally receives the true common-bias covariance.
-All methods exclude later observations. They retain a working Gaussian prior,
-so the information oracles are not claimed optimal for the enriched latent
-mixture. See the [state diagnostic contract](../docs/research/execution/state_fusion_plan.md).
-State error, uncertainty area and Gaussian-reference ellipse inclusion remain
-separate from class q and physical collision probability.
+### 4.4 Retrospective real-data analysis
 
+On the exposed Kelvins training cohort, `latest`, `latest_metadata`, `singleton`
+and `grouped` were refitted:
+- with the frozen C grid and strict convergence;
+- on the stored, nested, whole-event outer (5) and inner (3) folds;
+- reproducing an earlier narrower-grid run exactly in 19 of 20 arm-folds [R11].
 
-### 4.4 Endpoints and uncertainty
-
-Report clipped class log loss, Brier score, calibration summaries and explicit review/miss counts. Use the frozen paired change-in-loss estimand for the reuse question, together with absolute losses and new-information controls. Report official log-risk loss separately. Nominal training recall targets are not population miss guarantees. Scenario bootstrap intervals conditional on one fitted model exclude training variability; address that limitation in the scientific design.
-
-**Proposed primary estimand (development choice, not yet frozen).** For each
-latent scenario, take the change in clipped log loss of the one-partition history
-summary (`singleton`) between 90% observation overlap and no reuse. Subtract the
-same change for the latest-message metadata comparator, which is invariant by
-construction because the latest window is matched. Average over scenarios. Under
-correctly specified noise and matched-mixture training, the exposed development
-banks give 0.070-0.075 nats across four training trials. The proposed decision
-margin is 0.02 nats, about a quarter of the history model's no-reuse advantage.
-Material degradation is confirmed if the lower 95% bound exceeds the margin and
-called not material if the upper bound falls below it; otherwise the result is
-inconclusive. A provisional 5,000 evaluation scenarios gives a half-width near
-0.0094 at the development SD. Secondary contrasts cover absolute loss under 90%
-overlap and solution reissue, solution-reissue degradation, and whether grouping
-or privileged lineage weighting reduces degradation. Rationale and limits:
-[primary contrast](../docs/research/execution/primary_contrast.md) and
-[planning report](../docs/research/results/precision_2026-10-10/report.md).
-These open items are now fixed in the
-[analysis specification](../docs/research/execution/analysis_specification.md):
-- **Design:** ten independent in-configuration training banks and 5,000 shared
-  evaluation scenarios in the unexposed anisotropic configuration.
-- **Interval:** a studentized-bootstrap interval combined with a training-bank
-  term.
-- **Multiplicity:** Holm's procedure over four secondary hypotheses.
-
-Independent development banks show the degradation persisting under anisotropy
-and noise changes, and with bias-matched training (0.020). They also show that
-intervals conditional on one fitted model under-cover.
+Final models selected on the full training cohort were evaluated once on the
+historical test split, whose labels were already public but unused for any
+model choice. Paired event-level contrasts carry two intervals: a studentized
+bootstrap, and a mission-cluster bootstrap-t allowing within-mission
+dependence. Calibration, workload/miss frontiers, censoring and OD-quality
+strata are descriptive.
 
 ## 5. Results
 
-**Confirmatory simulation result (V04, frozen protocol).** In the held-out
-configuration (noise variance ratio 4 rotated 30 degrees; 10 independent
-training banks; 5,000 evaluation scenarios), 90% observation-ID overlap degraded
-the history-summary forecaster by 0.0628 nats of clipped log loss relative to the
-reuse-invariant latest-message comparator. The frozen bank-combined 95% interval
-was 0.0526-0.0737, so material degradation above the 0.02-nat margin was
-confirmed.
+### 5.1 Confirmatory simulation (frozen protocol)
 
-Holm-adjusted secondary tests all rejected their nulls:
-- **Remaining advantage:** the history model kept essentially none of its
-  advantage at 90% overlap (-0.0039; interval -0.0105 to 0.0035).
-- **Solution reissue:** it degraded the history model by 0.0773.
-- **Grouping:** label-free grouping did not reduce the degradation by more than
-  0.01 (+0.0007).
-- **Lineage weighting:** privileged lineage weighting did not reduce it either
-  (+0.0023).
+Without reuse, the history summary clearly beats the latest-message comparator
+(0.082 versus 0.149 nats) [V11, V12]. At 90% observation overlap, its loss rises
+to 0.145 nats [V13] (Figure 1).
 
-**Exploratory.** Under solution reissue the history model was worse than
-latest-only (+0.0106; 0.0050 to 0.0166). Its miss rate at the nominal 95%
-training-recall threshold rose from 1.4% without reuse to 8.7%.
+- **P1:** 0.063 nats (95% interval 0.053 to 0.074) [V01-V03]. Material
+  degradation is **confirmed**.
+- **Holm family:** all four nulls are rejected [V08]:
+  - the remaining history advantage at 90% overlap is -0.004 [V04];
+  - solution reissue degrades the history model by 0.077 [V05];
+  - grouping changes the degradation by +0.001 [V06];
+  - privileged lineage weighting changes it by +0.002, slightly worse [V07].
 
-Figures 1-2 show the overlap response and the frozen contrasts; Figure 3 shows
-development persistence across configurations (exposed) and Figure 4 the
-observation-window design. All are regenerated by `python -m research.paper_figures`
-into `paper/figures/` (captions and input hashes in `captions.md` and
-`provenance.json`). Sources: [report](../docs/research/results/track_r_scientific_2026-10-10/report.md);
-every number maps to [claim register](../docs/research/claims/claim_evidence.csv)
-rows V01-V10. The pre-run independent analysis check was waived; independent
-reproduction (A03) is pending.
+  Neither repair reduces the degradation by more than 0.01 (Figure 2).
+- **Exploratory:** under solution reissue the history model is worse than
+  latest-only, +0.011 [V09]. Its miss rate at the nominal 95% training-recall
+  threshold rises from 1.4% without reuse to 8.7% at 90% overlap [V14, V10].
+- **Diagnostics:**
+  - 18 of 40 model selections were at the C grid edge [V15], with last-step
+    inner-OOF gains of at most 0.0011 (V04 record);
+  - every result in `analysis.json` reconstructs exactly from the saved
+    predictions.
 
-**Retrospective real data (exposed, A01; not pooled with simulation).** The
-history summary was worse than latest-message metadata in the training cohort
-(+0.0030 nats out of fold; mission-cluster interval 0.0006 to 0.0062) and on the
-exposed historical test split (+0.026). This agrees in direction with the
-simulated mechanism but cannot attribute cause, because public CDMs lack
-observation lineage
-([A01 report](../docs/research/results/real_2026-10-10/report.md); Figures 5-6; cohort
-flow in `paper/figures/table3_cohort_flow.csv`).
+### 5.2 Development evidence (exposed; design support, not confirmation)
 
-**Development results below** support feasibility and design decisions, not confirmation. The candidate grouping model has not established superiority, and the corrected two-stage official-score model did not beat the latest-risk baseline in the initial campaign.
+**Independent training banks.** With in-configuration training, P1 exceeded
+0.02 on every one of six independent isotropic banks (smallest bank mean 0.051;
+smallest lower bound 0.038) [D01, D02]. It stayed positive under anisotropy
+ratios 2 and 8 and under doubled noise (smallest bank mean 0.044) [D03]
+(Figure 3).
 
-| Intended table/figure | Required source | Completion |
-|---|---|---|
-| Cohort flow and information boundary | Data crosswalk plus A01 cohort audit | PENDING final table |
-| Frozen primary paired reuse contrast | V04 predictions and protocol | PENDING experiment |
-| Absolute loss and genuine-new-information control | V04 paired scenarios | PENDING experiment |
-| Comparator/ablation and noise sensitivity | V02/V04 runs | Development partial; scientific evaluation pending |
-| Retrospective class forecast and review/miss frontier | A01 frozen retrospective analysis | Pilot only |
-| Separate corrected official-score reconstruction | B04 predictions; A01 selected analysis | Pilot complete, final scope pending |
-| Failure cases and provenance limits | A01/V04 failure records | PENDING analysis |
+**Shared bias.** With bias-matched training, P1 under a shared observation bias
+was about 0.020, at the margin [D04]. Models trained without bias reversed it
+(-0.131) [D05]. An earlier apparent "bias reversal" was therefore a
+training/evaluation mismatch.
 
-Pilot tables are reproducible through `research.summarize_pilot`; the run IDs and measured values belong in the development supplement if retained. Leave all scientific result cells empty until their source run is complete.
+**Null findings, consistent across configurations:**
+- the remaining history advantage at heavy overlap was near zero [D06, D07];
+- grouping did not reduce the degradation [D08];
+- nor did lineage weighting [D09].
 
-The [covariance development report](../docs/research/results/covariance_2026-10-09/report.md)
-adds 16 models against 72 saved controls on the same exposed scenarios. Across
-three overlapping training subsets, both weighting proxies improve software
-new-information loss over grouping and singleton but lose to latest-message
-metadata. Shared-bias failures persist. These results support retaining simpler
-controls and a bounded benchmark question; they do not establish confirmatory
-superiority. Scientific result tables remain unfilled pending V03/V04.
+**Earlier development studies** on the same exposed banks agree, with details in
+the supplement and result bundles:
+- covariance-volume weighting did not beat the latest-message comparator;
+- Gaussian-product fusion reproduced known double counting;
+- a bounded LSTM adaptation did not establish a family-level advantage;
+- component ablations showed only small, retuned differences.
 
-The [state-fusion development report](../docs/research/results/fusion_2026-10-09/report.md)
-reproduces known double-counting behavior. In the software reissue case, a product
-has the same point estimate as latest/CI but a sixfold smaller ellipse, with
-inclusion 386/1,000 versus 947/1,000. Under shared bias, cumulative-information
-CI/latest inclusion falls to 290/1,000 while the privileged bias-aware oracle
-includes 955/1,000. These unweighted, exposed-bank diagnostics are not a new CI
-method or a calibration guarantee. All campaign covariances are isotropic, and
-known analytic collapses are retained. They validate a controlled mechanism;
-confirmatory state or class-forecast claims remain pending.
+**Tuning.** Under matched training, the logistic C grid did not bind
+materially: 7 of 60 edge selections, with last-step gains of at most 0.0006
+[D18, D14]. Under no-reuse training it did bind, with 40 of 60 at the edge
+[D17]. The LSTM epoch budget bound under no-reuse training (median
+20-to-60-epoch gain 0.150) [D15]. Conclusions are therefore restricted to the
+declared bounded implementations, and neural results are not ranked.
 
+### 5.3 Retrospective real data (exposed; not pooled with simulation)
 
+- **History versus latest message (R1):** the history summary was worse than
+  latest-message metadata out of fold (+0.0030 nats; mission-cluster lower bound
+  +0.0006) [R01, R02] and on the historical test split (+0.026) [R03]
+  (Figure 5).
+- **Grouping (R2):** no difference from the history summary in training [R04].
+- **Gradient boosting:** slightly better than latest-message metadata out of
+  fold (-0.0023). The event interval excludes zero; the mission-cluster
+  interval does not [R05].
+- **Nominal thresholds:** at the training-selected nominal 95% recall threshold,
+  up to 12 of 150 test positives were missed [R06], so nominal recall is not a
+  guarantee (Figure 6).
+- **Label shift:** the test split's positive share (6.9%) far exceeds training's
+  (0.8%), so training-calibrated probabilities under-predict there (A01 report).
 
-The [sequence development report](../docs/research/results/sequence_2026-10-10/report.md)
-adds 16 selected models and audits all 304 training-fit checkpoints. Under matched
-training, the full-reference history LSTM has software new-information log loss
-0.109397 versus 0.083539 for its latest-only capacity control and 0.062295 for
-latest-message metadata. Across all three overlapping training subsets, history
-also loses to singleton/grouping on software heavy overlap and to both latest
-controls on new information. It beats latest-only LSTM on software heavy overlap
-in all three subsets, showing why the capacity control and absolute-loss controls
-answer different questions.
-
-Under shared-bias new-information stress, history loss is 0.812824 versus
-1.532965 for latest-message metadata, but it still misses 160 of 326 positives
-at the nominal training-recall threshold. Both neural arms improve bias-stress
-new-information loss over latest-metadata, singleton, grouping and covariance
-controls across all three subsets;
-that improvement does not remove the large review/miss failure. The simple
-ignore-updates control has lower bias-stress new-information loss than latest-only
-LSTM in all three subsets and than history LSTM in one. All 16 neural
-selections use the maximum epoch budget and eight use maximum width. This
-bounded adaptation does not establish model-family superiority or inferiority.
-The simulator-sensitivity and precision work remains before scientific freeze;
-the tuning-adequacy decision below bounds how these neural results may be read.
-
-The four provenance-component arms complete 608 fits under the common scenario
-design; all 448,000 new forecasts reconstruct bitwise from saved checkpoints
-(`components_summary_20261010_v1`). Across the three overlapping
-matched-training subsets, removing age readout features improves software
-heavy-overlap loss by 0.000285 to 0.001471 and new-information loss by 0.000322
-to 0.001888 relative to grouping. Removing OD readout instead worsens software
-heavy-overlap and solution-reissue loss in all three subsets, lowers loss in
-no-reuse, exact-replay, burst-reissue and 50%-overlap conditions in all three,
-and has mixed new-information effects.
-These are descriptive ranges from retuned models, not confidence intervals or
-causal field effects in a fixed predictor.
-
-Oracle lineage weighting improves software new-information loss over singleton
-by 0.000258 to 0.002404 across those subsets, but remains worse than latest-message
-metadata in all three. Under shared bias it worsens heavy-overlap and
-new-information loss relative to singleton in all three. The full-reference
-matched oracle has shared-bias new-information loss 1.867092 and misses 189/326
-positives. More privileged weighting does not resolve this stress failure.
-Fourteen of 32 component selections reach the maximum C despite optimizer
-convergence. These findings retain the bounded benchmark direction; a scientific
-contrast and its precision still need justification.
-
-A tuning-adequacy inventory of all 136 selected class-forecast models
-(`tuning_adequacy_20261010_v2`; no new fitting) separates grid limits from
-failures: no fit failed, and the largest L-BFGS iteration count was 262 of 10,000.
-Under matched training, 7/60 logistic selections reach C=1000. Their last-step
-inner-OOF gain is at most 0.000622, and C=1000 is better than C=100 in only 1/16
-component models with all candidates saved. Under no-reuse training, 40/60 reach
-C=1000, with last-step gains up to 0.009756. All 16 LSTM selections use the
-60-epoch maximum. Their 20-to-60-epoch gains have medians of 0.020 (matched) and
-0.150 (no reuse). No-reuse fits receive about 180 optimizer steps, whereas matched
-fits receive about 780. The comparison is therefore restricted to the declared
-bounded implementations ([decision](../docs/research/execution/tuning_decision.md)).
-Matched-training logistic comparisons are reported conditional on the grid.
-No-reuse within-regime differences below 0.01 nats and all neural family
-rankings are not interpreted.
+Public CDMs do not record which observations each message reused, so these
+contrasts cannot attribute the history deficit to reuse.
 
 ## 6. Discussion and limitations
 
-Required topics: retrospective cohort selection; exposed labels; few real positives; unknown observation lineage; event/object dependence; synthetic prevalence; static geometry rather than validated orbital dynamics; estimator misspecification; calibration under shift; training variability; unequal field access; selection among many pilot comparisons; null/negative findings; and the distinction between final recorded risk and actual operational outcomes.
+**What the evidence supports.** In a controlled model where observation reuse is
+known, heavy reuse removes the value of a history summary for final-risk-class
+forecasting. Under solution reissue the summary becomes worse than ignoring
+history. Two plausible repairs fail to recover the loss:
+- **metadata grouping:** it lacks the lineage information;
+- **privileged lineage weighting:** it changes only message weights, while
+  timing, count and summary-shape features still respond to reuse.
 
-A method route should be abandoned or narrowed if corrected simple controls remove its advantage. A benchmark or identification-limit conclusion still requires a clear contribution, justified design, and independent reproduction.
+The exposed real data show the same direction, which is what one would expect if
+real CDM sequences carry substantial reuse.
+
+**Limitations:**
+- **Simulator:** static two-dimensional geometry with a synthetic final-risk
+  label. There is no orbit determination, propagation or real sensor model, and
+  the held-out configuration is one of many possible.
+- **Implementations:** bounded logistic implementations with a declared C grid,
+  and selected-OOF calibration reuse. Neither risk certification nor optimal
+  tuning is claimed.
+- **Real data:** exposed, retrospective cohort selection; few positives (66 in
+  training); missions few and unbalanced; no lineage; label shift between splits.
+- **Inference:**
+  - the confirmatory interval relies on approximate quadrature combination and
+    normal training-bank effects, validated only in development simulation;
+  - its p-values reached the bootstrap floor;
+  - the pre-run independent check was waived, and independent reproduction is
+    pending.
+- **Scope:** final recorded risk is not collision occurrence. No claim of
+  collision prevention, maneuver safety, workload reduction or a 1% miss rate
+  follows.
+
+**Novelty boundary.** That correlated evidence must not be double counted is
+established theory. This study adds three things:
+1. a controlled, frozen measurement of how much a realistic class-forecasting
+   pipeline loses to reuse;
+2. matched controls showing which simple representations escape it, namely the
+   latest message;
+3. evidence that observable-metadata or lineage-weighting repairs within this
+   readout family do not.
+
+Whether that suffices for a given venue is a judgment for the authors and
+reviewers.
 
 ## 7. Conclusion
 
-**PENDING A02/A03.** State only the claim supported by the frozen scientific and retrospective results. No claim of collision prevention, maneuver safety, analyst-time savings or one-percent miss control follows from the current pilot.
+Within a controlled encounter-plane model and a frozen protocol, observation
+reuse materially degrades history-based forecasts of the final recorded risk
+class. The degradation eliminates the history summary's advantage over the
+latest message, and neither metadata grouping nor privileged lineage weighting
+removes it. Exposed real data agree in direction. Forecasting pipelines that
+summarize CDM histories should be evaluated against a latest-message comparator
+under explicit reuse stress before their history features are trusted.
 
 ## Availability, ethics and disclosures
 
-Code and artifact availability: **PENDING W04 packaging and data-license review**. Seeds, configurations, source snapshots and hashes are saved locally. Do not assume raw or third-party data may be redistributed. No new paid model inference was used in the initial pilot. Author contribution, AI-assistance disclosure, funding and conflicts: **TO BE COMPLETED BY AUTHORS**.
+Code, configurations, frozen protocol, claim register, compact result bundles
+and figure scripts are in this repository; full predictions and models are
+local run directories (W04 packaging pending). Redistribution of the Kelvins
+data follows its original licence; no third-party data are re-published here.
+No paid model inference was used.
+
+Author contributions, AI-assistance disclosure, funding and conflicts: **AUTHORS
+TO COMPLETE.**
+
+## Figures and tables
+
+Generated by `python -m research.paper_figures` from committed bundles, with
+captions in `paper/figures/captions.md`:
+
+| Figure | Content | Evidence type |
+|---|---|---|
+| 1 | Overlap response | Confirmatory |
+| 2 | Frozen contrasts | Confirmatory |
+| 3 | Development persistence | Exposed development |
+| 4 | Observation-window design | Generated from code |
+| 5 | Real-data contrasts | Exposed retrospective |
+| 6 | Real-data workload/miss frontier | Exposed retrospective |
+
+Tables:
+1. frozen results;
+2. real-data metrics;
+3. cohort flow.
 
 ## Supplement outline
 
-A. Full-column crosswalk, source hashes and cohort exclusions.  
-B. Feature lineage and future-information falsification tests.  
-C. Fold assignments, calibration/threshold rules and corrected B5 cross-fitting.  
-D. Gaussian/oracle derivations, integration checks and observation windows.  
-E. Pilot deviations, identical controls, failed variants and revised design rationale.  
-F. Frozen protocol, access ledger, complete secondary results and failures.  
-G. Reproduction commands, environment, checksums and independent review.
+A. Data crosswalk, cohort flow, censoring and source hashes.
+B. Feature lineage and future-information falsification tests.
+C. Folds, calibration and threshold rules; the corrected two-stage official-score
+   reconstruction.
+D. Simulator, integration checks, observation windows and configurations.
+E. Development studies: cadence controls, tuning adequacy, covariance proxies,
+   state fusion, sequence adaptation, component ablations, precision planning,
+   sensitivity campaign, interval validation; with failed and superseded runs.
+F. Frozen protocol, authorization, access ledger, full secondary and exploratory
+   results, diagnostics.
+G. Retrospective real-data analysis and quality addendum.
+H. Reproduction guide, claim register and independent-review log (A03).
 
-Bibliography: [references.bib](references.bib), copied from the dated verified source ledger. Use the V01 source ledger for updated access and comparator decisions; resolve remaining limitations before final citation formatting.
+Bibliography: [references.bib](references.bib), from the dated verified source
+ledger.
