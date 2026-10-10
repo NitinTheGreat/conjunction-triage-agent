@@ -10,19 +10,19 @@ This is the live execution record. Update it as work happens. Checked preparatio
 
 | Field | Current checkpoint — replace after each work session |
 |---|---|
-| NOW | **V02 COMPLETE.** The analysis specification is fixed: P1 at margin 0.02, K = 10 in-configuration banks, n = 5,000, the bank-combined bootstrap-t interval and Holm over S1/S5/S2/S3. The scientific runner `research/track_r_scientific.py` exists and is tested on development seeds. |
-| NEXT | V03: transcribe the specification into `docs/research/execution/track_r_protocol.json` (status frozen, code hashes), write the reservation/access manifest and `track_r_freeze.json`, then commit. **Stop before V04:** generating the reserved bank is irreversible and needs user authorization plus an independent check of the frozen analysis. |
-| Active task / owner | V03 READY. V04 needs the user's explicit go-ahead. A03 and W tasks follow V04. |
+| NOW | **V03 FROZEN** (`8903632`): Track R protocol, reservation and freeze record committed; the runner accepts them. No scientific scenario exists. |
+| NEXT | **USER DECISION REQUIRED before V04:** (1) authorize generating and evaluating the reserved scientific banks (irreversible: it consumes the holdout); (2) arrange an independent check of the frozen decision rule on boundary-null and zero-discordance cases, or record an explicit waiver. Then run V04 with the command below. |
+| Active task / owner | V04 BLOCKED on user authorization (by design). A01 (retrospective real-data analysis) can proceed independently under the frozen analysis choices. |
 | Selected direction | **Track R, narrowed:** controlled robustness/measurement benchmark. Grouping remains a candidate and may be discarded if simpler controls explain results. |
 | Conditional extension | **Track E:** independent real-data efficacy, only after access and statistical requirements pass. |
 | Research blockers | None preventing V01/V02 preparation. Full methods for some close papers and independent operational data remain unavailable; no novelty or real efficacy claim is established. |
 | Current machine | Windows, PowerShell; repository at `F:\conjunction-triage`; Python environment at `.venv\Scripts\python.exe`. Paths elsewhere in this file are relative to the repository root. |
 | HEAD when this checklist was created | `89d7f2efb8bf135e02fa51760e0ed3bb33a105c9`; working tree contains pre-existing modifications and untracked files. |
-| Latest validation | Full suite 477 passed / 1 skipped (110.70 s). 13 bundles / 105 artifacts pass. 12 raw, 45 historical and 8 frozen files unchanged. |
+| Latest validation | After freeze: full suite 479 passed / 1 skipped (111.72 s). 13 bundles / 105 artifacts pass. 12 raw, 45 historical and 8 frozen files unchanged. Frozen protocol accepted by the runner. |
 | New scientific runs | Development runs this session: tuning_adequacy_20261010_v2, precision_planning_20261010_v2, interval_validation_20261010_v1/v2, sensitivity_preflight_20261010_v1, sensitivity_20261010_v1, sensitivity_summary_20261010_v1 and bank_interval_validation_20261010_v1. No frozen scientific evaluation. |
 | Scientific holdout status | Seed 20261012 / scientific:00000..04999 reserved **but not generated**. Training-bank seeds 20261301-20261310 and the `scitrain` prefix are also reserved in code. Candidate configuration: ratio 4, rotated 30 degrees (unexposed). Kelvins and all development banks are exposed. |
 | Running jobs / processes | None for this project. |
-| Next executable command | `.\.venv\Scripts\python.exe -m research.verify_exports --root docs/research/results` (passes). The V04 command `python -m research.track_r_scientific --run-id <id>` refuses to run until a frozen, committed protocol and freeze record exist. |
+| Next executable command | After authorization only: `.\.venv\Scripts\python.exe -m research.track_r_scientific --run-id track_r_scientific_20261010_v1`, with LOKY_MAX_CPU_COUNT, OMP_NUM_THREADS and MKL_NUM_THREADS set to 2. Expected runtime 45-75 min. |
 
 ### Copy this into the next assistant
 
@@ -167,7 +167,7 @@ V01–V04 and A01 describe the Track R study. Proceed with them when F02 retains
 
 Grouping, oracle weighting and the neural arms are retained only as secondary or bounded comparisons.
 
-- [ ] **V03 — freeze the scientific Track R protocol.** Depends on: V02, S02. **Do:** fix one primary method, comparator, overlap/noise condition, sample size, scenario partition, clipped log-loss rule, paired contrast, uncertainty procedure, secondary analyses, failure policy, and all software/configuration hashes. **Expected:** immutable `protocol.json`, reservation/access manifest, and freeze record. **Done when:** the freeze precedes scientific outcome access and every item in Report 2's freeze checklist is addressed. A draft document or timestamp alone does not satisfy this task.
+- [x] **V03 — freeze the scientific Track R protocol.** Depends on: V02, S02. **Do:** fix one primary method, comparator, overlap/noise condition, sample size, scenario partition, clipped log-loss rule, paired contrast, uncertainty procedure, secondary analyses, failure policy, and all software/configuration hashes. **Expected:** immutable `protocol.json`, reservation/access manifest, and freeze record. **Done when:** the freeze precedes scientific outcome access and every item in Report 2's freeze checklist is addressed. A draft document or timestamp alone does not satisfy this task. **Evidence (frozen 10 October 2026, commit `8903632`):** [protocol](docs/research/execution/track_r_protocol.json) (canonical SHA-256 `69040e6b...`, 45 files pinned by git blob id), [reservation](docs/research/execution/track_r_reservation.json), [freeze record](docs/research/execution/track_r_freeze.json), [outcome](docs/research/execution/v03_freeze_plan.md). No scientific scenario exists. Report 2's separate-analysis-owner check is not satisfied by this assistant and is recorded as a V04 precondition, not claimed.
 
 - [ ] **V04 — run the held-out scientific simulation evaluation.** Depends on: V03. **Do:** execute the frozen run; retain all scenarios, failures, and planned secondary conditions. Compare the overlap-induced change in loss for method versus comparator, with absolute loss and new-information controls. **Expected:** complete run manifest, predictions, scenario-level paired analysis, intervals, and deviation log. **Done when:** all planned outputs are traceable and the conclusion follows the frozen rule. Do not tune on these outcomes and keep calling them untouched.
 
@@ -806,3 +806,29 @@ Evidence:
 - `code_sha256` for every research module the runner imports.
 
 Then write the reservation manifest and `track_r_freeze.json`, containing the protocol hash, and commit them before any generation.
+
+### V03 freeze milestone - 10 October 2026
+
+- [x] `research/freeze_track_r.py` transcribes the [analysis specification](docs/research/execution/analysis_specification.md) into the [protocol](docs/research/execution/track_r_protocol.json). It refuses to run with uncommitted code or with any existing reserved bank.
+- [x] The protocol pins code by git blob id; `load_protocol()` accepts the committed freeze.
+- [ ] V04 has not been run. User authorization and an independent analysis check are pending.
+
+Commits:
+- `7e456a2`: freeze tool and blob-id pinning;
+- `8903632`: protocol, reservation and freeze record.
+
+Freeze record: no scientific outcome accessed and no reserved bank file present.
+The one prior label-free contact is recorded in the reservation manifest: an
+integration accuracy check under the configuration's noise covariance.
+
+**Why V04 waits.** It permanently consumes the reserved holdout, and Report 2
+asks for a separate analysis owner first. This is a user-owned decision, not a
+technical blocker. Same-assistant evidence exists:
+- boundary-null tests: `tests/test_research_track_r_analysis.py`;
+- the label-permutation invariance test;
+- bank-combined coverage of 0.950-0.966 in simulation.
+
+**If authorized,** run V04 with the command in the checkpoint table. Then
+summarize with the frozen rules, keeping null, inconclusive and adverse results.
+Do not regenerate, extend or retune anything. A01 can proceed meanwhile.
+
