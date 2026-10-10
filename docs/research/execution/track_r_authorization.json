@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-10",
+  "authorization": "User instruction 'do it', given in reply to the request to authorize V04 (generate and evaluate the reserved Track R scientific banks).",
+  "protocol": "docs/research/execution/track_r_protocol.json",
+  "protocol_sha256": "69040e6bcf48416541a712250f3463c136b1b0e27fa513c4c650751fd30d13ca",
+  "freeze_record": "docs/research/execution/track_r_freeze.json",
+  "independent_analysis_check": "Not arranged before V04. The user authorized the run without an independent reproduction of the decision rule on boundary-null and zero-discordance cases, so this is recorded as waived for V04. The waiver is a stated limitation of the result; post-hoc independent review (A03) remains required.",
+  "same_assistant_checks_available": [
+    "tests/test_research_track_r_analysis.py (skewed boundary-null false-confirmation check; zero-discordance exact miss summary)",
+    "tests/test_research_track_r_scientific.py (label-permutation invariance of phase-2 predictions; reserved-identity refusal)",
+    "bank_interval_validation_20261010_v1 (bank-combined coverage 0.950-0.966 in simulation)"
+  ],
+  "planned_run_id": "track_r_scientific_20261010_v1",
+  "rules": "No frozen item may change. Results are reported under the frozen rules, including null, inconclusive or adverse outcomes. Any failure stops the run; a rerun uses a new run ID under the unchanged protocol and is reported as a deviation."
+}
