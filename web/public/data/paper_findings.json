@@ -5074,10 +5074,130 @@
    "evidence_type": "frozen scientific simulation",
    "claim": "Between-bank SD of the ten per-bank P1 means in the scientific run.",
    "value": 0.00565775
+  },
+  {
+   "id": "D19",
+   "evidence_type": "exposed development simulation",
+   "claim": "Upper-side error of the Student t interval for P1 at n=5,000 under right skew (nominal 0.025).",
+   "value": 0.034
+  },
+  {
+   "id": "D20",
+   "evidence_type": "exposed development simulation",
+   "claim": "Lower-side error of the Student t interval for P1 at n=5,000 (nominal 0.025).",
+   "value": 0.0205
+  },
+  {
+   "id": "D21",
+   "evidence_type": "exposed development simulation",
+   "claim": "Lower-side error of the studentized bootstrap interval for P1 at n=5,000 (nominal 0.025).",
+   "value": 0.026
+  },
+  {
+   "id": "D22",
+   "evidence_type": "exposed development simulation",
+   "claim": "Skewness of the per-scenario P1 contrast in the development reference distribution.",
+   "value": 4.47649
+  },
+  {
+   "id": "V21",
+   "evidence_type": "frozen scientific simulation",
+   "claim": "S1: lower bound of the frozen bank-combined 95% interval.",
+   "value": -0.0105353
+  },
+  {
+   "id": "V22",
+   "evidence_type": "frozen scientific simulation",
+   "claim": "S1: upper bound of the frozen bank-combined 95% interval.",
+   "value": 0.00351412
+  },
+  {
+   "id": "V23",
+   "evidence_type": "frozen scientific simulation",
+   "claim": "S5: lower bound of the frozen bank-combined 95% interval.",
+   "value": 0.0657761
+  },
+  {
+   "id": "V24",
+   "evidence_type": "frozen scientific simulation",
+   "claim": "S5: upper bound of the frozen bank-combined 95% interval.",
+   "value": 0.0896969
+  },
+  {
+   "id": "V25",
+   "evidence_type": "frozen scientific simulation",
+   "claim": "S2: lower bound of the frozen bank-combined 95% interval.",
+   "value": -0.0012475
+  },
+  {
+   "id": "V26",
+   "evidence_type": "frozen scientific simulation",
+   "claim": "S2: upper bound of the frozen bank-combined 95% interval.",
+   "value": 0.00261133
+  },
+  {
+   "id": "V27",
+   "evidence_type": "frozen scientific simulation",
+   "claim": "S3: lower bound of the frozen bank-combined 95% interval.",
+   "value": 5.80494e-05
+  },
+  {
+   "id": "V28",
+   "evidence_type": "frozen scientific simulation",
+   "claim": "S3: upper bound of the frozen bank-combined 95% interval.",
+   "value": 0.00453968
+  },
+  {
+   "id": "V29",
+   "evidence_type": "frozen scientific simulation",
+   "claim": "S6: lower bound of the frozen bank-combined 95% interval.",
+   "value": 0.00501711
+  },
+  {
+   "id": "V30",
+   "evidence_type": "frozen scientific simulation",
+   "claim": "S6: upper bound of the frozen bank-combined 95% interval.",
+   "value": 0.0165814
+  },
+  {
+   "id": "R13",
+   "evidence_type": "exposed retrospective real data",
+   "claim": "Smallest R1 (history summary minus latest metadata) when any single mission is left out, training cohort out of fold.",
+   "value": 0.00219803
+  },
+  {
+   "id": "R14",
+   "evidence_type": "exposed retrospective real data",
+   "claim": "Smallest R1 when any single mission is left out, historical test split.",
+   "value": 0.018516
+  },
+  {
+   "id": "V31",
+   "evidence_type": "frozen scientific simulation",
+   "claim": "History summary mean clipped log loss at 50% overlap.",
+   "value": 0.0975986
+  },
+  {
+   "id": "V32",
+   "evidence_type": "frozen scientific simulation",
+   "claim": "History summary mean clipped log loss under solution reissue.",
+   "value": 0.159193
+  },
+  {
+   "id": "R15",
+   "evidence_type": "exposed retrospective real data",
+   "claim": "Raw events in the Kelvins training release before eligibility filtering.",
+   "value": 13154.0
+  },
+  {
+   "id": "R16",
+   "evidence_type": "exposed retrospective real data",
+   "claim": "R2 (grouped minus history summary) on the historical test split.",
+   "value": -0.00873065
   }
  ],
  "inputs_sha256": {
-  "docs/research/claims/claim_evidence.csv": "5be90aa63da51ab489f5848acfb585157f0615f93fbdb885dbfd558efb8999d5",
+  "docs/research/claims/claim_evidence.csv": "40d3b6eb8fb860186a8d8f1c54d2bbeb9aee64b00e3ff4f54e98d245883c26c8",
   "docs/research/execution/track_r_freeze.json": "420914f533854c5267e7ce3a2826726a9911d282a5905702f97e1482378ab3e3",
   "docs/research/execution/track_r_protocol.json": "a7b9425187c79a462e1bd74bea85c6b4818fd171d34b52903365be181fa35655",
   "docs/research/results/pilot_2026-10-09/data_20261009_v2__data_summary.json": "0dd0d36cc4bc7ef31a77ca7ce97cd6ed01bfceeb4a09ba98b7aa9a4a07f1f170",
