@@ -69,6 +69,10 @@ let events = [];
 let summary = null;
 let visible = [];            // indices of events passing the current filters
 let selected = null;
+const initialInspector = document.getElementById('detail').innerHTML;
+const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+}[character]));
 
 const filters = {
   source: 'all',
@@ -170,14 +174,14 @@ scene.add(new THREE.Line(
 // --- object markers and pair lines -----------------------------------------------------
 
 /** Round sprite, drawn on a canvas so nothing is fetched. */
-function discTexture(ring) {
+function discTexture(ring, colour = '#ffb638') {
   const size = 64;
   const c = document.createElement('canvas');
   c.width = c.height = size;
   const g = c.getContext('2d');
   g.clearRect(0, 0, size, size);
   if (ring) {
-    g.strokeStyle = '#ffb638';
+    g.strokeStyle = colour;
     g.lineWidth = 7;
     g.beginPath();
     g.arc(size / 2, size / 2, size / 2 - 6, 0, Math.PI * 2);
@@ -198,6 +202,15 @@ function discTexture(ring) {
 }
 
 let pointGeometry, pointCloud, lineGeometry, lineSegments, ringGeometry, ringCloud;
+const selectionGeometry = new THREE.BufferGeometry();
+selectionGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(6), 3));
+const selectionMarkers = new THREE.Points(selectionGeometry, new THREE.PointsMaterial({
+  map: discTexture(true, '#e1f3ff'), color: 0xe1f3ff, size: 25, sizeAttenuation: false,
+  transparent: true, alphaTest: 0.1, depthWrite: false, depthTest: false,
+}));
+selectionMarkers.visible = false;
+selectionMarkers.renderOrder = 10;
+scene.add(selectionMarkers);
 
 function buildBuffers(total) {
   // Two vertices per event (one per object) for points and rings; two for each line.
@@ -205,7 +218,7 @@ function buildBuffers(total) {
   pointGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(total * 2 * 3), 3));
   pointGeometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(total * 2 * 3), 3));
   pointCloud = new THREE.Points(pointGeometry, new THREE.PointsMaterial({
-    size: 0.42, sizeAttenuation: true, vertexColors: true,
+    size: 0.28, sizeAttenuation: true, vertexColors: true,
     map: discTexture(false), transparent: true, alphaTest: 0.12, depthWrite: false,
   }));
   scene.add(pointCloud);
@@ -213,8 +226,8 @@ function buildBuffers(total) {
   ringGeometry = new THREE.BufferGeometry();
   ringGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(total * 2 * 3), 3));
   ringCloud = new THREE.Points(ringGeometry, new THREE.PointsMaterial({
-    size: 0.95, sizeAttenuation: true, color: 0xffb638,
-    map: discTexture(true), transparent: true, alphaTest: 0.08, depthWrite: false, opacity: 0.9,
+    size: 0.65, sizeAttenuation: true, color: 0xf4c57b,
+    map: discTexture(true, '#ffffff'), transparent: true, alphaTest: 0.08, depthWrite: false, opacity: 0.8,
   }));
   scene.add(ringCloud);
 
@@ -309,8 +322,17 @@ function applyFilters() {
   lineGeometry.setDrawRange(0, point);
   ringGeometry.setDrawRange(0, ring);
   pointGeometry.computeBoundingSphere();
+  lineGeometry.computeBoundingSphere();
+  ringGeometry.computeBoundingSphere();
 
   document.getElementById('shown-count').textContent = visible.length.toLocaleString();
+  document.getElementById('scene-empty').hidden = visible.length > 0;
+  document.getElementById('inspect-example').disabled = visible.length === 0;
+  document.getElementById('next-event').disabled = visible.length === 0;
+  if (selected && !passes(selected)) {
+    clearSelection('The selected encounter no longer matches the filters. Choose another example to inspect the current sample.');
+  }
+  updateHud();
 }
 
 // ---------------------------------------------------------------------------------------
@@ -320,8 +342,14 @@ function applyFilters() {
 const raycaster = new THREE.Raycaster();
 raycaster.params.Points.threshold = 0.32;
 const pointer = new THREE.Vector2();
+let pointerStart = null;
+canvas.addEventListener('pointerdown', (event) => {
+  pointerStart = { x: event.clientX, y: event.clientY };
+});
 
 renderer.domElement.addEventListener('click', (e) => {
+  if (!pointCloud || !visible.length) return;
+  if (pointerStart && Math.hypot(e.clientX - pointerStart.x, e.clientY - pointerStart.y) > 5) return;
   const rect = renderer.domElement.getBoundingClientRect();
   pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
   pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
@@ -349,8 +377,8 @@ const fmt = (v, digits = 4) =>
 
 function objectCard(object, index, highlight) {
   return `
-    <div class="objcard" ${highlight ? 'style="border-color:var(--accent)"' : ''}>
-      <h3>Object ${index + 1} — ${object.catalog_id}${highlight ? ' ◄' : ''}</h3>
+    <details class="objcard" ${highlight ? 'open style="border-color:var(--accent)"' : ''}>
+      <summary>Object ${index + 1} · ${escapeHtml(object.catalog_id)}${highlight ? ' · selected' : ''}</summary>
       <dl class="kv">
         <dt>Altitude</dt><dd>${fmt(object.altitude_km, 1)} km</dd>
         <dt>Position X</dt><dd>${fmt(object.position_km[0], 1)} km</dd>
@@ -358,68 +386,109 @@ function objectCard(object, index, highlight) {
         <dt>Position Z</dt><dd>${fmt(object.position_km[2], 1)} km</dd>
         <dt>Speed</dt><dd>${fmt(Math.hypot(...object.velocity_kms), 3)} km/s</dd>
         <dt>Hard-body radius</dt><dd>${fmt(object.hbr_m, 4)} m</dd>
-        <dt>Covariance σ²<sub>max</sub></dt><dd>${fmt(object.cov_max_eigenvalue_km2, 3)} km²</dd>
-        <dt>Position σ<sub>max</sub></dt><dd>${object.cov_max_eigenvalue_km2 === null ? '—'
+        <dt>Largest covariance eigenvalue</dt><dd>${fmt(object.cov_max_eigenvalue_km2, 3)} km²</dd>
+        <dt>Largest position uncertainty (1σ)</dt><dd>${object.cov_max_eigenvalue_km2 == null ? '—'
           : fmt(Math.sqrt(object.cov_max_eigenvalue_km2), 3) + ' km'}</dd>
         <dt>Met screening criteria</dt><dd>${object.met_criteria ? 'yes' : 'no'}</dd>
       </dl>
-    </div>`;
+      <p class="note">Position is in J2000/ECI. Uncertainty describes the estimated position, not the object's physical size.</p>
+    </details>`;
 }
 
-function showDetail(event, objectIndex) {
+function clearSelection(message) {
+  selected = null;
+  selectionMarkers.visible = false;
+  const detail = document.getElementById('detail');
+  detail.innerHTML = message
+    ? `<span class="section-label">ENCOUNTER INSPECTOR</span><h2 class="inspector-title">Choose an encounter.</h2><p class="empty">${escapeHtml(message)}</p>`
+    : initialInspector;
+}
+
+function markSelected(event, focusCamera = false) {
+  const positions = selectionGeometry.attributes.position;
+  event.objects.forEach((object, index) => {
+    const [x, y, z] = object.position_km;
+    positions.setXYZ(index, x * SCALE, z * SCALE, -y * SCALE);
+  });
+  positions.needsUpdate = true;
+  selectionGeometry.computeBoundingSphere();
+  selectionMarkers.visible = true;
+  if (focusCamera) {
+    const target = new THREE.Vector3().fromBufferAttribute(positions, 0);
+    const distance = Math.max(23, target.length() * 1.6);
+    camera.position.copy(target.normalize().multiplyScalar(distance));
+    controls.target.set(0, 0, 0);
+    controls.update();
+  }
+}
+
+function showDetail(event, objectIndex = null, focusCamera = false) {
   selected = event;
+  markSelected(event, focusCamera);
   const isNull = event.pc === null || event.pc === undefined;
 
   let pcStatus;
   if (isNull) {
-    pcStatus = `<div class="status nullpc"><strong>No collision probability.</strong>
-      P<sub>c</sub> could not be computed for this event — per the Users Guide, most likely
-      because the covariance at TCA is not positive-definite.</div>`;
+    pcStatus = `<div class="status nullpc"><strong>Probability unavailable.</strong>
+      The source reports no P<sub>c</sub>. A non-positive-definite covariance is a possible
+      cause identified in the Users Guide. Missing probability does not mean zero risk.</div>`;
   } else if (event.pc_is_floored) {
-    pcStatus = `<div class="status censored"><strong>Censored.</strong>
-      P<sub>c</sub> sits at the 1e-10 reporting floor. This is an <em>upper bound</em>, not a
-      measurement — the true probability is somewhere at or below it. The floor itself is
-      inferred from the data; the Users Guide does not document it.</div>`;
+    pcStatus = `<div class="status censored"><strong>P<sub>c</sub> ≤ 10<sup>−10</sup> · censored.</strong>
+      This entry sits at the inferred reporting floor. It is treated as an upper bound
+      on the calculated probability, not an exact measurement.</div>`;
   } else {
     pcStatus = `<div class="status ${event.pc >= ACTION_THRESHOLD ? 'diluted' : 'robust'}">
-      <strong>P<sub>c</sub> = ${event.pc.toExponential(4)}</strong> — a computed value
+      <strong>P<sub>c</sub> = ${event.pc.toExponential(4)}</strong><br>This calculated probability is
       ${event.pc >= ACTION_THRESHOLD
-        ? 'at or above the 1e-4 operational manoeuvre threshold.'
-        : 'below the 1e-4 operational manoeuvre threshold.'}</div>`;
+        ? 'at or above'
+        : 'below'} the 10<sup>−4</sup> reference line used in this view.
+      It is conditional on the geometry, object sizes and uncertainty model.</div>`;
   }
 
   const dilutionStatus = event.dilution === 1
-    ? `<div class="status diluted"><strong>Covariance diluted (dilution = 1).</strong>
-       The uncertainty is large enough that P<sub>c</sub> has passed its maximum on the
-       P<sub>c</sub>-versus-scale-factor curve, so a lower value here reflects <em>worse</em>
-       knowledge rather than lower risk. Treat this P<sub>c</sub> as unreliable.</div>`
+    ? `<div class="status diluted"><strong>Dilution flagged · 1.</strong>
+       In this regime, spreading the uncertainty further can lower the calculated P<sub>c</sub>.
+       Read a small probability alongside the uncertainty; it does not by itself establish a well-known separation.</div>`
     : event.dilution === 0
-      ? `<div class="status robust"><strong>Covariance robust (dilution = 0).</strong>
-         The uncertainty is on the trustworthy side of the P<sub>c</sub> curve.</div>`
+      ? `<div class="status robust"><strong>No dilution flag · 0.</strong>
+         The source does not flag probability dilution. This does not establish that the covariance is accurate.</div>`
       : `<div class="status nullpc"><strong>Dilution unknown.</strong> Not reported for this event.</div>`;
 
   document.getElementById('detail').innerHTML = `
-    <h2>Event detail</h2>
+    <span class="section-label">ENCOUNTER INSPECTOR</span>
+    <h2 class="inspector-title">How close do they pass?</h2>
+    <div class="bignum">${fmt(event.miss_distance_km, 4)} <span class="exp">km</span></div>
+    <p class="note">Predicted separation at closest approach. Pale rings identify this pair in the scene; marker size is illustrative.</p>
     <dl class="kv">
-      <dt>Event</dt><dd style="font-size:11px">${event.event_id}</dd>
-      <dt>Conjunction id</dt><dd>${event.conj_id}</dd>
-      <dt>Answer key</dt><dd>${event.source === 'TRACSS_SPHERICAL' ? 'Spherical' : 'SFSH'}</dd>
-      <dt>TCA (UTC)</dt><dd style="font-size:11px">${event.tca.replace('T', ' ').replace('Z', '')}</dd>
-      <dt>Miss distance</dt><dd>${fmt(event.miss_distance_km, 4)} km</dd>
+      <dt>Closest approach · UTC</dt><dd>${escapeHtml(String(event.tca).replace('T', ' ').replace('Z', ''))}</dd>
       <dt>Relative speed</dt><dd>${fmt(event.relative_speed_kms, 4)} km/s</dd>
-      <dt>Mahalanobis distance</dt><dd>${fmt(event.mahalanobis_distance, 4)} σ</dd>
+      <dt>Mahalanobis distance</dt><dd>${fmt(event.mahalanobis_distance, 4)}</dd>
     </dl>
+    <p class="note">Mahalanobis distance is dimensionless: separation measured relative to the combined position uncertainty.</p>
     ${pcStatus}
     ${dilutionStatus}
-    <h2>Objects</h2>
+    <h2>Object details</h2>
     <div class="objgrid">
       ${objectCard(event.objects[0], 0, objectIndex === 0)}
       ${objectCard(event.objects[1], 1, objectIndex === 1)}
     </div>
-    <h2>Sampling</h2>
-    <dl class="kv"><dt>Stratum</dt><dd style="font-size:11px">${event.stratum}</dd></dl>
-    <div class="notice">Positions are at <strong>time of closest approach</strong>, not live.
-      Public orbital data must not be used for operational collision avoidance.</div>`;
+    <details class="method-note"><summary>Record &amp; sampling details</summary>
+      <dl class="kv">
+        <dt>Event</dt><dd>${escapeHtml(event.event_id)}</dd>
+        <dt>Conjunction ID</dt><dd>${escapeHtml(event.conj_id)}</dd>
+        <dt>Answer key</dt><dd>${event.source === 'TRACSS_SPHERICAL' ? 'Spherical' : 'SFSH'}</dd>
+        <dt>Sampling stratum</dt><dd>${escapeHtml(event.stratum)}</dd>
+      </dl>
+      <p class="note">A stratum groups the source, probability class and dilution flag used to build the display sample.</p>
+    </details>`;
+  const inspector = document.getElementById('detail');
+  inspector.parentElement.scrollTop = 0;
+  if (focusCamera && matchMedia('(max-width: 1000px)').matches) {
+    inspector.tabIndex = -1;
+    inspector.focus({ preventScroll: true });
+    inspector.scrollIntoView({ block: 'start', behavior: 'instant' });
+  }
+  updateHud();
 }
 
 // ---------------------------------------------------------------------------------------
@@ -466,22 +535,24 @@ function wire() {
     applyFilters();
   }, 'click');
 
-  // Phase 3 had two tabs and switched them with a boolean. Phase 9 adds three more, so
-  // the switch is driven off `aria-controls` instead. Every `.view` is hidden and one is
-  // shown, which keeps the two original views behaving exactly as they did.
-  const tabs = [...document.querySelectorAll('.tab')];
-  const show = (viewId) => {
-    for (const view of document.querySelectorAll('.view')) view.hidden = view.id !== viewId;
-    for (const tab of tabs) {
-      tab.setAttribute('aria-selected', String(tab.getAttribute('aria-controls') === viewId));
-    }
-    if (viewId === 'scene-view') resize();
-    dispatchEvent(new CustomEvent('viewchange', { detail: { viewId } }));
-  };
-  for (const tab of tabs) {
-    tab.addEventListener('click', () => show(tab.getAttribute('aria-controls')));
-  }
-  window.showView = show;
+  bind('camera-reset', () => {
+    controls.target.set(0, 0, 0);
+    camera.position.set(16, 9, 16);
+    controls.update();
+  }, 'click');
+  bind('inspect-example', () => {
+    const comparable = visible.filter((index) => events[index].pc != null && !events[index].pc_is_floored);
+    const candidates = comparable.length ? comparable : visible;
+    const index = candidates.reduce((best, current) => (
+      best === undefined || (events[current].pc ?? -1) > (events[best].pc ?? -1) ? current : best
+    ), undefined);
+    if (index !== undefined) showDetail(events[index], null, true);
+  }, 'click');
+  bind('next-event', () => {
+    if (!visible.length) return;
+    const current = selected ? visible.indexOf(events.indexOf(selected)) : -1;
+    showDetail(events[visible[(current + 1) % visible.length]], null, true);
+  }, 'click');
 }
 
 // ---------------------------------------------------------------------------------------
@@ -497,26 +568,38 @@ function resize() {
   camera.updateProjectionMatrix();
 }
 addEventListener('resize', resize);
+new ResizeObserver(resize).observe(document.getElementById('canvas-wrap'));
+addEventListener('viewchange', (event) => {
+  if (event.detail.viewId === 'scene-view') {
+    resize();
+    startAnimation();
+  }
+});
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) startAnimation();
+});
 
-let frames = 0;
-let lastSecond = performance.now();
-let fps = 0;
+let animationFrame = null;
+let ready = false;
+
+function updateHud() {
+  const hud = document.getElementById('hud');
+  hud.textContent = `${visible.length.toLocaleString()} encounters · ` +
+    `${(visible.length * 2).toLocaleString()} object appearances` +
+    (selected ? ' · pale rings mark the selected pair' : ' · choose a marker to inspect');
+}
+
+function startAnimation() {
+  if (!ready || animationFrame !== null || document.hidden || document.getElementById('scene-view').hidden) return;
+  animationFrame = requestAnimationFrame(animate);
+}
 
 function animate() {
-  requestAnimationFrame(animate);
+  animationFrame = null;
+  if (document.hidden || document.getElementById('scene-view').hidden) return;
   controls.update();
   renderer.render(scene, camera);
-
-  frames++;
-  const now = performance.now();
-  if (now - lastSecond >= 1000) {
-    fps = frames;
-    frames = 0;
-    lastSecond = now;
-    document.getElementById('hud').textContent =
-      `${fps} fps · ${visible.length.toLocaleString()} events · ` +
-      `${(visible.length * 2).toLocaleString()} objects · ${visible.length.toLocaleString()} lines`;
-  }
+  startAnimation();
 }
 
 // ---------------------------------------------------------------------------------------
@@ -524,21 +607,31 @@ function animate() {
 // ---------------------------------------------------------------------------------------
 
 async function main() {
+  const loadJson = async (path) => {
+    const response = await fetch(path);
+    if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
+    return response.json();
+  };
   const [eventData, summaryData] = await Promise.all([
-    fetch('./data/events.json').then((r) => r.json()),
-    fetch('./data/summary.json').then((r) => r.json()),
+    loadJson('./data/events.json'),
+    loadJson('./data/summary.json'),
   ]);
+  if (!Array.isArray(eventData) || !summaryData?.population?.events) {
+    throw new Error('The exported dataset has an unexpected format.');
+  }
   events = eventData;
   summary = summaryData;
 
   document.getElementById('sample-total').textContent = events.length.toLocaleString();
   const population = summary.population.events;
   document.getElementById('population-line').textContent =
-    `The full dataset holds ${population.toLocaleString()} ingested events — ` +
-    `this sample is ${(100 * events.length / population).toFixed(2)}% of it, and is ` +
+    `The two source files contain ${population.toLocaleString()} ingested records. ` +
+    `This sample is ${(100 * events.length / population).toFixed(2)}% of those records and is ` +
     `deliberately weighted toward rare high-probability cases.`;
   document.getElementById('pop-n').textContent = population.toLocaleString();
   document.getElementById('samp-n').textContent = events.length.toLocaleString();
+  document.getElementById('overview-population').textContent = population.toLocaleString();
+  document.getElementById('overview-sample').textContent = events.length.toLocaleString();
 
   const excluded = summary.sample.excluded_unrenderable || {};
   const excludedTotal = Object.values(excluded).reduce((a, b) => a + b, 0);
@@ -546,7 +639,7 @@ async function main() {
     const notice = document.createElement('div');
     notice.className = 'notice hard';
     notice.innerHTML = `<strong>${excludedTotal} sampled event(s) are not rendered</strong>
-      because their positions are not finite: ${JSON.stringify(excluded)}. They are counted
+      because their positions are not finite: ${escapeHtml(JSON.stringify(excluded))}. They are counted
       here rather than dropped silently.`;
     document.querySelector('aside.left').prepend(notice);
   }
@@ -554,20 +647,28 @@ async function main() {
   buildBuffers(events.length);
   wire();
   applyFilters();
+  document.getElementById('charts-loading')?.remove();
   renderCharts(document.getElementById('charts'), summary, events);
 
-  document.getElementById('loading').remove();
+  document.getElementById('loading')?.remove();
+  ready = true;
   resize();
-  animate();
+  startAnimation();
 }
 
 main().catch((error) => {
-  document.getElementById('loading').innerHTML =
+  const loading = document.getElementById('loading');
+  if (loading) loading.innerHTML =
     `<div style="color:#ff5c5c;max-width:520px;text-align:center">
-       <strong>Failed to load.</strong><br>${error}<br><br>
-       This page reads ./data/events.json, so it must be served over HTTP
-       (<code>python -m http.server</code> from the viz/ directory) rather than opened
-       directly from the filesystem.
+       <strong>The scene data could not be loaded.</strong><br>${escapeHtml(error.message)}<br><br>
+       Serve the frontend folder with <code>python -m http.server 8001 --directory frontend</code>
+       from the repository root, and check that its data files are present.
+       The other workspace tabs remain available.
      </div>`;
-  throw error;
+  document.getElementById('hud').textContent = 'Scene unavailable';
+  document.getElementById('charts-loading')?.replaceChildren(document.createTextNode('The distribution data could not be loaded. Check the exported data files in frontend/data.'));
+  for (const id of ['inspect-example', 'next-event', 'camera-reset', 'reset', 'f-source', 'f-altitude', 'f-dilution', 'f-pc', 'f-miss', 'f-censored', 'f-null']) {
+    document.getElementById(id).disabled = true;
+  }
+  console.warn('Geometry data unavailable:', error.message);
 });

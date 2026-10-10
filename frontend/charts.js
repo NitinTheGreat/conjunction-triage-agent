@@ -1,8 +1,8 @@
 /**
  * Distribution charts, drawn as hand-built SVG. No charting library, no CDN.
  *
- * Every chart declares its scope — POPULATION (all 1,196,860 ingested events, via
- * summary.json) or SAMPLE (the 2,000 stratified events actually rendered in 3D). The two
+ * Every chart declares its scope — POPULATION (all ingested records, via
+ * summary.json) or SAMPLE (the stratified records actually rendered in 3D). The two
  * are never mixed inside one chart, because the sample deliberately over-represents rare
  * high-probability events and reading a dataset proportion off it would be wrong.
  *
@@ -11,6 +11,7 @@
  */
 
 const NS = 'http://www.w3.org/2000/svg';
+let chartId = 0;
 
 const COLOURS = {
   bar: '#5eb0ff',
@@ -29,16 +30,41 @@ function el(name, attrs = {}, parent = null) {
   return node;
 }
 
-function card(container, title, scope, note) {
-  const wrap = document.createElement('div');
+function card(container, title, scope, note, counts) {
+  const wrap = document.createElement('section');
   wrap.className = 'card';
-  wrap.innerHTML =
-    `<h3>${title}</h3><span class="scope ${scope}">${scope === 'population'
-      ? 'population · all 1,196,860 events'
-      : 'sample · 2,000 events'}</span>` + (note ? `<p class="note">${note}</p>` : '');
+  const heading = document.createElement('h3');
+  heading.id = `chart-heading-${++chartId}`;
+  heading.textContent = title;
+  wrap.setAttribute('aria-labelledby', heading.id);
+  wrap.appendChild(heading);
+  const badge = document.createElement('span');
+  badge.className = `scope ${scope}`;
+  badge.textContent = scope === 'population'
+    ? `Full dataset · ${counts.population.toLocaleString()} ingested records`
+    : `3D sample · ${counts.sample.toLocaleString()} records`;
+  wrap.appendChild(badge);
+  if (note) {
+    const explanation = document.createElement('p');
+    explanation.className = 'note';
+    explanation.textContent = note;
+    wrap.appendChild(explanation);
+  }
   container.appendChild(wrap);
   return wrap;
 }
+
+function describeChart(svg, parent, description) {
+  const titleId = `chart-title-${++chartId}`;
+  const descriptionId = `chart-description-${chartId}`;
+  svg.setAttribute('aria-labelledby', titleId);
+  svg.setAttribute('aria-describedby', descriptionId);
+  el('title', { id: titleId }, svg).textContent = parent.querySelector('h3').textContent;
+  el('desc', { id: descriptionId }, svg).textContent = description;
+}
+
+const exact = (value) => Number.isInteger(value) ? value.toLocaleString('en-US') : String(value);
+const sourceLabel = (name) => name === 'spherical' ? 'Sph.' : name.toUpperCase();
 
 /** Compact bar label. Values here span counts in the millions and physical quantities
  *  below 0.01, so both ends need trimming or the labels collide with the axis. */
@@ -47,23 +73,23 @@ const shorten = (n) => {
   const a = Math.abs(n);
   if (a >= 1e6) return `${(n / 1e6).toFixed(a >= 1e7 ? 0 : 1)}M`;
   if (a >= 1e3) return `${(n / 1e3).toFixed(a >= 1e4 ? 0 : 1)}k`;
-  if (a >= 1) return String(Number(n.toFixed(a >= 100 ? 0 : 2)));
+  if (a >= 1) return String(Number(n.toFixed(2)));
   if (a >= 0.01) return String(Number(n.toFixed(3)));
   return n.toExponential(1);
 };
 
 /**
  * Vertical bar chart. `bars` is [{label, value, colour, emphasis}].
- * A log value axis is used when the range spans more than two decades, which is the norm
- * here — linear bars would render every small category as invisible.
+ * A log(1 + value) axis keeps small categories visible alongside very large values.
+ * Tick labels always show the original quantity, and exact values are available below.
  */
-function barChart(parent, bars, { height = 190, logScale = null } = {}) {
-  const width = 430;
-  const padding = { top: 12, right: 8, bottom: 46, left: 46 };
+function barChart(parent, bars, { height = 240, logScale = null, unit = 'records' } = {}) {
+  const width = 480;
+  const padding = { top: 24, right: 10, bottom: 64, left: 54 };
   const plotW = width - padding.left - padding.right;
   const plotH = height - padding.top - padding.bottom;
 
-  const svg = el('svg', { viewBox: `0 0 ${width} ${height}`, role: 'img' }, parent);
+  const svg = el('svg', { viewBox: `0 0 ${width} ${height}`, role: 'group' }, parent);
   const maximum = Math.max(...bars.map((b) => b.value), 1);
   const useLog = logScale === null ? maximum > 500 : logScale;
   const scale = (v) => {
@@ -72,11 +98,22 @@ function barChart(parent, bars, { height = 190, logScale = null } = {}) {
     return (Math.log10(v + 1) / Math.log10(maximum + 1)) * plotH;
   };
 
-  // gridlines
-  const ticks = useLog
-    ? Array.from({ length: Math.ceil(Math.log10(maximum + 1)) + 1 }, (_, i) => 10 ** i)
-        .filter((v) => v <= maximum * 1.4)
+  describeChart(svg, parent,
+    `Bar chart in ${unit}. ${useLog ? 'Heights use log base 10 of one plus the value; axis labels show original values.' : 'Heights use a linear scale.'} ` +
+    'Focus a bar to read its value, or expand the exact values table below.');
+  const readout = document.createElement('p');
+  readout.className = 'chart-readout';
+  readout.setAttribute('role', 'status');
+  readout.setAttribute('aria-live', 'polite');
+  readout.textContent = 'Hover or focus a bar to inspect its value.';
+
+  // Gridlines are in the original units, including a zero baseline.
+  const candidateTicks = useLog
+    ? [0, ...Array.from({ length: Math.ceil(Math.log10(maximum + 1)) + 1 }, (_, i) => 10 ** i)
+        .filter((v) => v <= maximum)]
     : [0, maximum / 2, maximum];
+  const ticks = candidateTicks.filter((tick, index) =>
+    index === 0 || scale(tick) - scale(candidateTicks[index - 1]) >= 12);
   for (const tick of ticks) {
     const y = padding.top + plotH - scale(tick);
     el('line', {
@@ -86,7 +123,7 @@ function barChart(parent, bars, { height = 190, logScale = null } = {}) {
     el('text', {
       x: padding.left - 6, y: y + 3.5, fill: COLOURS.ink,
       'font-size': 9.5, 'text-anchor': 'end',
-    }, svg).textContent = shorten(Math.round(tick));
+    }, svg).textContent = shorten(tick);
   }
 
   const slot = plotW / bars.length;
@@ -96,16 +133,19 @@ function barChart(parent, bars, { height = 190, logScale = null } = {}) {
     const h = scale(bar.value);
     const x = padding.left + i * slot + (slot - barWidth) / 2;
     const y = padding.top + plotH - h;
-    el('rect', {
+    const valueLabel = `${bar.label}: ${exact(bar.value)} ${unit}`;
+    const rectangle = el('rect', {
       x, y, width: barWidth, height: Math.max(h, bar.value > 0 ? 1.5 : 0),
       fill: bar.colour || COLOURS.bar, rx: 2,
       opacity: bar.emphasis ? 1 : 0.88,
       stroke: bar.emphasis ? '#fff' : 'none', 'stroke-width': bar.emphasis ? 1 : 0,
-    }, svg).appendChild(
-      el('title', {}, null),
-    ).textContent = `${bar.label}: ${bar.value.toLocaleString()}`;
+      tabindex: 0, role: 'img', 'aria-label': valueLabel,
+    }, svg);
+    el('title', {}, rectangle).textContent = valueLabel;
+    rectangle.addEventListener('mouseenter', () => { readout.textContent = valueLabel; });
+    rectangle.addEventListener('focus', () => { readout.textContent = valueLabel; });
 
-    if (bar.value > 0) {
+    if (bars.length <= 12) {
       el('text', {
         x: x + barWidth / 2, y: y - 3.5, 'text-anchor': 'middle',
         class: 'bar-label',
@@ -114,7 +154,7 @@ function barChart(parent, bars, { height = 190, logScale = null } = {}) {
 
     const label = el('text', {
       x: x + barWidth / 2, y: padding.top + plotH + 12,
-      'text-anchor': 'end', fill: COLOURS.ink, 'font-size': 9,
+      'text-anchor': 'end', fill: COLOURS.ink, 'font-size': 10,
       transform: `rotate(-40 ${x + barWidth / 2} ${padding.top + plotH + 12})`,
     }, svg);
     label.textContent = bar.label;
@@ -126,23 +166,59 @@ function barChart(parent, bars, { height = 190, logScale = null } = {}) {
     stroke: COLOURS.grid,
   }, svg);
 
-  if (useLog) {
-    el('text', {
-      x: width - padding.right, y: 9, 'text-anchor': 'end',
-      fill: COLOURS.ink, 'font-size': 9,
-    }, svg).textContent = 'log scale';
+  el('text', {
+    x: padding.left, y: 11, fill: COLOURS.ink, 'font-size': 10,
+  }, svg).textContent = unit;
+  el('text', {
+    x: width - padding.right, y: 11, 'text-anchor': 'end',
+    fill: COLOURS.ink, 'font-size': 9,
+  }, svg).textContent = useLog ? 'Height: log₁₀(1 + value)' : 'Linear scale';
+  parent.appendChild(readout);
+
+  const disclosure = document.createElement('details');
+  disclosure.className = 'chart-values';
+  const summary = document.createElement('summary');
+  summary.textContent = 'View exact values';
+  disclosure.appendChild(summary);
+  const table = document.createElement('table');
+  const caption = document.createElement('caption');
+  caption.textContent = `${parent.querySelector('h3').textContent} (${unit})`;
+  table.appendChild(caption);
+  const header = table.createTHead().insertRow();
+  for (const label of ['Category', unit]) {
+    const th = document.createElement('th');
+    th.scope = 'col';
+    th.textContent = label;
+    header.appendChild(th);
   }
+  const body = table.createTBody();
+  for (const bar of bars) {
+    const row = body.insertRow();
+    const label = document.createElement('th');
+    label.scope = 'row';
+    label.textContent = bar.label;
+    row.appendChild(label);
+    row.insertCell().textContent = exact(bar.value);
+  }
+  disclosure.appendChild(table);
+  parent.appendChild(disclosure);
   return svg;
 }
 
 /** Scatter with log x (miss distance) and log y (Pc); censored drawn distinctly. */
 function scatterMissVsPc(parent, events) {
-  const width = 430;
-  const height = 260;
-  const padding = { top: 14, right: 12, bottom: 40, left: 52 };
+  const width = 480;
+  const height = 290;
+  const padding = { top: 25, right: 12, bottom: 40, left: 52 };
   const plotW = width - padding.left - padding.right;
   const plotH = height - padding.top - padding.bottom;
   const svg = el('svg', { viewBox: `0 0 ${width} ${height}`, role: 'img' }, parent);
+  const missing = events.filter((event) => event.pc === null || event.pc === undefined).length;
+  describeChart(svg, parent,
+    `Scatter plot of miss distance and collision probability for ${events.length.toLocaleString()} sampled records. ` +
+    'Both axes use logarithmic scales. Gray points occupy a separate censored band. ' +
+    `${missing.toLocaleString()} records without a probability are omitted. ` +
+    'This deliberately selected sample does not show the frequency of events in the full dataset.');
 
   const xMin = 0.005;
   const xMax = 70;
@@ -165,16 +241,18 @@ function scatterMissVsPc(parent, events) {
       .textContent = `${x}`;
   }
   el('text', { x: padding.left + plotW / 2, y: height - 6, 'text-anchor': 'middle', fill: COLOURS.ink, 'font-size': 10 }, svg)
-    .textContent = 'miss distance (km, log)';
+    .textContent = 'Miss distance · km · logarithmic scale';
+  el('text', { x: padding.left, y: 11, fill: COLOURS.ink, 'font-size': 10 }, svg)
+    .textContent = 'Collision probability (Pc)';
 
-  // the 1e-4 action threshold
+  // The dataset's 1e-4 reference threshold, distinct from the Kelvins benchmark threshold.
   const thresholdY = sy(-4);
   el('line', {
     x1: padding.left, x2: width - padding.right, y1: thresholdY, y2: thresholdY,
     stroke: '#ff5c5c', 'stroke-width': 1.2, 'stroke-dasharray': '5 3', opacity: 0.85,
   }, svg);
   el('text', { x: width - padding.right, y: thresholdY - 4, 'text-anchor': 'end', fill: '#ff8a8a', 'font-size': 9 }, svg)
-    .textContent = '1e-4 action threshold';
+    .textContent = '1e−4 reference threshold';
 
   // censored band, drawn as its own zone rather than as points on the Pc axis
   const censoredY = sy(-10.35);
@@ -183,25 +261,35 @@ function scatterMissVsPc(parent, events) {
     fill: COLOURS.censored, opacity: 0.12,
   }, svg);
   el('text', { x: padding.left + 4, y: censoredY + 3, fill: COLOURS.censored, 'font-size': 8.5 }, svg)
-    .textContent = 'censored — bound, not a value';
+    .textContent = 'Censored: Pc at or below the inferred floor';
 
-  for (const event of events) {
+  for (const [index, event] of events.entries()) {
     const isNull = event.pc === null || event.pc === undefined;
     if (isNull) continue;
     const censored = event.pc_is_floored;
-    const y = censored ? censoredY + (Math.random() - 0.5) * 8 : sy(Math.log10(event.pc));
-    el('circle', {
+    // Deterministic separation in the censored band; vertical position is not a Pc value.
+    const y = censored ? censoredY + (((index * 37) % 101) / 100 - 0.5) * 8 : sy(Math.log10(event.pc));
+    const point = el('circle', {
       cx: sx(event.miss_distance_km), cy: y, r: censored ? 1.5 : 2.1,
-      fill: censored ? COLOURS.censored : (event.dilution === 1 ? COLOURS.diluted : COLOURS.robust),
+      fill: censored ? COLOURS.censored : (event.dilution === 1 ? COLOURS.diluted
+        : event.dilution === 0 ? COLOURS.robust : COLOURS.nullPc),
       opacity: censored ? 0.5 : 0.75,
     }, svg);
+    el('title', {}, point).textContent =
+      `Miss distance: ${exact(event.miss_distance_km)} km. ` +
+      (censored ? 'Pc is censored at the inferred 1e−10 floor.' : `Pc: ${event.pc.toExponential(3)}.`);
   }
+  const readout = document.createElement('p');
+  readout.className = 'chart-readout';
+  readout.textContent = `${missing.toLocaleString()} records have no Pc and are omitted. Point density reflects sample selection.`;
+  parent.appendChild(readout);
   return svg;
 }
 
 function legendRow(parent, items) {
   const div = document.createElement('div');
-  div.style.cssText = 'display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 10px;font-size:11px;color:#98a0b8';
+  div.className = 'chart-legend';
+  div.style.cssText = 'display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 10px;font-size:12px;color:#98a0b8';
   div.innerHTML = items.map(([colour, label]) =>
     `<span style="display:flex;align-items:center;gap:5px">
        <span style="width:10px;height:10px;border-radius:2px;background:${colour};display:inline-block"></span>${label}
@@ -215,67 +303,74 @@ export function renderCharts(container, summary, events) {
   container.innerHTML = '';
   const population = summary.population;
   const bySource = population.by_source;
+  const counts = {
+    population: population.events ?? Object.values(bySource).reduce((total, source) => total + source.events, 0),
+    sample: events.length,
+  };
+  const chart = (title, scope, note) => card(container, title, scope, note, counts);
 
   // --- 1. Pc by decade, censored as a separate bar -------------------------------------
   {
-    const wrap = card(container, 'Collision probability by decade', 'population',
-      'Censored records are shown as their own bar, deliberately separated from the ' +
-      'histogram — they sit at the 1e-10 floor and are upper bounds, not measurements. ' +
-      'The floor itself is inferred from the data, not documented in the Users Guide.');
+    const wrap = chart('How collision probabilities are distributed', 'population',
+      'Blue bars group Pc into powers of ten; labels show the lower edge of each range. ' +
+      'Gray records are at the inferred 1e−10 reporting floor: a bound, not an exact probability. ' +
+      'This floor is inferred from the data, not documented by the provider.');
     const decades = {};
     for (const source of Object.values(bySource)) {
       for (const [key, value] of Object.entries(source.uncensored_decades || {})) {
         decades[key] = (decades[key] || 0) + value;
       }
     }
-    const bars = Object.keys(decades).sort().map((key) => ({
-      label: key.split('..')[0].replace('1e', '1e'),
+    const bars = Object.keys(decades).sort((a, b) => Number(a.split('..')[0]) - Number(b.split('..')[0])).map((key) => ({
+      label: key.split('..')[0],
       value: decades[key],
       colour: COLOURS.bar,
     }));
-    bars.unshift({ label: 'CENSORED', value: population.censored, colour: COLOURS.censored, emphasis: true });
+    bars.unshift({ label: 'Censored', value: population.censored, colour: COLOURS.censored, emphasis: true });
     bars.push({ label: 'no Pc', value: population.pc_null, colour: COLOURS.nullPc, emphasis: true });
-    legendRow(wrap, [[COLOURS.bar, 'uncensored Pc'], [COLOURS.censored, 'censored (bound)'], [COLOURS.nullPc, 'not computable']]);
+    legendRow(wrap, [[COLOURS.bar, 'Reported Pc above floor'], [COLOURS.censored, 'Censored bound'], [COLOURS.nullPc, 'No Pc reported']]);
     barChart(wrap, bars);
   }
 
   // --- 2. events above the action threshold --------------------------------------------
   {
-    const wrap = card(container, 'Events at or above the 1e-4 action threshold', 'population',
-      'This is the population a triage benchmark would actually operate on. It is ' +
-      'vanishingly small, and almost all of it is flagged as having diluted (untrustworthy) ' +
-      'covariance — which constrains every downstream experiment.');
+    const wrap = chart('Records above the reference threshold', 'population',
+      'Pc ≥ 1e−4 means at least 1 in 10,000 under the model. Compare records with and without ' +
+      'a dilution flag before interpreting that probability. This is a reference level for ' +
+      'this dataset; the separate Kelvins agent is invoked at latest Pc ≥ 1e−7.');
     const bars = [];
     for (const [name, source] of Object.entries(bySource)) {
       const robust = source.pc_by_dilution?.robust?.above_action_threshold ?? 0;
       const diluted = source.pc_by_dilution?.diluted?.above_action_threshold ?? 0;
-      bars.push({ label: `${name} robust`, value: robust, colour: COLOURS.robust, emphasis: true });
-      bars.push({ label: `${name} diluted`, value: diluted, colour: COLOURS.diluted, emphasis: true });
+      bars.push({ label: `${sourceLabel(name)} unflagged`, value: robust, colour: COLOURS.robust, emphasis: true });
+      bars.push({ label: `${sourceLabel(name)} flagged`, value: diluted, colour: COLOURS.diluted, emphasis: true });
     }
-    legendRow(wrap, [[COLOURS.robust, 'robust covariance'], [COLOURS.diluted, 'diluted covariance']]);
+    legendRow(wrap, [[COLOURS.robust, 'No dilution flag'], [COLOURS.diluted, 'Dilution flagged']]);
     barChart(wrap, bars, { logScale: false });
   }
 
   // --- 3. dilution split ----------------------------------------------------------------
   {
-    const wrap = card(container, 'Covariance quality (dilution flag)', 'population',
-      'dilution = 1 means the covariance is diluted: Pc has passed its maximum on the ' +
-      'Pc-versus-scale-factor curve, so a lower Pc reflects worse knowledge, not lower risk.');
+    const wrap = chart('When uncertainty can hide risk', 'population',
+      'A dilution flag warns that broadening the position uncertainty can lower the calculated Pc. ' +
+      'A small Pc can therefore coexist with poor knowledge of the orbit. An absent flag does ' +
+      'not by itself verify the accuracy of the uncertainty estimate.');
     const bars = [];
     for (const [name, source] of Object.entries(bySource)) {
       const values = source.dilution_values || {};
-      bars.push({ label: `${name} robust`, value: values['0.0'] || 0, colour: COLOURS.robust });
-      bars.push({ label: `${name} diluted`, value: values['1.0'] || 0, colour: COLOURS.diluted });
-      bars.push({ label: `${name} null`, value: values.NULL || 0, colour: COLOURS.nullPc });
+      bars.push({ label: `${sourceLabel(name)} unflagged`, value: values['0.0'] || 0, colour: COLOURS.robust });
+      bars.push({ label: `${sourceLabel(name)} flagged`, value: values['1.0'] || 0, colour: COLOURS.diluted });
+      bars.push({ label: `${sourceLabel(name)} unknown`, value: values.NULL || 0, colour: COLOURS.nullPc });
     }
     barChart(wrap, bars);
   }
 
   // --- 4. altitude ----------------------------------------------------------------------
   {
-    const wrap = card(container, 'Altitude of both objects', 'population',
-      'Object slots (two per event), |r| − 6378.137 km. Relevant to the later drag work: ' +
-      'atmospheric drag only meaningfully affects the low bands.');
+    const wrap = chart('Where the objects are', 'population',
+      'Altitude in kilometres above a spherical Earth (radius 6,378.137 km). Each record ' +
+      'contributes two object observations, so these counts are not unique satellites. ' +
+      'Lower orbits are more sensitive to atmospheric drag.');
     const bands = {};
     for (const source of Object.values(bySource)) {
       for (const [key, value] of Object.entries(source.altitude_bands || {})) {
@@ -284,39 +379,41 @@ export function renderCharts(container, summary, events) {
     }
     barChart(wrap, Object.entries(bands).map(([label, value]) => ({
       label: label.replace(' km', '').replace(/\(.*\)/, '').trim(), value, colour: COLOURS.bar,
-    })));
+    })), { unit: 'object observations' });
   }
 
   // --- 5/6/7. quartile summaries --------------------------------------------------------
   const quartileCharts = [
-    ['miss_distance_km', 'Miss distance', 'km'],
-    ['relative_speed_kms', 'Relative speed', 'km/s'],
-    ['mahalanobis_distance', 'Mahalanobis distance', 'σ'],
+    ['miss_distance_km', 'How close the objects pass', 'km', 'Miss distance is the predicted separation at closest approach.'],
+    ['relative_speed_kms', 'How quickly the objects pass', 'km/s', 'Relative speed measures how fast one object moves past the other.'],
+    ['mahalanobis_distance', 'Separation relative to uncertainty', 'dimensionless', 'Mahalanobis distance measures separation after accounting for position uncertainty.'],
   ];
-  for (const [key, title, unit] of quartileCharts) {
-    const wrap = card(container, `${title} — quartiles by answer key`, 'population',
-      `Minimum, lower quartile, median, upper quartile and maximum, in ${unit}.`);
+  for (const [key, title, unit, definition] of quartileCharts) {
+    const wrap = chart(title, 'population',
+      `${definition} Each source shows its minimum, 25th percentile (Q1), median, ` +
+      '75th percentile (Q3) and maximum. White outlines mark the medians.');
     const bars = [];
     for (const [name, source] of Object.entries(bySource)) {
       const stats = source[key] || {};
       for (const stat of ['min', 'q1', 'median', 'q3', 'max']) {
         bars.push({
-          label: `${name.slice(0, 4)} ${stat}`,
+          label: `${sourceLabel(name)} ${stat}`,
           value: Number(stats[stat] ?? 0),
           colour: name === 'spherical' ? COLOURS.bar : '#7d6bd8',
           emphasis: stat === 'median',
         });
       }
     }
-    legendRow(wrap, [[COLOURS.bar, 'spherical'], ['#7d6bd8', 'SFSH'], ['#ffffff', 'median outlined']]);
-    barChart(wrap, bars, { logScale: true });
+    legendRow(wrap, [[COLOURS.bar, 'Spherical source'], ['#7d6bd8', 'SFSH source'], ['#ffffff', 'Median outlined']]);
+    barChart(wrap, bars, { logScale: true, unit });
   }
 
   // --- 8. covariance magnitude ----------------------------------------------------------
   {
-    const wrap = card(container, 'Position uncertainty magnitude by decade', 'population',
-      'Covariance trace (c11+c22+c33, km²), an upper bound on the largest eigenvalue. ' +
-      'The spread across many decades is why uncertainty cannot be shown on a linear scale.');
+    const wrap = chart('How much position uncertainty varies', 'population',
+      'The covariance trace adds the three position variances (c11 + c22 + c33), in km². ' +
+      'For a valid covariance it bounds the largest eigenvalue. Each bar counts object ' +
+      'observations within a power-of-ten range, labelled by its lower edge.');
     const decades = {};
     for (const source of Object.values(bySource)) {
       for (const [key, value] of Object.entries(source.covariance_trace_decades || {})) {
@@ -327,33 +424,38 @@ export function renderCharts(container, summary, events) {
       (a, b) => parseInt(a.slice(2), 10) - parseInt(b.slice(2), 10));
     barChart(wrap, sorted.map((key) => ({
       label: key.split('..')[0], value: decades[key], colour: COLOURS.bar,
-    })));
+    })), { unit: 'object observations' });
   }
 
   // --- 9. scatter -----------------------------------------------------------------------
   {
-    const wrap = card(container, 'Miss distance against Pc', 'sample',
-      'Drawn from the 2,000 rendered events, so the density here is a property of the ' +
-      'sampling design, not of the dataset. Censored events are placed in their own band ' +
-      'at the foot of the chart rather than plotted at 1e-10, because that value is a bound.');
-    legendRow(wrap, [[COLOURS.robust, 'robust covariance'], [COLOURS.diluted, 'diluted covariance'],
-      [COLOURS.censored, 'censored (own band)']]);
+    const wrap = chart('A close pass does not tell the whole story', 'sample',
+      'Compare predicted separation with Pc. Rare high-Pc records are deliberately over-represented, ' +
+      'so dot density does not show their real prevalence. Gray points sit in a separate censored ' +
+      'band because their exact probability is unknown.');
+    legendRow(wrap, [[COLOURS.robust, 'No dilution flag'], [COLOURS.diluted, 'Dilution flagged'],
+      [COLOURS.censored, 'Censored bound'], [COLOURS.nullPc, 'Dilution flag unknown']]);
     scatterMissVsPc(wrap, events);
   }
 
   // --- 10. sample composition -----------------------------------------------------------
   {
-    const wrap = card(container, 'What the 3D view is actually showing', 'sample',
-      'Composition of the rendered sample by Pc class. Compare against the population ' +
-      'chart above: rare high-Pc events are deliberately over-sampled so they appear at all.');
+    const wrap = chart('What is included in the 3D sample', 'sample',
+      'Records grouped by the sampling categories used for the 3D view. Compare with the first ' +
+      'chart: rare high-Pc records are intentionally sampled more often so they remain visible. ' +
+      'The lowest Pc range excludes censored records.');
     const classes = {};
     for (const event of events) {
       const key = event.stratum.split('|')[1];
       classes[key] = (classes[key] || 0) + 1;
     }
     const order = ['action', 'near_threshold', 'moderate', 'low', 'censored', 'null'];
+    const labels = {
+      action: '≥ 1e−4', near_threshold: '1e−6 to < 1e−4', moderate: '1e−8 to < 1e−6',
+      low: '< 1e−8', censored: 'Censored', null: 'No Pc',
+    };
     barChart(wrap, order.filter((k) => classes[k]).map((key) => ({
-      label: key,
+      label: labels[key],
       value: classes[key],
       colour: key === 'censored' ? COLOURS.censored
         : key === 'null' ? COLOURS.nullPc
