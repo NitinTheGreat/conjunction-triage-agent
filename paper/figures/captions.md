@@ -1,0 +1,13 @@
+# Figure captions (generated)
+
+**fig1_overlap_response.** Frozen scientific evaluation (V04; held-out configuration, 10 independent training banks x 5,000 evaluation scenarios). Mean clipped log loss by reuse condition; whiskers span the 10 bank means. The latest-message comparator is invariant by construction. Grouped and oracle-weighted history arms (gray) track the history summary. Source: track_r_scientific_2026-10-10/per_bank_losses.csv (run track_r_scientific_20261010_v1).
+
+**fig2_frozen_contrasts.** Frozen scientific evaluation (V04). Points: estimates averaged over 10 independent training banks and 5,000 scenarios; bars: frozen bank-combined 95% intervals (studentized bootstrap, B = 9,999, plus a training-bank term); vertical ticks: each hypothesis null. P1 is the primary contrast (material degradation confirmed); S1, S5, S2 and S3 are the Holm family (all rejected); S6 is exploratory. Source: track_r_scientific_2026-10-10/decisions.csv.
+
+**fig3_development_persistence.** Exposed development simulation (sensitivity_20261010_v1), not confirmation. P1 for each independently generated training bank (6 isotropic, 2 per other configuration) with in-configuration training, evaluated on a fresh 2,000-scenario bank; whiskers are per-bank t-intervals conditional on the fitted bank. Source: sensitivity_2026-10-10/bank_contrasts.csv.
+
+**fig4_observation_windows.** Controlled observation-lineage design generated from research.simulation.windows. Each bar is one message's observation window; the latest message (blue) is identical across reuse conditions, so the latest-message comparator is invariant. Exact replay repeats no-reuse messages; burst reissue repeats them at new publication times (not shown).
+
+**fig5_real_contrasts.** Exposed retrospective real CDMs (A01; Kelvins), never pooled with simulation. Paired event-level contrasts with studentized-bootstrap (blue) and mission-cluster bootstrap-t (gray) 95% intervals. Training cohort: 8,293 events / 66 positives, out of fold; historical test: 2,167 / 150, labels long public. Public CDMs carry no observation lineage, so these are absolute comparisons, not reuse contrasts. Source: real_2026-10-10/contrasts.csv.
+
+**fig6_real_frontier.** Exposed retrospective real CDMs (A01), training cohort out of fold. Missed positives against the fraction reviewed across score thresholds; points mark the training-selected nominal 95%-recall operating point. Descriptive only: thresholds along the curve were not selected on training data, and review fractions are not operational workload. Source: real_2026-10-10/frontiers.csv and metrics.csv.

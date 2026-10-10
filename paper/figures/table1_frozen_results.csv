@@ -1,0 +1,7 @@
+id,role,arm,comparator,condition,estimand,null,mean,lower,upper,p_value,holm_rejected,decision
+P1,primary,singleton,latest_metadata,overlap_90,degradation,0.02,0.0627636564077593,0.0525961335255017,0.0737265213195552,0.0001,,material_degradation_confirmed
+S1,confirmatory_secondary,singleton,latest_metadata,overlap_90,absolute,-0.02,-0.0038708075116884,-0.0105352955351733,0.0035141150029726,0.0001,True,
+S2,confirmatory_secondary,grouped,singleton,overlap_90,degradation,-0.01,0.0006802552731835,-0.0012475015282175,0.0026113281796565,0.0001,True,
+S3,confirmatory_secondary,oracle_lineage_weight,singleton,overlap_90,degradation,-0.01,0.0022754841164083,5.80493947295738e-05,0.0045396766873349,0.0001,True,
+S5,confirmatory_secondary,singleton,latest_metadata,solution_reissue,degradation,0.02,0.0772619027835164,0.0657761329539849,0.0896969349202195,0.0001,True,
+S6,exploratory,singleton,latest_metadata,solution_reissue,absolute,,0.0106274388640686,0.0050171138246766,0.0165814069079538,,,

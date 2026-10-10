@@ -1,0 +1,30 @@
+{
+  "generator": "research/paper_figures.py",
+  "inputs_sha256": {
+    "track_r_scientific_2026-10-10/per_bank_losses.csv": "e355ee4f1d618b1e58a82405e2e682a855a67ac0169a05f56d46b52684b72f55",
+    "track_r_scientific_2026-10-10/decisions.csv": "efa865e15199310bd692bb0452c1ee5ef2078a3d6b9fe9c64183cec17accf976",
+    "sensitivity_2026-10-10/bank_contrasts.csv": "361be3c32ac305d7275827fe8c98d800b3eca72c9676ea2d8237d4674f99bd4b",
+    "real_2026-10-10/contrasts.csv": "9a3c8a67cbffca8b68550f87e23b80f32a8f4658f7169547a902e159be2eb276",
+    "real_2026-10-10/frontiers.csv": "1b9f3e7b5b8e3e7e7f3dc1fe15e4c86b86231ecdb238cb77779bc9ae5b265163",
+    "real_2026-10-10/metrics.csv": "40b85152b5f6e99e7dbb138d84f187dd7a765a8757f7d968e2febd2806d8052d",
+    "pilot_2026-10-09/data_20261009_v2__data_summary.json": "0dd0d36cc4bc7ef31a77ca7ce97cd6ed01bfceeb4a09ba98b7aa9a4a07f1f170"
+  },
+  "outputs": [
+    "captions.md",
+    "fig1_overlap_response.pdf",
+    "fig1_overlap_response.png",
+    "fig2_frozen_contrasts.pdf",
+    "fig2_frozen_contrasts.png",
+    "fig3_development_persistence.pdf",
+    "fig3_development_persistence.png",
+    "fig4_observation_windows.pdf",
+    "fig4_observation_windows.png",
+    "fig5_real_contrasts.pdf",
+    "fig5_real_contrasts.png",
+    "fig6_real_frontier.pdf",
+    "fig6_real_frontier.png",
+    "table1_frozen_results.csv",
+    "table2_real_metrics.csv",
+    "table3_cohort_flow.csv"
+  ]
+}

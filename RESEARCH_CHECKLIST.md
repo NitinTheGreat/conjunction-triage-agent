@@ -192,7 +192,11 @@ All results are labelled exposed and are separate from simulation. Main result: 
 
 - [x] **W01 — draft the manuscript skeleton and related work.** Depends on: F02; can proceed alongside later experiments. **Do:** write question, task definition, data provenance, nearest-work comparison, methods outline, and empty result tables. **Expected:** manuscript source under a clearly chosen `paper/` directory, plus bibliography and supplement outline. **Done when:** every intended result has a defined artifact source and all placeholders are visibly incomplete. Never fill them with anticipated scores.
 
-- [ ] **W02 — generate paper figures and tables.** Depends on: A02. **Do:** script the cohort-flow, task/mechanism diagram, primary comparison, workload/miss frontier, controlled-overlap response, and ablation/failure figures relevant to the final claim. **Expected:** plotting/table scripts and standalone exports with run IDs and captions. **Done when:** plots regenerate from saved data, intervals/counts are shown, and no favorable values are manually patched.
+- [x] **W02 — generate paper figures and tables.** Depends on: A02. **Do:** script the cohort-flow, task/mechanism diagram, primary comparison, workload/miss frontier, controlled-overlap response, and ablation/failure figures relevant to the final claim. **Expected:** plotting/table scripts and standalone exports with run IDs and captions. **Done when:** plots regenerate from saved data, intervals/counts are shown, and no favorable values are manually patched. **Evidence (10 October 2026):**
+- `research/paper_figures.py` (1 test) regenerates six figures and three tables from committed bundles only, with input hashes in `paper/figures/provenance.json`.
+- Figures cover the overlap response and frozen contrasts (V04), development persistence, the observation-window design, real-data contrasts and frontiers (A01), and cohort flow.
+- Two regenerations are byte-identical. Renderings are git-ignored; captions, tables and provenance are committed.
+- matplotlib 3.10.7 is recorded in `requirements-figures.txt`; no existing package changed.
 
 - [ ] **W03 — finish results, limitations, and the submission draft.** Depends on: W01–W02, A03. **Do:** write only supported results; reconcile abstract, conclusion, supplement, README-facing claims, and errata while preserving frozen history. Choose a venue by the actual contribution and verify its current author requirements. **Expected:** complete manuscript and supplement, limitations, data/code availability, and disclosure statements. **Done when:** reviewers can distinguish retrospective, simulated, and independently confirmed findings, and no placeholder or unsupported novelty/performance claim remains.
 
@@ -881,4 +885,15 @@ on the user's V04 decision.
 P1 = 0.0628 nats (frozen bank-combined 95% interval 0.0526-0.0737; margin 0.02): material degradation confirmed. Holm rejects all four secondary nulls: S1 -0.0039, S5 0.0773, S2 +0.0007, S3 +0.0023. Exploratory S6 is +0.0106. Reuse-induced new-miss rate: 7.8% (599 new versus 33 recovered).
 18/40 selections at C=1000, with last-step gains of at most 0.0011.
 Details: [V04 record](docs/research/execution/v04_record.md).
+
+### W02 figures - 10 October 2026
+
+Six figures and three tables are scripted from committed bundles. They follow the
+validated palette (slots 1-3 pass CVD checks; the aqua contrast warning is
+relieved by direct labels and tables). Every figure was visually checked and
+layout collisions fixed before commit. Evidence types never share an axis.
+
+Next:
+- A03 needs an independent reviewer; the [guide](docs/research/execution/a03_reproduction_guide.md) is ready.
+- W03 (results, limitations and novelty account) can be drafted. Every quantitative sentence must map to a claim-register row.
 
