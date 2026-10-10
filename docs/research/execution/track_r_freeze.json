@@ -1,0 +1,14 @@
+{
+  "created_utc": "2026-10-10T07:35:51.558619+00:00",
+  "git_head_at_freeze": "7e456a2af871140660a3c9e94aa5913ffc7cb431",
+  "pending_before_v04": [
+    "independent analysis-owner reproduction of the decision rule on boundary-null and zero-discordance cases",
+    "user authorization to generate and evaluate the reserved scientific banks"
+  ],
+  "protocol": "docs/research/execution/track_r_protocol.json",
+  "protocol_sha256": "69040e6bcf48416541a712250f3463c136b1b0e27fa513c4c650751fd30d13ca",
+  "reservation": "docs/research/execution/track_r_reservation.json",
+  "reserved_bank_files_found": 0,
+  "scientific_outcomes_accessed": false,
+  "statement": "Frozen before any scientific scenario or outcome existed. V04 must not change any frozen item."
+}

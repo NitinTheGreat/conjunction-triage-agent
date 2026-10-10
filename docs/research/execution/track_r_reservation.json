@@ -1,0 +1,39 @@
+{
+  "access_rule": "Only research.track_r_scientific may generate these banks, through ReservedAccess derived from the committed frozen protocol whose canonical hash matches track_r_freeze.json.",
+  "created_utc": "2026-10-10T07:35:51.557191+00:00",
+  "prior_label_free_contact": "One numerical-integration accuracy check (300 random posteriors, seed 11) used the scientific noise covariance; no scenario, label or model was involved.",
+  "scientific_evaluation": {
+    "generated": false,
+    "ids": "scientific:00000..04999",
+    "seed": 20261012
+  },
+  "scientific_training": {
+    "banks": [
+      "scitrain01",
+      "scitrain02",
+      "scitrain03",
+      "scitrain04",
+      "scitrain05",
+      "scitrain06",
+      "scitrain07",
+      "scitrain08",
+      "scitrain09",
+      "scitrain10"
+    ],
+    "generated": false,
+    "ids": "scitrainKK:00000..00999",
+    "seeds": [
+      20261301,
+      20261302,
+      20261303,
+      20261304,
+      20261305,
+      20261306,
+      20261307,
+      20261308,
+      20261309,
+      20261310
+    ]
+  },
+  "written_before_generation": true
+}

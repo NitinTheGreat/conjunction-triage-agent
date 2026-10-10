@@ -1,0 +1,253 @@
+{
+  "C": [
+    0.01,
+    0.1,
+    1.0,
+    10.0,
+    100.0,
+    1000.0
+  ],
+  "amendment_policy": "Amendments are recorded with date, reason and outcome visibility; amendments made after scientific outcomes are visible cannot change the primary contrast, margin, rule, sample size or interval method.",
+  "analysis": {
+    "alpha": 0.05,
+    "bootstrap_resamples": 9999,
+    "bootstrap_seed": 20261391,
+    "clipping": 1e-06,
+    "confirmatory_secondary": [
+      "S1",
+      "S5",
+      "S2",
+      "S3"
+    ],
+    "contrasts": [
+      {
+        "alternative": "greater",
+        "arm": "singleton",
+        "comparator": "latest_metadata",
+        "condition": "overlap_90",
+        "estimand": "degradation",
+        "id": "P1",
+        "null": 0.02,
+        "role": "primary"
+      },
+      {
+        "alternative": "greater",
+        "arm": "singleton",
+        "comparator": "latest_metadata",
+        "condition": "overlap_90",
+        "estimand": "absolute",
+        "id": "S1",
+        "null": -0.02,
+        "role": "confirmatory_secondary"
+      },
+      {
+        "alternative": "greater",
+        "arm": "singleton",
+        "comparator": "latest_metadata",
+        "condition": "solution_reissue",
+        "estimand": "degradation",
+        "id": "S5",
+        "null": 0.02,
+        "role": "confirmatory_secondary"
+      },
+      {
+        "alternative": "greater",
+        "arm": "grouped",
+        "comparator": "singleton",
+        "condition": "overlap_90",
+        "estimand": "degradation",
+        "id": "S2",
+        "null": -0.01,
+        "role": "confirmatory_secondary"
+      },
+      {
+        "alternative": "greater",
+        "arm": "oracle_lineage_weight",
+        "comparator": "singleton",
+        "condition": "overlap_90",
+        "estimand": "degradation",
+        "id": "S3",
+        "null": -0.01,
+        "role": "confirmatory_secondary"
+      },
+      {
+        "alternative": null,
+        "arm": "singleton",
+        "comparator": "latest_metadata",
+        "condition": "solution_reissue",
+        "estimand": "absolute",
+        "id": "S6",
+        "null": null,
+        "role": "exploratory"
+      }
+    ],
+    "interval": "bank-combined studentized bootstrap: bootstrap-t over scenarios of bank-averaged contrasts, combined in quadrature per side with t(K-1) x SD(bank means)/sqrt(K)",
+    "margin": 0.02,
+    "multiplicity": "P1 alone at two-sided 95%; Holm step-down at familywise one-sided 0.05 over the secondary family",
+    "primary": "P1",
+    "primary_rule": {
+      "inconclusive": "otherwise",
+      "material_degradation_confirmed": "lower > margin",
+      "not_material": "upper < margin"
+    },
+    "reported_regardless": [
+      "absolute and degradation losses for every arm and condition",
+      "Brier and calibration summaries",
+      "reuse-induced misses with exact intervals",
+      "review counts",
+      "scenario-only conditional intervals as sensitivity"
+    ]
+  },
+  "analysis_specification": {
+    "blob_id": "31a82e2fc58e0a83c41c43f66d8b187d0fe360ea",
+    "path": "docs/research/execution/analysis_specification.md"
+  },
+  "arms": [
+    "singleton",
+    "latest_metadata",
+    "grouped",
+    "oracle_lineage_weight"
+  ],
+  "claim": "With the latest message and the final-risk label fixed, 90% observation-ID overlap between successive windows degrades a history-summary logistic forecaster (singleton) by more than 0.02 nats of clipped log loss relative to the reuse-invariant latest-message comparator, averaged over independent training banks and scenarios, in the held-out simulator configuration.",
+  "code_blob_ids": {
+    "requirements-sequence.txt": "1c91d954930ebc8816869a7c79db61c0baac7db3",
+    "requirements.txt": "1c1e967a3068e1190094d1ace5d13961dffc7949",
+    "research/__init__.py": "492d9e0043367ce49dfdfb0aabbb6b9da21d8fa0",
+    "research/artifacts.py": "44a2199753db1f3e76c14b0da80cdaf71d296396",
+    "research/bank_interval_validation.py": "0d525dc18e731548866b22b589ccbeff967732ca",
+    "research/component_campaign.py": "1e554797e48bfa09e6b74ea76164ff0535de6cd3",
+    "research/components.py": "1c98b406e049a3b00b090a541b631a2c12d0fff1",
+    "research/covariance_campaign.py": "56391099a1b52c64fba0444ce69806b9cd942ce6",
+    "research/covariance_proxy.py": "c178ecb18131b98b399cc30b2b59208ec764a6e5",
+    "research/data.py": "4cb7e0ca7882a9688226cf377b260a97b1b6ebb6",
+    "research/evaluate.py": "d77a8622a611db607965d3561b6c24e77500304f",
+    "research/export_pilot.py": "50eb492a6d8f9bf11733b6c73fa32584ecbbfc15",
+    "research/freeze_track_r.py": "e37e52400916c6bcb92d28f2ea0a48562a7a8452",
+    "research/fusion_campaign.py": "e3257cd8128ce31467d84a7f45bdc6eb3d2a55ad",
+    "research/history.py": "281aa8965ee41dec44b45027eb2123804c643b46",
+    "research/interval_validation.py": "604e1af36c9236f9776e9d37d60c2adbb89c03dd",
+    "research/metrics.py": "d4a60c31eb7ab5217d9ee7f2ed2b2865c98a46ae",
+    "research/models.py": "4a6ffd7e7288f0aeeef8ce7589fd4eb1b8195ad4",
+    "research/precision_planning.py": "c80b742c4fbd1cbf1f5d69e8b9a69b25e4f67abb",
+    "research/prepare.py": "f86f11ac323cbbb65b9ab0c22111060eb988c494",
+    "research/sensitivity_banks.py": "b6f429f3e0a279b3c9ccfd36716c917be91b4fbd",
+    "research/sensitivity_campaign.py": "3a9e988e92f34521e182ffffb6632c0999ab04b1",
+    "research/sequence_campaign.py": "6a46fd284c947756ee1401acba2cdd1133247d37",
+    "research/sequence_model.py": "390b9eaaf6c0aa344acd90b3f749f17059159c6c",
+    "research/sequence_preflight.py": "e1662413351bcefbf9a9237bf564663e3341ce6a",
+    "research/simulation.py": "1e3e9f982037f67527dbd74bfa729d9ffb547ac9",
+    "research/simulation_pilot.py": "b494b969d9240d15aee3dc082ee65297d211a284",
+    "research/simulation_regimes.py": "045c49b104edc630856d099a3bd00c00314aadb6",
+    "research/simulation_v2.py": "5f92cb44f4d9e835ad56c0f189d48642fe1ec7e0",
+    "research/state_fusion.py": "f16fa64a1e562e7ede055df10ee0f76f1255eb01",
+    "research/summarize_components.py": "bfaafa67e8415b3367cc4b434a2d17858d8783f8",
+    "research/summarize_covariance.py": "3a8535f4e07750a292d185e2102f1f88cd743913",
+    "research/summarize_fusion.py": "f4df5fa1d23424eb84cf80a7116412a6a221a5ff",
+    "research/summarize_pilot.py": "7df54163c7f92cce65a643a4d458becd8e49b367",
+    "research/summarize_regimes.py": "cb622a480e344938a2b9e8e684db560be03ba4fc",
+    "research/summarize_sensitivity.py": "c511cc0d6e32715aa8582990eab52536253aa8d2",
+    "research/summarize_sequence.py": "ec01fc83868eae5560e2723dff76dcefe2d32d69",
+    "research/summarize_tuning.py": "f10b3372e610ecbb2c1b4d5262b85748eeeb60cb",
+    "research/track_r_analysis.py": "1c3363548f09e0fff9c9986edec3166f6848ba0c",
+    "research/track_r_scientific.py": "9766752a9b3d67eae6f9f71256ae3b0857bf3c3e",
+    "research/tuning_adequacy.py": "c0f0448dbe3aea0915cdbf2ed0b59299362af9d9",
+    "research/tuning_stability.py": "19009583fd462d85e2b721d002d588517c22afe0",
+    "research/two_stage.py": "686abec54a4d89e02e1a9cf913ec78a1ba4bf9fd",
+    "research/verify_exports.py": "5bfa01b00c7a99e3652a3992d27764f6e988fb2d",
+    "research/verify_two_stage.py": "89263f26ddbde272e416fa339490591fc82c91ad"
+  },
+  "conditions": [
+    "no_reuse",
+    "overlap_50",
+    "overlap_90",
+    "solution_reissue",
+    "new_information",
+    "burst_reissue"
+  ],
+  "configuration": {
+    "eigenvalues": [
+      0.144,
+      0.036
+    ],
+    "note": "Unexposed candidate: noise variance ratio 4 rotated 30 degrees, trace 0.18; bracketed by development ratios 2 and 8.",
+    "rotation_degrees": 30.0,
+    "shared_bias_variance": 0.0
+  },
+  "environment": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python": "3.11.9"
+  },
+  "evaluation_bank": {
+    "bank": "scientific",
+    "ids": "scientific:00000..04999",
+    "seed": 20261012
+  },
+  "evaluation_conditions": "all seven, including exact_replay",
+  "evaluation_scenarios": 5000,
+  "evidence_runs": [
+    "tuning_adequacy_20261010_v2",
+    "precision_planning_20261010_v2",
+    "interval_validation_20261010_v1",
+    "interval_validation_20261010_v2",
+    "sensitivity_20261010_v1",
+    "sensitivity_summary_20261010_v1",
+    "bank_interval_validation_20261010_v1"
+  ],
+  "failure_policy": "Any convergence warning, nonfinite value, failed integration check, failed exact-replay or latest-message invariance, or plan/output mismatch stops the run; records are retained; no scenario, bank, arm or candidate is dropped; a rerun uses a new run ID under the unchanged protocol and is reported.",
+  "git_head_at_freeze": "7e456a2af871140660a3c9e94aa5913ffc7cb431",
+  "independent_training_banks": 10,
+  "inner_folds": 3,
+  "integration_seed": 20261390,
+  "label": "final recorded log10 risk >= -6 from the full unique-observation posterior (not physical collision occurrence)",
+  "max_iter": 10000,
+  "population": "Unweighted enriched latent encounter-plane scenarios (30% near-miss component); not operational prevalence.",
+  "regime": "matched_mixture",
+  "selection_and_calibration": "Minimum weighted inner-OOF clipped log loss (1e-6), ties to smaller C; monotone Platt on selected OOF; nominal 95% training-recall threshold; refit on the full training bank.",
+  "status": "frozen",
+  "track": "R (narrowed robustness/measurement benchmark)",
+  "training_banks": [
+    {
+      "bank": "scitrain01",
+      "seed": 20261301
+    },
+    {
+      "bank": "scitrain02",
+      "seed": 20261302
+    },
+    {
+      "bank": "scitrain03",
+      "seed": 20261303
+    },
+    {
+      "bank": "scitrain04",
+      "seed": 20261304
+    },
+    {
+      "bank": "scitrain05",
+      "seed": 20261305
+    },
+    {
+      "bank": "scitrain06",
+      "seed": 20261306
+    },
+    {
+      "bank": "scitrain07",
+      "seed": 20261307
+    },
+    {
+      "bank": "scitrain08",
+      "seed": 20261308
+    },
+    {
+      "bank": "scitrain09",
+      "seed": 20261309
+    },
+    {
+      "bank": "scitrain10",
+      "seed": 20261310
+    }
+  ],
+  "training_scenarios": 1000,
+  "unit": "whole latent scenario; all reuse variants share its observation bank and label",
+  "version": 1
+}
