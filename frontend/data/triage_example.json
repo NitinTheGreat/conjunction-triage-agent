@@ -1,0 +1,85 @@
+{
+  "recorded": true,
+  "verdicts": [
+    {
+      "series_id": "test:100",
+      "in_scope": true,
+      "baseline_risk": -6.836242476018044,
+      "predicted_final_risk": -30.0,
+      "effective_prediction": -30.0,
+      "will_collapse": true,
+      "confidence": "medium",
+      "reasoning": "The miss distance has stabilized at approximately 4 km, which is significantly larger than the combined physical dimensions of the objects (7.1 m). While the risk is currently elevated because the chaser's uncertainty (15.6 km) is large enough to overlap the miss distance, the risk will resolve to negligible as the chaser's covariance shrinks and the Mahalanobis distance increases, confirming the objects will pass at a safe distance.",
+      "evidence_cited": [
+        {
+          "field": "miss_km",
+          "value": "4.039"
+        },
+        {
+          "field": "sig_chs_km",
+          "value": "15.6"
+        },
+        {
+          "field": "mahalanobis_distance",
+          "value": "20.66"
+        },
+        {
+          "field": "max_risk_scaling",
+          "value": "3.294"
+        }
+      ]
+    },
+    {
+      "series_id": "test:1001",
+      "in_scope": true,
+      "baseline_risk": -5.829444941478791,
+      "predicted_final_risk": -5.83,
+      "effective_prediction": -5.83,
+      "will_collapse": false,
+      "confidence": "medium",
+      "reasoning": "The risk has remained stable above the -6.0 threshold for over two days as tracking improved, with the miss distance converging and stabilizing around 1.5 km. Although the max_risk_scaling of 0.84 indicates the conjunction is in the dilution region, the risk level has not dropped as the chaser uncertainty (sig_chs_km) was reduced from 28.6 km to 8.4 km, suggesting the threat is persistent rather than a mathematical artifact of large uncertainty.",
+      "evidence_cited": [
+        {
+          "field": "risk",
+          "value": "-5.8294"
+        },
+        {
+          "field": "miss_km",
+          "value": "1.522"
+        },
+        {
+          "field": "max_risk_scaling",
+          "value": "0.8406"
+        },
+        {
+          "field": "sig_chs_km",
+          "value": "8.479"
+        },
+        {
+          "field": "mahalanobis_distance",
+          "value": "21.72"
+        }
+      ]
+    }
+  ],
+  "requested": 2,
+  "answered": 2,
+  "failed": 0,
+  "provenance": {
+    "dataset": "ESA Kelvins Collision Avoidance Challenge, test split",
+    "method": "Recorded Phase 7 agent predictions, prompt v1",
+    "source_file": "processed/agent_predictions_test.parquet",
+    "source_sha256": "b49ae2e80e3a5922f9132048998d0f3ae91fe300b28374ef4fc7f14836307856",
+    "provider": "gemini",
+    "model": "gemini-3-flash-preview",
+    "prompt_version": "v1",
+    "frozen_manifest_head": "24abb2cd4731d40e579cace5eb44de99f8072d6d",
+    "exported_at": "2026-09-08",
+    "caveats": [
+      "Saved model output, not a new API response. No provider call is made when this example is loaded.",
+      "The explanation is the model's original assertion, not a verified physical conclusion. The Phase 7 agent performed worse than the latest-CDM baseline overall.",
+      "A risk of -30 is the negligible-risk floor in this workflow, not an exact measured probability.",
+      "Kelvins labels are calculated probabilities. They are not observed collision outcomes, and anonymised series cannot be mapped to catalogue objects here."
+    ]
+  }
+}
