@@ -16,7 +16,8 @@ from pathlib import Path
 import pandas as pd
 
 STATISTICS = {'value', 'min', 'max', 'mean', 'count'}
-EVIDENCE_TYPES = {'exposed development simulation', 'exposed retrospective real data', 'protocol', 'pending scientific evaluation'}
+EVIDENCE_TYPES = {'exposed development simulation', 'exposed retrospective real data', 'protocol', 'pending scientific evaluation',
+                  'frozen scientific simulation'}
 
 
 def recompute(row: pd.Series, results: Path) -> float:

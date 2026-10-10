@@ -169,7 +169,41 @@ intervals conditional on one fitted model under-cover.
 
 ## 5. Results
 
-**This section remains incomplete.** Pilot results support feasibility decisions, not confirmation. The candidate grouping model has not established superiority, and the corrected two-stage official-score model did not beat the latest-risk baseline in the initial campaign.
+**Confirmatory simulation result (V04, frozen protocol).** In the held-out
+configuration (noise variance ratio 4 rotated 30 degrees; 10 independent
+training banks; 5,000 evaluation scenarios), 90% observation-ID overlap degraded
+the history-summary forecaster by 0.0628 nats of clipped log loss relative to the
+reuse-invariant latest-message comparator. The frozen bank-combined 95% interval
+was 0.0526-0.0737, so material degradation above the 0.02-nat margin was
+confirmed.
+
+Holm-adjusted secondary tests all rejected their nulls:
+- **Remaining advantage:** the history model kept essentially none of its
+  advantage at 90% overlap (-0.0039; interval -0.0105 to 0.0035).
+- **Solution reissue:** it degraded the history model by 0.0773.
+- **Grouping:** label-free grouping did not reduce the degradation by more than
+  0.01 (+0.0007).
+- **Lineage weighting:** privileged lineage weighting did not reduce it either
+  (+0.0023).
+
+**Exploratory.** Under solution reissue the history model was worse than
+latest-only (+0.0106; 0.0050 to 0.0166). Its miss rate at the nominal 95%
+training-recall threshold rose from 1.4% without reuse to 8.7%.
+
+Sources: [report](../docs/research/results/track_r_scientific_2026-10-10/report.md);
+every number maps to [claim register](../docs/research/claims/claim_evidence.csv)
+rows V01-V10. The pre-run independent analysis check was waived; independent
+reproduction (A03) is pending.
+
+**Retrospective real data (exposed, A01; not pooled with simulation).** The
+history summary was worse than latest-message metadata in the training cohort
+(+0.0030 nats out of fold; mission-cluster interval 0.0006 to 0.0062) and on the
+exposed historical test split (+0.026). This agrees in direction with the
+simulated mechanism but cannot attribute cause, because public CDMs lack
+observation lineage
+([A01 report](../docs/research/results/real_2026-10-10/report.md)).
+
+**Development results below** support feasibility and design decisions, not confirmation. The candidate grouping model has not established superiority, and the corrected two-stage official-score model did not beat the latest-risk baseline in the initial campaign.
 
 | Intended table/figure | Required source | Completion |
 |---|---|---|

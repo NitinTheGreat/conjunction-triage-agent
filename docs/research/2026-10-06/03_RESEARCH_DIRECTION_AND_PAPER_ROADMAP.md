@@ -1,5 +1,42 @@
 # Research direction and paper roadmap
 
+## V04 frozen scientific result - 10 October 2026
+
+The frozen Track R evaluation ran once in the held-out configuration (noise
+variance ratio 4 rotated 30 degrees), with 10 independent training banks and
+5,000 evaluation scenarios, after the user authorized it
+([record](../execution/v04_record.md), [report](../results/track_r_scientific_2026-10-10/report.md)).
+
+**Primary (P1):** 90% observation-ID overlap degrades the history-summary
+forecaster by 0.0628 nats relative to the reuse-invariant latest-message
+comparator. The frozen bank-combined 95% interval is 0.0526-0.0737, above the
+0.02 margin, so material degradation is **confirmed**.
+
+**Secondaries (Holm, all rejected):**
+- **S1:** the remaining history advantage at 90% overlap is -0.0039
+  ([-0.0105, 0.0035]).
+- **S5:** solution-reissue degradation is 0.0773.
+- **S2:** grouping changes degradation by +0.0007, no reduction above 0.01.
+- **S3:** privileged lineage weighting changes it by +0.0023, no reduction and
+  slightly worse.
+
+**Exploratory (S6):** under solution reissue the history summary is worse than
+latest-only, +0.0106 ([0.0050, 0.0166]).
+
+These results come from a static simulator with a synthetic label. They are
+confirmatory within that model only and are not pooled with the exposed real-data
+analysis, which agrees in direction: there, history summaries do not beat
+latest-message metadata. The pre-run independent check was waived; A03 remains.
+
+**Paper consequence.** The narrowed benchmark now has a confirmed, bounded
+central finding and two well-powered null method results. Remaining work:
+- A03 independent reproduction;
+- scripted figures (W02);
+- results text in which every quantitative sentence maps to a claim-register
+  row (W03);
+- an explicit account of how far known information-reuse theory predicts the
+  effect.
+
 ## V02 complete; V03 freeze next - 10 October 2026
 
 The development record now supports a specific confirmatory question. Reuse of

@@ -1,0 +1,3 @@
+method,banks,scenarios,replicates,false_low_side,false_high_side,coverage,median_half_width,id,note
+bank_combined,10,5000,400,0.0275,0.0175,0.955,0.01041752620850033,P1,post hoc; simulated from observed scientific components
+scenario_only,10,5000,400,0.0425,0.0275,0.93,0.009643893943277,P1,post hoc; simulated from observed scientific components

@@ -1,0 +1,18 @@
+{
+  "artifacts": {
+    "audit.json": "04758438fee9f7ae3a20feda0cbb0a7719bca7844a60cc5c7f48e094cfe73e04",
+    "bank_contrasts.csv": "621332282b266d71e45b2155818bd611bc041cc0b2b6345c87fe1e323c04e7b8",
+    "calibration.csv": "7184f392de2bf2a3a516d37956b74682c0987e8d4f5357d3db0be0a7f1414b07",
+    "decisions.csv": "efa865e15199310bd692bb0452c1ee5ef2078a3d6b9fe9c64183cec17accf976",
+    "losses.csv": "50f6e9fe220eb2c27389489f9eb9bd33db55f1b431f172d47063077090182f82",
+    "per_bank_losses.csv": "e355ee4f1d618b1e58a82405e2e682a855a67ac0169a05f56d46b52684b72f55",
+    "post_hoc_coverage.csv": "fb842f5fdb5fc5e67579a96fe4e90f5271a27e5cbd0245a6c5e0a0a2db2b0732",
+    "report.md": "56ea21c0babc1ca8a94388c49ef8b4e2b4bdda5988b5edc50f8ee9585836cf73",
+    "selections.csv": "4caa7ca6bd6dce36bc681f427ed7da42abd82fb8b23ea6f71912271e9f130072"
+  },
+  "manifest_sha256": "24b250227efe7411e9c3453f70be3d4c13ce25d161c3fe8ade54b8c2cf3ea7e4",
+  "run_id": "track_r_report_20261010_v1",
+  "source_runs": [
+    "track_r_scientific_20261010_v1"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "analysis_reconstructed_exactly": true,
+  "independent_pre_run_check": "waived by the user for V04 (see track_r_authorization.json)",
+  "labelled_rows": 1400000,
+  "phase2_commit_verified": true,
+  "scientific_components_P1": {
+    "bank_means_sd": 0.005657747810726437,
+    "bank_sd": 0.00556243320521501,
+    "bank_truncated": false,
+    "banks": 10,
+    "grand_mean": 0.06276365640775936,
+    "scenario_truncated": false,
+    "scenarios": 5000,
+    "var_bank": 3.094066316247853e-05,
+    "var_interaction": 0.005347235636506232,
+    "var_scenario": 0.12048469803388535
+  },
+  "source_run": {
+    "archived_sources_verified": 106,
+    "artifacts_verified": 678,
+    "inputs_verified": 2,
+    "run_id": "track_r_scientific_20261010_v1",
+    "status": "complete"
+  }
+}
