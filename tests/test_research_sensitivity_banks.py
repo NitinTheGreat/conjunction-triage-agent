@@ -48,3 +48,15 @@ def test_cadence_bank_adds_burst_reissue_and_keeps_scenarios_whole():
     assert len(cohort) == 4 and set(messages.condition) == set(lineage.condition)
     assert 'burst_reissue' in set(messages.condition) and messages.series_id.nunique() == 4
     assert (messages.time_to_tca >= 2.).all()
+
+
+def test_reserved_access_permits_only_named_banks_and_seeds():
+    noise = sb.noise_covariance((.09, .09), 0.)
+    access = sb.ReservedAccess('a' * 64, {'scitrain01': 20261301})
+    cohort, _, _ = sb.generate_config_bank(2, 20261301, 'scitrain01', noise, np.zeros((2, 2)), access)
+    assert cohort.series_id.tolist() == ['scitrain01:00000', 'scitrain01:00001']
+    for bank, seed in (('scitrain01', 20261302), ('scitrain02', 20261301), ('scientific', 20261012)):
+        with pytest.raises(ValueError, match='reservation'):
+            sb.generate_config_bank(1, seed, bank, noise, np.zeros((2, 2)), access)
+    with pytest.raises(ValueError):
+        sb.ReservedAccess('short', {'scitrain01': 20261301})
