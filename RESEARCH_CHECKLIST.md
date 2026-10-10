@@ -10,19 +10,19 @@ This is the live execution record. Update it as work happens. Checked preparatio
 
 | Field | Current checkpoint — replace after each work session |
 |---|---|
-| NOW | **V04, A01, A02 and W02 COMPLETE; W03 drafted.** Frozen result: P1 = 0.0628 nats (95% CI 0.0526-0.0737 > 0.02 margin), material reuse degradation confirmed; Holm rejects S1/S5/S2/S3. Full manuscript draft with 47 regenerating register claims; six scripted figures. |
-| NEXT | (1) A03: an independent reviewer follows the [reproduction guide](docs/research/execution/a03_reproduction_guide.md) and logs discrepancies; this cannot be this assistant. (2) Authors: venue choice and its current requirements, authorship, disclosures, funding. (3) Supplement text. (4) W04 packaging after W03. |
-| Active task / owner | Blocked on people: A03 needs an independent reviewer; W03 author-only items need the authors. Assistant-doable next: supplement drafting. |
+| NOW | **Paper drafted** as `paper/main.tex` (single LaTeX file; register-checked numbers; compiles). Findings page `/findings` added to the web app. All pending frontend work committed. V04, A01, A02 and W02 complete. |
+| NEXT | (1) Authors review `paper/main.tex`: names, affiliations, acknowledgements, AI-assistance disclosure, venue choice and its current requirements. (2) A03 independent reproduction ([guide](docs/research/execution/a03_reproduction_guide.md)); the paper states that it is pending. (3) Supplement and W04 packaging. |
+| Active task / owner | W03 (author items) and A03 (independent reviewer) need people. Assistant-doable: supplement draft, venue formatting once a venue is chosen. |
 | Selected direction | **Track R, narrowed:** controlled robustness/measurement benchmark. Grouping remains a candidate and may be discarded if simpler controls explain results. |
 | Conditional extension | **Track E:** independent real-data efficacy, only after access and statistical requirements pass. |
 | Research blockers | None preventing V01/V02 preparation. Full methods for some close papers and independent operational data remain unavailable; no novelty or real efficacy claim is established. |
 | Current machine | Windows, PowerShell; repository at `F:\conjunction-triage`; Python environment at `.venv\Scripts\python.exe`. Paths elsewhere in this file are relative to the repository root. |
 | HEAD when this checklist was created | `89d7f2efb8bf135e02fa51760e0ed3bb33a105c9`; working tree contains pre-existing modifications and untracked files. |
-| Latest validation | Session end: full suite 491 passed / 1 skipped (106.65 s). 16 bundles / 129 artifacts pass. Claim register 47 claims (45 regenerated, 2 documented). Frozen protocol accepted. 12 raw, 45 historical and 8 frozen files and `requirements.txt` unchanged. |
+| Latest validation | After the paper (10 Oct 2026, 23:10): 446 passed and 1 skipped. 19 tests could not run because Windows Smart App Control began blocking scikit-learn's compiled `sklearn/tree/_partitioner` module mid-session (Code Integrity events 3077/3118); every error and failure is that ImportError, and the same tests passed earlier today (491 passed after V04). Not bypassed. Also: 16 bundles / 129 artifacts pass; claim register 85 rows (70 regenerated, 15 documented); `research.paper_tex` 91 values, 0 problems; protected files and requirements.txt unchanged; web Playwright 7/7 and production build pass. |
 | New scientific runs | This session: tuning_adequacy_20261010_v2, precision_planning_20261010_v2, interval_validation_20261010_v1/v2, sensitivity_20261010_v1 (+ preflight and summary), bank_interval_validation_20261010_v1, real_retrospective_20261010_v1, real_summary_20261010_v2, real_quality_20261010_v1, **track_r_scientific_20261010_v1 (V04)** and track_r_report_20261010_v1. Failed and retained: real_summary_20261010_v1. Superseded: tuning_adequacy v1, precision_planning v1. |
 | Scientific holdout status | **Consumed by V04** under the frozen protocol (authorized 10 October 2026). Any further use of these banks is post-hoc analysis, not confirmation. |
 | Running jobs / processes | None for this project. |
-| Next executable command | `.\.venv\Scripts\python.exe -m research.claim_register`; `python -m research.verify_exports --root docs/research/results`; `python -m research.paper_figures --force` to regenerate figures (needs `requirements-figures.txt`). |
+| Next executable command | `.\.venv\Scripts\python.exe -m research.paper_tex` (paper numbers, tables, citations, figures); `python -m research.claim_register`; `python -m research.paper_figures --force` to regenerate the figures. |
 
 ### Copy this into the next assistant
 
@@ -198,7 +198,7 @@ All results are labelled exposed and are separate from simulation. Main result: 
 - Two regenerations are byte-identical. Renderings are git-ignored; captions, tables and provenance are committed.
 - matplotlib 3.10.7 is recorded in `requirements-figures.txt`; no existing package changed.
 
-- [ ] **W03 — finish results, limitations, and the submission draft.** Depends on: W01–W02, A03. **Do:** write only supported results; reconcile abstract, conclusion, supplement, README-facing claims, and errata while preserving frozen history. Choose a venue by the actual contribution and verify its current author requirements. **Expected:** complete manuscript and supplement, limitations, data/code availability, and disclosure statements. **Done when:** reviewers can distinguish retrospective, simulated, and independently confirmed findings, and no placeholder or unsupported novelty/performance claim remains. **IN PROGRESS (10 October 2026):** a full [draft manuscript](paper/manuscript.md) exists. It covers the abstract, methods, frozen V04 results, development and exposed real-data evidence, limitations, the novelty boundary and the conclusion. Every estimate cites a [claim-register](docs/research/claims/claim_evidence.csv) row (47 claims, all regenerating or documented). Still open:
+- [ ] **W03 — finish results, limitations, and the submission draft.** Depends on: W01–W02, A03. **Do:** write only supported results; reconcile abstract, conclusion, supplement, README-facing claims, and errata while preserving frozen history. Choose a venue by the actual contribution and verify its current author requirements. **Expected:** complete manuscript and supplement, limitations, data/code availability, and disclosure statements. **Done when:** reviewers can distinguish retrospective, simulated, and independently confirmed findings, and no placeholder or unsupported novelty/performance claim remains. **IN PROGRESS (10 October 2026, later):** the paper is now [`paper/main.tex`](paper/main.tex), one self-contained LaTeX file for Overleaf, written after the [claim audit](docs/research/execution/w03_claim_audit.md) and the [related-work update](docs/research/2026-10-10/related_work_update.md). `python -m research.paper_tex` verifies all 91 claimed values against the register (85 rows), the three generated tables, the citations, the figures and the cross-references; the file compiles without warnings (checked with Tectonic 0.15.0 in two upload layouts). Earlier: a full [draft manuscript](paper/manuscript.md) exists. It covers the abstract, methods, frozen V04 results, development and exposed real-data evidence, limitations, the novelty boundary and the conclusion. Every estimate cites a [claim-register](docs/research/claims/claim_evidence.csv) row (47 claims, all regenerating or documented). Still open:
 - A03 independent review;
 - author-only items (authors, venue choice and its current requirements, disclosures, funding);
 - the supplement text;
@@ -318,6 +318,11 @@ Next task and exact next command:
 | 2026-10-06 | Use one assistant-neutral checklist at repository root. | User requested continuity from Codex to Claude Code. | Update this file and artifact paths after each task; carry the working tree and required local data across any machine change. |
 | 2026-10-10 | Continue autonomously; commit as `NitinTheGreat <nitinpandey1304@gmail.com>` with no assistant trailer. | User: "dont stop and dont wait for me to say next. keep going." | Ready tasks proceed without per-step confirmation. Irreversible or outward actions still need explicit authorization. |
 | 2026-10-10 | After the V03 freeze, the user said "continue as you see fit". | Interpreted as: proceed with A01. Not taken as authorization to open the reserved scientific holdout. | V04 stays gated on explicit authorization plus an independent analysis check, or a recorded waiver; A01 proceeds. |
+| 2026-10-10 | Do not wait for A03; draft the paper now. | User: "dont wait for A03". | W03 proceeds; the paper states that independent reproduction has not been done. A03 stays open. |
+| 2026-10-10 | Commit the pending frontend work incrementally. | User: "commit incrementally the frontend as well". | `frontend/`, `web/`, Docker/Compose, README, `api/main.py`, the demo launcher and `.gitignore` were committed in 13 scoped commits; the Dockerfile was fixed to copy `styles.css` and `ui.js`. |
+| 2026-10-10 | Add a findings page with an interactive 3D globe. | User request. | `web/app/findings` (Next.js), data from `research/web_findings.py` with register IDs; Playwright smoke test added. |
+| 2026-10-10 | Write the paper as one self-contained LaTeX file in the voice of Tomasz Radzik's papers, with figures in `paper/figures` under the same names. | User request; three papers supplied. | `paper/main.tex` with inline bibliography; style notes in `docs/research/writing/`; numbers checked by `research.paper_tex`. |
+| 2026-10-10 | Parts of the request named FIRCE, CALIBURN, LanG, GroundEval, an LLM security agent with epistemic guardrails, a "specified versus enacted" audit and a "weak evidence" list in a skeleton. | None of these exists in this repository, its history or its ignored files; they appear to belong to another project. | The equivalent steps were done for this paper: related work redone for its framing, arXiv-only citations checked, novelty re-checked, and a claim audit before drafting. |
 
 ### Earlier preparation session
 
@@ -908,4 +913,16 @@ labelled throughout: confirmatory simulation (V04), exposed development, exposed
 retrospective real data. Register rows were added (V11-V15, D17-D18, R08-R12),
 and `research.claim_register` gained a `sum` statistic. W03 stays unchecked until
 A03 and the author-only items are done.
+
+### Paper and findings page - 10 October 2026
+
+- [x] Frontend work committed in 13 scoped commits (vanilla dashboard, demo infrastructure, Next.js app).
+- [x] `/findings` page:
+  - a 3D lineage globe, observation windows, the overlap response, the decision rule, contrasts with per-bank detail, misses, development banks and real-data charts;
+  - data from `research/web_findings.py`; colours checked for colour-vision deficiency; phone layouts; Playwright test.
+- [x] Claim audit before drafting ([w03_claim_audit.md](docs/research/execution/w03_claim_audit.md)); register grew to 85 rows.
+- [x] Related work redone for the measurement framing, arXiv-only citations checked, novelty re-checked ([related_work_update.md](docs/research/2026-10-10/related_work_update.md)).
+- [x] Style notes from three Radzik papers ([radzik_style_notes.md](docs/research/writing/radzik_style_notes.md)).
+- [x] `paper/main.tex`: one file, inline bibliography, figures by bare name, `\graphicspath` for root or `figures/`; `research.paper_tex` checks it.
+- [ ] Author-only items; A03; supplement; W04.
 
