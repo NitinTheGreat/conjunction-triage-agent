@@ -1,0 +1,22 @@
+{
+  "artifacts": {
+    "audit.json": "1fd3bf032b377f87905578a29e61b13d2ff7961e502b32f2b911e7dedcad6d21",
+    "calibration.csv": "d2e3c49482fc5ecbd03f6583922a2e073707dffb88b8a2274490d3506643df9c",
+    "censoring.csv": "83188e1c9def83de3ead387f919a0540294641da767ffda648f833b4ac61a908",
+    "contrasts.csv": "9a3c8a67cbffca8b68550f87e23b80f32a8f4658f7169547a902e159be2eb276",
+    "frontiers.csv": "1b9f3e7b5b8e3e7e7f3dc1fe15e4c86b86231ecdb238cb77779bc9ae5b265163",
+    "leave_one_mission_out.csv": "a2323da1a5e07f59da87774792d6b831d2244b671c104194b113eb46318203d9",
+    "metrics.csv": "40b85152b5f6e99e7dbb138d84f187dd7a765a8757f7d968e2febd2806d8052d",
+    "missed_positives.csv": "10e5a0e84bf647facf72cf3eda575d161222d39f84ae7521cf644b3ed662f17f",
+    "reference_reproduction.csv": "52e107d15533aa839e7a94a574fc8e2c7466128d3765a75c394c8cdbf618d626",
+    "reliability.csv": "ca5e82aca62d88f3362bc71cc9303f863081b2b3dbac4568e22e14f0a2e637c3",
+    "report.md": "e7854f474f0e9d70a1dcd6b318bbbb602e404160f6d113bc30968f487b4ebd3c",
+    "selections.csv": "02207f324feb8fd941bc83fedfdf01152cbbcdb777efbb3a61a34850b1270c9b"
+  },
+  "manifest_sha256": "8cffc97a93bff063b3aefd79970a5f8b7b60013aff97aa0537bc9fa314cb34d6",
+  "run_id": "real_summary_20261010_v2",
+  "source_runs": [
+    "real_retrospective_20261010_v1",
+    "cv_20261009_v2"
+  ]
+}

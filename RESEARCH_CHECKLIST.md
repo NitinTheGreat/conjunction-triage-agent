@@ -10,9 +10,9 @@ This is the live execution record. Update it as work happens. Checked preparatio
 
 | Field | Current checkpoint — replace after each work session |
 |---|---|
-| NOW | **V03 FROZEN** (`8903632`): Track R protocol, reservation and freeze record committed; the runner accepts them. No scientific scenario exists. |
+| NOW | **A01 COMPLETE** (exposed retrospective real-CDM analysis). V03 is frozen (`8903632`). V04 is still awaiting user authorization and an independent analysis check. |
 | NEXT | **USER DECISION REQUIRED before V04:** (1) authorize generating and evaluating the reserved scientific banks (irreversible: it consumes the holdout); (2) arrange an independent check of the frozen decision rule on boundary-null and zero-discordance cases, or record an explicit waiver. Then run V04 with the command below. |
-| Active task / owner | V04 BLOCKED on user authorization (by design). A01 (retrospective real-data analysis) can proceed independently under the frozen analysis choices. |
+| Active task / owner | V04 BLOCKED on user authorization (by design). A02 can be drafted for every claim except the V04 outcome; A03, W02-W04 follow V04. |
 | Selected direction | **Track R, narrowed:** controlled robustness/measurement benchmark. Grouping remains a candidate and may be discarded if simpler controls explain results. |
 | Conditional extension | **Track E:** independent real-data efficacy, only after access and statistical requirements pass. |
 | Research blockers | None preventing V01/V02 preparation. Full methods for some close papers and independent operational data remain unavailable; no novelty or real efficacy claim is established. |
@@ -171,7 +171,13 @@ Grouping, oracle weighting and the neural arms are retained only as secondary or
 
 - [ ] **V04 — run the held-out scientific simulation evaluation.** Depends on: V03. **Do:** execute the frozen run; retain all scenarios, failures, and planned secondary conditions. Compare the overlap-induced change in loss for method versus comparator, with absolute loss and new-information controls. **Expected:** complete run manifest, predictions, scenario-level paired analysis, intervals, and deviation log. **Done when:** all planned outputs are traceable and the conclusion follows the frozen rule. Do not tune on these outcomes and keep calling them untouched.
 
-- [ ] **A01 — finalize retrospective real-CDM analysis.** Depends on: V03, B04. **Do:** generate the selected real-data comparisons, calibration, workload/miss frontiers, censoring diagnostics, and mission/quality sensitivity under the frozen analysis choices. **Expected:** separate retrospective tables and failure analysis. **Done when:** exposed-data results are labeled as such and are not pooled with simulation or new-real-cohort confirmation into an ambiguous test score.
+- [x] **A01 — finalize retrospective real-CDM analysis.** Depends on: V03, B04. **Do:** generate the selected real-data comparisons, calibration, workload/miss frontiers, censoring diagnostics, and mission/quality sensitivity under the frozen analysis choices. **Expected:** separate retrospective tables and failure analysis. **Done when:** exposed-data results are labeled as such and are not pooled with simulation or new-real-cohort confirmation into an ambiguous test score. **Evidence (10 October 2026):**
+- [contract](docs/research/execution/a01_contract.json);
+- refit `real_retrospective_20261010_v1` (frozen C grid, stored folds, 19/20 arm-folds reproduce earlier predictions);
+- [report](docs/research/results/real_2026-10-10/report.md): metrics, calibration, frontiers, paired contrasts with event and mission-cluster intervals, leave-one-mission-out, censoring and missed-positive listing;
+- post-hoc [quality strata](docs/research/results/real_quality_2026-10-10/report.md).
+
+All results are labelled exposed and are separate from simulation. Main result: the history summary is worse than latest-message metadata (R1 +0.0030 out-of-fold, +0.026 historical test).
 
 - [ ] **A02 — assemble a claim-to-evidence register.** Depends on: V04 and A01 for Track R, or the completed alternative study explicitly selected in F02. **Do:** map each proposed abstract/result/conclusion claim to its experiment, metric, cohort, interval, limitations, and source. **Expected:** `claim_evidence.csv` or equivalent structured table. **Done when:** null, negative, and inconclusive findings are included, all quantitative claims regenerate, and no statement exceeds its evidence type.
 
@@ -833,4 +839,19 @@ technical blocker. Same-assistant evidence exists:
 **If authorized,** run V04 with the command in the checkpoint table. Then
 summarize with the frozen rules, keeping null, inconclusive and adverse results.
 Do not regenerate, extend or retune anything. A01 can proceed meanwhile.
+
+### A01 milestone - 10 October 2026
+
+- [x] Contract committed before fitting (`fa92928`).
+- [x] Refit under the frozen choices: `real_retrospective_20261010_v1`.
+- [x] Analysis `real_summary_20261010_v2` and post-hoc quality addendum `real_quality_20261010_v1`.
+- [x] Exposed labelling throughout; nothing pooled with simulation.
+
+Evidence: [report](docs/research/results/real_2026-10-10/report.md), [quality](docs/research/results/real_quality_2026-10-10/report.md),
+and commands in [V02 record](docs/research/execution/v02_development.md).
+The earlier `real_summary_20261010_v1` failed on a too-strict optimizer check and
+is retained as a failed run.
+
+Next: draft the A02 claim-evidence register for development, A01 and protocol
+claims, leaving the V04 rows visibly pending. V04 still waits on the user.
 

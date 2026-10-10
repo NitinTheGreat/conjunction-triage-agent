@@ -1,0 +1,15 @@
+{
+  "rms_tertile_cuts": [
+    1.599,
+    2.13
+  ],
+  "rows": 18,
+  "source_run": {
+    "archived_sources_verified": 103,
+    "artifacts_verified": 9,
+    "inputs_verified": 7,
+    "run_id": "real_retrospective_20261010_v1",
+    "status": "complete"
+  },
+  "status": "post hoc exploratory addendum; main A01 outputs were visible"
+}

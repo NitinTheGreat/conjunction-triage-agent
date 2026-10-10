@@ -1,0 +1,12 @@
+{
+  "artifacts": {
+    "audit.json": "27d93076bc68a62aa9ea7e3a52cee5b43a5ba0dc6e9536ab8819e28e0986d489",
+    "quality_strata.csv": "641a7d65fbe4375e29623a6eb032fa95b736b1771a39c3068057d78f99cc96fa",
+    "report.md": "1972c23133e31003ee7059fa9c0ee66fcb4c71ef7a9686f5ab2a06d02cb3bb4b"
+  },
+  "manifest_sha256": "02ab6fa2cfe21e77430e8f2ca0a848a24569fd96f9814d537a2a94076981a78e",
+  "run_id": "real_quality_20261010_v1",
+  "source_runs": [
+    "real_retrospective_20261010_v1"
+  ]
+}

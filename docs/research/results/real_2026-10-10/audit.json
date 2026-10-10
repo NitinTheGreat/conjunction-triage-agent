@@ -1,0 +1,15 @@
+{
+  "evidence": "exposed retrospective; never pooled with simulation or with any new-cohort confirmation",
+  "reference_folds": 20,
+  "reproduced_reference_folds": 19,
+  "scope": "Exposed retrospective analysis; not confirmation and not pooled with simulation.",
+  "source_run": {
+    "archived_sources_verified": 103,
+    "artifacts_verified": 9,
+    "inputs_verified": 7,
+    "run_id": "real_retrospective_20261010_v1",
+    "status": "complete"
+  },
+  "test_events": 2167,
+  "training_events": 8293
+}

@@ -592,3 +592,52 @@ through access derived from a frozen, committed protocol. It seals evaluation
 labels and commits label-free predictions and model hashes before analysis.
 Training-bank seeds 20261301-20261310 and the `scitrain` prefix are now reserved
 in the generator. The analysis library `research/track_r_analysis.py` has 7 tests.
+
+## A01 retrospective real-CDM analysis - 10 October 2026
+
+The A01 [contract](a01_contract.json) was committed (`fa92928`) before fitting.
+
+- **Refit** `real_retrospective_20261010_v1` (code `fa92928`, 4.5 minutes): the
+  `latest`, `latest_metadata`, `singleton` and `grouped` arms were refitted on the
+  exposed 8,293-event / 66-positive training cohort, using the frozen six-value C
+  grid and strict convergence on the stored nested folds (regenerated and checked
+  equal). 19/20 arm-folds reproduce the earlier narrower-grid predictions exactly;
+  only `latest` fold 0 moved from C 10 to 100. Final models were evaluated once on
+  the exposed 2,167 / 150 historical test split.
+- **Analysis** `real_summary_20261010_v2` (code `f8f349f`):
+  [report](../results/real_2026-10-10/report.md). The earlier
+  `real_summary_20261010_v1` failed on a too-strict recalibration convergence
+  check (BFGS precision-loss status at a gradient of 1.8e-10); the record is kept
+  and the retry used a new run ID.
+- **Post-hoc quality addendum** `real_quality_20261010_v1` (code `d476da4`):
+  [report](../results/real_quality_2026-10-10/report.md).
+
+```powershell
+.\.venv\Scripts\python.exe -m research.real_retrospective --run-id real_retrospective_20261010_v1
+.\.venv\Scripts\python.exe -m research.summarize_real --source processed/research/real_retrospective_20261010_v1 --run-id real_summary_20261010_v2 --export docs/research/results/real_2026-10-10
+.\.venv\Scripts\python.exe -m research.real_quality_addendum --source processed/research/real_retrospective_20261010_v1 --run-id real_quality_20261010_v1 --export docs/research/results/real_quality_2026-10-10
+```
+
+Exposed retrospective results, not pooled with simulation (differences in clipped
+log loss per event; positive is worse for the first arm):
+
+- **R1: singleton minus latest_metadata (history versus latest).**
+  - Training out-of-fold: +0.0030 (event bootstrap-t 0.0013 to 0.0048; mission
+    cluster 0.0006 to 0.0062).
+  - Historical test: +0.026 (0.011 to 0.043; mission cluster 0.004 to 0.058).
+  - Positive in every leave-one-mission-out subset and every training RMS tertile.
+  - Larger above the -30 censoring floor (0.014 training, 0.116 test).
+  - The history summary does not beat the latest message on real CDMs. That fits,
+    but cannot establish, the simulated reuse mechanism, because public CDMs have
+    no lineage.
+- **R2: grouped minus singleton.** About zero in training; -0.0087 on test
+  (grouping slightly better than singleton there, but still worse than
+  latest-only).
+- **R3: latest_metadata minus latest.** About zero in both splits.
+- **R4: causal GBM minus latest_metadata.** -0.0023 out-of-fold. The event
+  interval excludes zero; the mission interval does not.
+- **Label shift.** Test positive share is 6.92% versus 0.80% in training, so
+  calibration intercepts on test are 1.27 to 2.74.
+- **Misses at nominal 95% training recall.** 2-3/66 out-of-fold and 6-12/150 on
+  test (up to 8%), so the nominal target is not a guarantee.
+- **Censoring.** 82.5% of training events sit at the -30 floor.
