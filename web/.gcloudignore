@@ -1,0 +1,10 @@
+# Used by `gcloud builds submit` for web/. Unlike .gitignore, this keeps public/data,
+# whose static exports are gitignored but needed in the image.
+node_modules/
+.next/
+test-results/
+playwright-report/
+*.tsbuildinfo
+.env*
+AGENTS.md
+CLAUDE.md

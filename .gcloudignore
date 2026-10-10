@@ -1,0 +1,19 @@
+# Used by `gcloud builds submit` from the repository root (the API image). Keeps the
+# upload to what the Dockerfile copies; the datasets and credentials are never uploaded.
+.git/
+.venv/
+dataset/
+processed/
+cache/
+legacy/
+web/
+paper/
+results/
+research/
+docs/research/
+**/node_modules/
+**/__pycache__/
+.env
+.env.*
+!.env.example
+.pytest_cache/
