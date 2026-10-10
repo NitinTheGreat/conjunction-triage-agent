@@ -1,0 +1,13 @@
+{
+  "artifacts": {
+    "audit.json": "04da685ac7a0b5c952072b373b8d591eaaa45d47d2f869666f7d73e9a5b75fc0",
+    "bank_interval_validation.csv": "0b41728674ba5cb14a4010413d01364af5d8f40af5911402b06a0d51e1c40fd2",
+    "report.md": "8f7518ad8d6b61c35cf3d69cd4a9265af5138185ce14db4dc900242baae13b29",
+    "simulation_inputs.csv": "bdcc3af31e7ee0b822af904605e78ac966df2bf4e690e3579b625cfea22fbdb8"
+  },
+  "manifest_sha256": "f26942c75a4163aa59ec00effd97314c3ace96f0b7bea6de7a9961fa675b3520",
+  "run_id": "bank_interval_validation_20261010_v1",
+  "source_runs": [
+    "sensitivity_20261010_v1"
+  ]
+}

@@ -10,19 +10,19 @@ This is the live execution record. Update it as work happens. Checked preparatio
 
 | Field | Current checkpoint — replace after each work session |
 |---|---|
-| NOW | Plan §1-§2 COMPLETE: tuning decision (restrict) and [primary contrast](docs/research/execution/primary_contrast.md) P1 with margin 0.02 nats and provisional n = 5,000 (precision_planning_20261010_v2). §3 uncertainty/analysis design is next. |
-| NEXT | §3 of the [tuning and precision plan](docs/research/execution/tuning_precision_plan.md): training-versus-evaluation uncertainty design, selection/calibration/threshold separation, primary/secondary/multiplicity and interval specification. Then §4 exposed simulator sensitivity. |
-| Active task / owner | V02 IN PROGRESS. Remaining: §3 analysis specification, §4 exposed simulator sensitivity (anisotropic candidate), then V02 acceptance and V03 freeze preparation. |
+| NOW | **V02 COMPLETE.** The analysis specification is fixed: P1 at margin 0.02, K = 10 in-configuration banks, n = 5,000, the bank-combined bootstrap-t interval and Holm over S1/S5/S2/S3. The scientific runner `research/track_r_scientific.py` exists and is tested on development seeds. |
+| NEXT | V03: transcribe the specification into `docs/research/execution/track_r_protocol.json` (status frozen, code hashes), write the reservation/access manifest and `track_r_freeze.json`, then commit. **Stop before V04:** generating the reserved bank is irreversible and needs user authorization plus an independent check of the frozen analysis. |
+| Active task / owner | V03 READY. V04 needs the user's explicit go-ahead. A03 and W tasks follow V04. |
 | Selected direction | **Track R, narrowed:** controlled robustness/measurement benchmark. Grouping remains a candidate and may be discarded if simpler controls explain results. |
 | Conditional extension | **Track E:** independent real-data efficacy, only after access and statistical requirements pass. |
 | Research blockers | None preventing V01/V02 preparation. Full methods for some close papers and independent operational data remain unavailable; no novelty or real efficacy claim is established. |
 | Current machine | Windows, PowerShell; repository at `F:\conjunction-triage`; Python environment at `.venv\Scripts\python.exe`. Paths elsewhere in this file are relative to the repository root. |
 | HEAD when this checklist was created | `89d7f2efb8bf135e02fa51760e0ed3bb33a105c9`; working tree contains pre-existing modifications and untracked files. |
-| Latest validation | Full suite 442 passed / 1 skipped (58.53s) on committed `12706f3`. 8 bundles / 78 artifacts pass checksums; 12 raw, 45 historical and 8 frozen files unchanged. |
-| New scientific runs | Completed development/analysis runs precision_planning_20261010_v2 and tuning_adequacy_20261010_v2 (both v1 superseded), components_20261010_v1 and components_summary_20261010_v1, plus earlier runs. No frozen scientific evaluation. |
-| Scientific holdout status | Seed 20261012 / scientific:00000..04999 reserved **but not generated**. Candidate anisotropic configuration and sample size still need V03 freeze. Kelvins and all pilot banks are exposed. |
-| Running jobs / processes | None for this project. Python processes running `F:\Agentic BSN\scripts\phase6_0_baseline.py` belong to a different project; leave them alone. |
-| Next executable command | `.\.venv\Scripts\python.exe -m research.verify_exports --root docs/research/results` (passes). No §3/§4 CLI exists yet; design before implementing. |
+| Latest validation | Full suite 477 passed / 1 skipped (110.70 s). 13 bundles / 105 artifacts pass. 12 raw, 45 historical and 8 frozen files unchanged. |
+| New scientific runs | Development runs this session: tuning_adequacy_20261010_v2, precision_planning_20261010_v2, interval_validation_20261010_v1/v2, sensitivity_preflight_20261010_v1, sensitivity_20261010_v1, sensitivity_summary_20261010_v1 and bank_interval_validation_20261010_v1. No frozen scientific evaluation. |
+| Scientific holdout status | Seed 20261012 / scientific:00000..04999 reserved **but not generated**. Training-bank seeds 20261301-20261310 and the `scitrain` prefix are also reserved in code. Candidate configuration: ratio 4, rotated 30 degrees (unexposed). Kelvins and all development banks are exposed. |
+| Running jobs / processes | None for this project. |
+| Next executable command | `.\.venv\Scripts\python.exe -m research.verify_exports --root docs/research/results` (passes). The V04 command `python -m research.track_r_scientific --run-id <id>` refuses to run until a frozen, committed protocol and freeze record exist. |
 
 ### Copy this into the next assistant
 
@@ -157,7 +157,15 @@ V01–V04 and A01 describe the Track R study. Proceed with them when F02 retains
 
 - [x] **V01 — resolve the closest-work comparison.** Depends on: F02; literature acquisition may start earlier. **Do:** inspect enough accessible full methods/code for the relevant Sánchez weighting/classification approach, a strong sequence/ensemble family, and applicable fusion alternatives. Track TimeQuery, Ouari, the TCN–Transformer, and AMOS fusion work without mixing their targets. **Expected:** compatibility table with dataset, label, horizon, split, inputs, calibration, metric, and reproduced/adapted/approximate/discussion-only status. **Done when:** the selected comparison is justified and remaining inaccessible details explicitly limit claims. Do not stall all local work while waiting for a paper.
 
-- [ ] **V02 — complete strong comparators, ablations, and precision planning.** Depends on: F02, B04, V01. **Do:** implement feasible close comparators; remove grouping/age/OD components separately; compare oracle versus observed provenance only where lineage is known. Use development results for sample-size and runtime planning. **Expected:** development comparison package, tuning budgets, simulator sensitivity plan, and precision/power report. **Done when:** the study size and primary comparator are justified, all arms share an honest evaluation, and ineffective complexity is not retained solely for a headline.
+- [x] **V02 — complete strong comparators, ablations, and precision planning.** Depends on: F02, B04, V01. **Do:** implement feasible close comparators; remove grouping/age/OD components separately; compare oracle versus observed provenance only where lineage is known. Use development results for sample-size and runtime planning. **Expected:** development comparison package, tuning budgets, simulator sensitivity plan, and precision/power report. **Done when:** the study size and primary comparator are justified, all arms share an honest evaluation, and ineffective complexity is not retained solely for a headline. **Evidence (complete 10 October 2026):**
+- **Comparators:** the comparison package (tuning, covariance, sequence, fusion and component bundles).
+- **Tuning:** the [tuning decision](docs/research/execution/tuning_decision.md).
+- **Primary contrast:** the [primary contrast](docs/research/execution/primary_contrast.md) and [precision report](docs/research/results/precision_2026-10-10/report.md).
+- **Sensitivity:** the [sensitivity results](docs/research/results/sensitivity_2026-10-10/report.md), with independent training banks and four alternative configurations.
+- **Specification:** the [analysis specification](docs/research/execution/analysis_specification.md), covering K = 10 banks, n = 5,000, the validated bank-combined interval and Holm.
+- **Verification:** [verification](docs/research/execution/v02_completion_verification.json).
+
+Grouping, oracle weighting and the neural arms are retained only as secondary or bounded comparisons.
 
 - [ ] **V03 — freeze the scientific Track R protocol.** Depends on: V02, S02. **Do:** fix one primary method, comparator, overlap/noise condition, sample size, scenario partition, clipped log-loss rule, paired contrast, uncertainty procedure, secondary analyses, failure policy, and all software/configuration hashes. **Expected:** immutable `protocol.json`, reservation/access manifest, and freeze record. **Done when:** the freeze precedes scientific outcome access and every item in Report 2's freeze checklist is addressed. A draft document or timestamp alone does not satisfy this task.
 
@@ -765,3 +773,36 @@ independent training banks, with seeds and runtime fixed before generating them.
 Fix selection/calibration/threshold roles; choose and validate the interval
 method under right skew; fix the confirmatory secondary family and Holm
 multiplicity; and set the failure policy.
+
+### V02 completion milestone - 10 October 2026
+
+- [x] Independent training-bank and configuration sensitivity under a committed contract (`sensitivity_20261010_v1`, 61 min, 2,128,000 predictions).
+- [x] Interval-method validation (bootstrap-t; bank-combined coverage 0.950-0.966 in simulation).
+- [x] Complete analysis specification; plan sections 1-5 ticked with evidence.
+- [x] Three-phase scientific runner with sealed labels and protocol-gated reserved access (`25d4854`), tested on development seeds only.
+- [ ] V03 freeze; V04 awaits user authorization.
+
+Evidence:
+- [sensitivity](docs/research/results/sensitivity_2026-10-10/report.md);
+- [bank intervals](docs/research/results/bank_intervals_2026-10-10/report.md);
+- [intervals](docs/research/results/intervals_2026-10-10/report.md) and [P1 n = 5,000](docs/research/results/intervals_p1_n5000_2026-10-10/report.md);
+- [specification](docs/research/execution/analysis_specification.md), [freeze plan](docs/research/execution/v03_freeze_plan.md) and [verification](docs/research/execution/v02_completion_verification.json);
+- commands in [V02 record](docs/research/execution/v02_development.md).
+
+**Key results** (exposed development):
+- **P1 persists:** reuse degradation is 0.051-0.074 across six independent isotropic banks and 0.044-0.079 under anisotropy and doubled noise. It is +0.020 with bias-matched training; earlier negative bias results came from training without bias.
+- **Bank variance:** it is about 3.6 times the earlier overlapping-trial estimate, so V04 uses K = 10 independent banks.
+- **Small or null contrasts:** S1 is near zero; S6 is small and therefore exploratory; grouping and oracle weighting give no reduction above 0.01.
+
+**Decision for the user:** V03 can be frozen locally. Running V04 opens the reserved scientific bank permanently. Report 2 asks for a separate analysis owner to reproduce the decision rule on boundary-null cases before then. Same-assistant tests exist (`tests/test_research_track_r_analysis.py`); an independent check does not.
+
+**Exact next step:** create `docs/research/execution/track_r_protocol.json` from the analysis specification and `tests/test_research_track_r_scientific.py::protocol()`, substituting the scientific values:
+- `scitrain01`-`scitrain10` banks with seeds 20261301-20261310;
+- the `scientific` evaluation bank with seed 20261012;
+- 1,000 training and 5,000 evaluation scenarios;
+- the six-value C grid;
+- 9,999 bootstrap resamples with a fixed seed;
+- the analysis contrasts;
+- `code_sha256` for every research module the runner imports.
+
+Then write the reservation manifest and `track_r_freeze.json`, containing the protocol hash, and commit them before any generation.

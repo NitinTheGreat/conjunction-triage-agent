@@ -495,3 +495,100 @@ at half the development effect. Secondary candidates S1-S6 are recorded with
 their roles. Issues for §3: training variation is comparable to or larger than
 evaluation precision (S2/S3 about three times), and right skew makes one t bound
 anti-conservative. Not frozen; §3 and §4 follow.
+
+## Interval method and analysis library - 10 October 2026
+
+`research/interval_validation.py` validates interval methods against the
+development distribution of each candidate contrast, with no fitting. The runs
+are `interval_validation_20261010_v1` (code `b27d646`: P1, S1 and S6 at n = 1,000
+with 4,000 replicates and at n = 5,000 with 1,500) and
+`interval_validation_20261010_v2` (code `c8d2c48`: P1 at n = 5,000 with 4,000
+replicates). The results are in the
+[intervals bundle](../results/intervals_2026-10-10/report.md) and the
+[P1 n = 5,000 bundle](../results/intervals_p1_n5000_2026-10-10/report.md).
+
+One-sided error rates (nominal 0.025 per side):
+- **P1, t interval:** 0.0145 low / 0.0428 high at n = 1,000, and 0.0205 / 0.0340
+  at n = 5,000.
+- **P1, bootstrap-t:** 0.0250 / 0.0295 at n = 1,000, and 0.0260 / 0.0288 at
+  n = 5,000.
+- **Large t check:** 40,000 replicates gave P1 t coverage of 0.950 at n = 5,000;
+  the v1 n = 5,000 rows were Monte Carlo noise and are superseded by v2.
+
+Decision, recorded in the [analysis specification](analysis_specification.md)
+§4: the primary interval is the studentized bootstrap with B = 9,999, and the
+t interval is reported alongside. Hall's (1992) closed-form transformation was
+not adopted because its exact form could not be verified from an accessible
+primary source.
+
+`research/track_r_analysis.py` (`c5ebbe3`, 5 tests) provides pure functions:
+- bootstrap-t intervals and consistent one-sided p-values;
+- the three-way margin decision;
+- Holm's step-down procedure;
+- exact Clopper-Pearson and McNemar summaries for reuse-induced misses.
+
+A skewed boundary-null test checks that false confirmation stays near nominal.
+
+```powershell
+.\.venv\Scripts\python.exe -m research.interval_validation --run-id interval_validation_20261010_v1 --export docs/research/results/intervals_2026-10-10
+.\.venv\Scripts\python.exe -m research.interval_validation --run-id interval_validation_20261010_v2 --export docs/research/results/intervals_p1_n5000_2026-10-10 --candidates P1 --design 5000:4000 --seed 20261042
+```
+
+## Independent training banks and simulator sensitivity - 10 October 2026
+
+The contract ([JSON](sensitivity_contract.json), [notes](sensitivity_contract.md))
+was committed in `e280644` before any bank existed. Banks came from
+`research/sensitivity_banks.py`, the pilot generator with explicit noise and bias
+covariances, which reproduces the pilot banks bit for bit. The runner is
+`research/sensitivity_campaign.py`.
+
+- **Preflight** `sensitivity_preflight_20261010_v1`: integration agreed within
+  2.1e-7 relative error and the measured timings set the runtime estimate.
+- **Campaign** `sensitivity_20261010_v1` (PID 8536, 23:07:30-00:08:41 UTC, code
+  `e280644`): 14 independent training banks and 5 evaluation banks, 56 selected
+  models, 1,064 fits and 2,128,000 prediction rows. There were no failures; 20
+  selections reached C=1000, each with a last-step gain of at most 0.00061.
+- **Summary** `sensitivity_summary_20261010_v1` (code `70ae151`) regenerated all
+  1,064 metric rows: [report](../results/sensitivity_2026-10-10/report.md).
+- **Interval validation** `bank_interval_validation_20261010_v1` (code `eec9adf`):
+  [report](../results/bank_intervals_2026-10-10/report.md).
+
+```powershell
+$env:OMP_NUM_THREADS='2'; $env:MKL_NUM_THREADS='2'; $env:LOKY_MAX_CPU_COUNT='2'
+.\.venv\Scripts\python.exe -m research.sensitivity_campaign --preflight --run-id sensitivity_preflight_20261010_v1
+.\.venv\Scripts\python.exe -u -m research.sensitivity_campaign --run-id sensitivity_20261010_v1
+.\.venv\Scripts\python.exe -m research.summarize_sensitivity --source processed/research/sensitivity_20261010_v1 --run-id sensitivity_summary_20261010_v1 --export docs/research/results/sensitivity_2026-10-10
+.\.venv\Scripts\python.exe -m research.bank_interval_validation --source processed/research/sensitivity_20261010_v1 --run-id bank_interval_validation_20261010_v1 --export docs/research/results/bank_intervals_2026-10-10
+```
+
+Findings, all exposed development evidence:
+
+- **Training-bank variance.** Across independent isotropic banks, P1 ranged
+  0.051-0.074 (SD 0.0080), about 3.6 times the spread of the earlier overlapping
+  trials. Conditional-on-one-fit intervals would understate P1 uncertainty by
+  about 45% and S2/S3 uncertainty by a factor of 3.5-5.
+- **Persistence.** P1 persists under native training in every configuration
+  (anisotropy ratios 2 and 8, doubled noise). With bias-matched training, P1 is
+  +0.020. The earlier "bias reverses the comparison" came from configuration
+  transfer: isotropic-trained P1 is -0.131 on biased scenarios.
+- **Small contrasts.** S1 is near zero everywhere (-0.009 to +0.005). S6 is small
+  and variable. Grouping and oracle weighting give no material reduction.
+- **Combined interval.** Bank-combined coverage was 0.950-0.966 in simulated
+  designs, whereas scenario-only intervals under-covered (0.66-0.93).
+
+These results fix the [analysis specification](analysis_specification.md):
+- K = 10 in-configuration training banks and n = 5,000 evaluation scenarios;
+- the bank-combined bootstrap-t interval;
+- P1 tested alone, plus a Holm family of S1 (null -0.02), S5 (null 0.02), and S2
+  and S3 (null -0.01);
+- S6 and S4 exploratory.
+
+The scientific configuration stays the unexposed candidate (ratio 4, rotated
+30 degrees).
+
+The [three-phase scientific runner](../../../research/track_r_scientific.py)
+(`25d4854`, 3 tests on development seeds) generates reserved identities only
+through access derived from a frozen, committed protocol. It seals evaluation
+labels and commits label-free predictions and model hashes before analysis.
+Training-bank seeds 20261301-20261310 and the `scitrain` prefix are now reserved
+in the generator. The analysis library `research/track_r_analysis.py` has 7 tests.

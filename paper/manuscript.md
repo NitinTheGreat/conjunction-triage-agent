@@ -155,8 +155,17 @@ overlap and solution reissue, solution-reissue degradation, and whether grouping
 or privileged lineage weighting reduces degradation. Rationale and limits:
 [primary contrast](../docs/research/execution/primary_contrast.md) and
 [planning report](../docs/research/results/precision_2026-10-10/report.md).
-Training-bank variability, the interval method under right skew, multiplicity
-and the held-out configuration remain to be fixed before V03.
+These open items are now fixed in the
+[analysis specification](../docs/research/execution/analysis_specification.md):
+- **Design:** ten independent in-configuration training banks and 5,000 shared
+  evaluation scenarios in the unexposed anisotropic configuration.
+- **Interval:** a studentized-bootstrap interval combined with a training-bank
+  term.
+- **Multiplicity:** Holm's procedure over four secondary hypotheses.
+
+Independent development banks show the degradation persisting under anisotropy
+and noise changes, and with bias-matched training (0.020). They also show that
+intervals conditional on one fitted model under-cover.
 
 ## 5. Results
 

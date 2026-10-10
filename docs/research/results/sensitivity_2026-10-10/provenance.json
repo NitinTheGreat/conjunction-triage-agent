@@ -1,0 +1,18 @@
+{
+  "artifacts": {
+    "audit.json": "254660388fea77e02b0bba986711fdb22acf0944766bdb5865cb762a9cd70e51",
+    "bank_contrasts.csv": "361be3c32ac305d7275827fe8c98d800b3eca72c9676ea2d8237d4674f99bd4b",
+    "design_projections.csv": "91df04d66e75c0e56c6707301c53d52d08361d889978015fd1994646897f3314",
+    "generation.csv": "39450b1f84ca2127336eb613e6189581903e197491e5c684ba06e793312f4ddc",
+    "persistence.csv": "cf8f779f1d437957fbc0b203acec1d39fc01d7dec4c72f2fefad016a79ad7801",
+    "report.md": "e7288e822084ef7d120d72794486f8e4557a0ba4c1a605aa19a25fdce4fd79ff",
+    "selections.csv": "9ed14675113cdccac2fb94a1c218d841cf58522432338f30c85ab1d0a43ad35c",
+    "transfer.csv": "87aee070af43eff6e3f9bc235e7b36651127bec4255c4582d9f091624bc5940f",
+    "variance_components.csv": "844de4962eb0148957461e9173b73d60d648381e2d8c8c8b9dc1e24d59609dca"
+  },
+  "manifest_sha256": "283479d788f47019a8679ae36e0a0b47165ccc2397c49a536ea983085685e8a8",
+  "run_id": "sensitivity_summary_20261010_v1",
+  "source_runs": [
+    "sensitivity_20261010_v1"
+  ]
+}

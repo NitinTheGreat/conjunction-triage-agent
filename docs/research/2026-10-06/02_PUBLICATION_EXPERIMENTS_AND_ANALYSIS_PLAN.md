@@ -1,5 +1,25 @@
 # Report 02 — Publication experiments and statistical analysis plan
 
+## V02 analysis specification complete - 10 October 2026
+
+The [analysis specification](../execution/analysis_specification.md) completes
+the Track R design for V03. The estimand is procedure-level, so intervals include
+training variability:
+
+- **Banks and scenarios:** K = 10 independent in-configuration training banks of
+  1,000 scenarios, with n = 5,000 shared evaluation scenarios under the unexposed
+  candidate configuration (anisotropy 4, rotated 30 degrees).
+- **Interval:** the studentized bootstrap over scenarios (B = 9,999), combined in
+  quadrature with a t(K-1) bank term. It was validated at 0.950-0.966 coverage in
+  simulation from development components.
+- **Decisions:** the P1 margin rule at 0.02 nats; Holm over S1 (remaining
+  advantage below 0.02), S5 (reissue degradation above 0.02), S2 and S3 (no
+  reduction larger than 0.01); S6 and S4 exploratory.
+- **Power:** approximately at least 0.91 for every confirmatory hypothesis at the
+  development effects.
+- **Information flow:** labels are sealed before prediction, with a tested
+  label-permutation invariance.
+
 ## Proposed Track R primary contrast - 10 October 2026
 
 §6.2's contrast T is now instantiated as P1 in the

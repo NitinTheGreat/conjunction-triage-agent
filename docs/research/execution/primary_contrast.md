@@ -1,5 +1,18 @@
 # V02 primary scientific contrast and precision target
 
+> **Update, 10 October 2026.** P1, its 0.02 margin and its decision rule are
+> unchanged. The [analysis specification](analysis_specification.md) now
+> supersedes four points below:
+> - **Design:** K = 10 independent training banks with n = 5,000 shared
+>   evaluation scenarios, instead of one fitted model.
+> - **Interval:** the bank-combined studentized bootstrap.
+> - **S1:** reframed as "the remaining history advantage is below 0.02".
+> - **S6 and S4:** exploratory.
+>
+> Independent development banks (`sensitivity_20261010_v1`) give a P1 of
+> 0.051-0.074 (isotropic) and 0.044-0.079 in the other native non-bias
+> configurations.
+
 **Date:** 10 October 2026. **Status:** proposed for V03, chosen openly from exposed
 development evidence. It is not frozen: the §3 analysis specification and the §4
 simulator-sensitivity results must be completed, and V03 must record them, before

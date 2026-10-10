@@ -112,35 +112,51 @@ and resulting precision before using such language.
 
 ## 3. Separate evaluation uncertainty from training and threshold uncertainty
 
-- [ ] State whether inference is conditional on one fitted model or averages
+- [x] State whether inference is conditional on one fitted model or averages
   over independently generated training banks. If the latter is necessary,
   specify independent development training seeds, repetitions and runtime before
   generating them; the existing 800-scenario subsets overlap within one bank.
   **Expected:** a variance decomposition/design rationale and an honest statement
   of which uncertainty the eventual intervals include.
-- [ ] Decide how selection, monotone calibration and threshold fitting will be
+  **Evidence:** `sensitivity_20261010_v1` (six independent isotropic banks);
+  [analysis specification](analysis_specification.md) §3. The estimand is
+  procedure-level, with K = 10 independent training banks and n = 5,000 shared
+  evaluation scenarios. Intervals include training-bank variation.
+- [x] Decide how selection, monotone calibration and threshold fitting will be
   separated in the scientific design. Current selected OOF reuse is exploratory;
   retaining it requires an explicit limitation. Risk certification needs its
   own valid calibration design and sample-size argument.
   **Expected:** an information-flow diagram or table, fixed split roles and tests
   that future evaluation labels cannot change model or threshold decisions.
-- [ ] Define primary versus secondary comparisons, multiplicity handling,
+  **Evidence:** specification §2 table. The two-phase sealed-label runner
+  `research/track_r_scientific.py` has a label-permutation test (`25d4854`).
+- [x] Define primary versus secondary comparisons, multiplicity handling,
   missing/failed fits, interval construction and reporting of unfavorable
   results. Preserve all prespecified arms and conditions in the final exports.
   **Expected:** a draft analysis specification suitable for V03, not only a list
   of significant comparisons selected from the development tables.
+  **Evidence:** [analysis specification](analysis_specification.md) §§4-8:
+  - validated bank-combined bootstrap-t;
+  - P1 alone plus a Holm family of four, with S6 and S4 exploratory;
+  - failure and amendment rules;
+  - power at K = 10, n = 5,000.
 
 ## 4. Check simulator sensitivity without consuming the scientific reservation
 
-- [ ] Design a small, explicitly exposed development grid covering covariance
+- [x] Design a small, explicitly exposed development grid covering covariance
   anisotropy/rotation, observation noise and shared bias. Check positive-definite
   covariance and reference integration accuracy analytically/numerically before
   model comparisons. The previously suggested anisotropy 4 / rotation 30 degrees
   is a candidate, not a frozen setting.
-- [ ] Estimate runtime and storage from existing manifests, run a limited timing
+  **Evidence:** [sensitivity contract](sensitivity_contract.md). It covers ratios 2
+  and 8 rotated 60 degrees, doubled noise and shared bias, and leaves the
+  candidate unexposed. Preflight integration agreed within 2.1e-7 relative.
+- [x] Estimate runtime and storage from existing manifests, run a limited timing
   check where needed, and commit a bounded development sensitivity contract.
   Use fresh development names/seeds; never scientific seed 20261012.
-- [ ] Report which conclusions persist, reverse or remain uncertain across that
+  **Evidence:** preflight `sensitivity_preflight_20261010_v1`; the contract was
+  committed in `e280644` before generation; the campaign ran 61 minutes.
+- [x] Report which conclusions persist, reverse or remain uncertain across that
   grid. Keep the static two-dimensional simulator's physical limitations visible.
   Do not describe synthetic robustness as validated orbital or operational safety.
 
@@ -148,15 +164,30 @@ and resulting precision before using such language.
 decision about the final configuration. Merely drafting this grid does not finish
 the V02 sensitivity requirement.
 
+**Evidence and decision:** [sensitivity report](../results/sensitivity_2026-10-10/report.md)
+(`sensitivity_summary_20261010_v1`).
+
+- **Persists:** P1 under native training in every configuration (iso
+  0.051-0.074, ratio 2 0.077-0.079, ratio 8 0.054-0.064, doubled noise
+  0.044-0.052). S5 persists likewise.
+- **Near zero:** S1, the remaining history advantage at 90% overlap.
+- **Small and variable:** S6.
+- **No benefit:** grouping and oracle weighting.
+- **Reverses:** only the earlier shared-bias result, and only under
+  configuration transfer (-0.131). With bias-matched training, P1 is +0.020.
+
+The scientific configuration stays the unexposed candidate (ratio 4, rotated
+30 degrees, trace 0.18, no shared bias), bracketed by ratios 2 and 8.
+
 ## 5. Handoff and acceptance
 
-- [ ] Save the tuning decision, precision report, sensitivity results and proposed
+- [x] Save the tuning decision, precision report, sensitivity results and proposed
   scientific contrast; update all three reports, manuscript and root checklist.
-- [ ] Check V02 only when its acceptance criteria are satisfied. Then prepare a
+- [x] Check V02 only when its acceptance criteria are satisfied. Then prepare a
   reviewable V03 protocol with exact source/configuration hashes, sample sizes,
   seeds, endpoints and failure rules. Keep A03 independent review distinct from
   same-workflow artifact reconstruction.
-- [ ] Commit each completed stage under the requested author/committer identity;
+- [x] Commit each completed stage under the requested author/committer identity;
   keep checkpoints, full predictions and machine-specific logs local.
 
 Start by inspecting existing artifacts; do not refit completed campaigns. The

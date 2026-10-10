@@ -1,0 +1,101 @@
+{
+  "date": "2026-10-10",
+  "task": "V02 complete",
+  "full_suite": {
+    "passed": 477,
+    "skipped": 1,
+    "seconds": 110.7,
+    "exit_code": 0,
+    "command": ".venv/Scripts/python.exe -m pytest -q --tb=short --no-showlocals -p no:cacheprovider",
+    "log": "docs/research/execution/verification_v02_complete_20261010.local.log",
+    "skip_reason": "Existing credential-presence test"
+  },
+  "thread_environment": {
+    "LOKY_MAX_CPU_COUNT": "2",
+    "OMP_NUM_THREADS": "2",
+    "MKL_NUM_THREADS": "2"
+  },
+  "runs": {
+    "tuning_adequacy_20261010_v2": {
+      "status": "complete",
+      "started_utc": "2026-10-09T22:37:14.240872+00:00",
+      "finished_utc": "2026-10-09T22:37:39.602980+00:00",
+      "git_head": "12706f3be286d8f1cafab6875f205890d34a5f4f",
+      "pid": 9336
+    },
+    "precision_planning_20261010_v2": {
+      "status": "complete",
+      "started_utc": "2026-10-09T22:57:51.858330+00:00",
+      "finished_utc": "2026-10-09T22:58:15.943880+00:00",
+      "git_head": "a98236cf754ae2bef68ac7c57c670a3ec05b8eb5",
+      "pid": 17924
+    },
+    "interval_validation_20261010_v1": {
+      "status": "complete",
+      "started_utc": "2026-10-09T23:14:56.956930+00:00",
+      "finished_utc": "2026-10-09T23:27:01.471834+00:00",
+      "git_head": "b27d6460f952602da6a40a0ca7a7c09fc6414ef4",
+      "pid": 19544
+    },
+    "interval_validation_20261010_v2": {
+      "status": "complete",
+      "started_utc": "2026-10-09T23:28:40.465694+00:00",
+      "finished_utc": "2026-10-09T23:35:47.655820+00:00",
+      "git_head": "c8d2c4834fdbeefa50990d1aac9fd84919927b2d",
+      "pid": 5124
+    },
+    "sensitivity_preflight_20261010_v1": {
+      "status": "complete",
+      "started_utc": "2026-10-09T23:05:54.287973+00:00",
+      "finished_utc": "2026-10-09T23:06:45.376389+00:00",
+      "git_head": "0f2bde296a8665e8b05e3d28c73d4eb9eeecda45",
+      "pid": 17880
+    },
+    "sensitivity_20261010_v1": {
+      "status": "complete",
+      "started_utc": "2026-10-09T23:07:30.238370+00:00",
+      "finished_utc": "2026-10-10T00:08:41.028456+00:00",
+      "git_head": "e2806442d0709f860dcafb787480aa227d84b04b",
+      "pid": 8536
+    },
+    "sensitivity_summary_20261010_v1": {
+      "status": "complete",
+      "started_utc": "2026-10-10T00:08:59.386636+00:00",
+      "finished_utc": "2026-10-10T00:09:22.551794+00:00",
+      "git_head": "eec9adf0d0bffb011739d9542888350fedf467a7",
+      "pid": 7636
+    },
+    "bank_interval_validation_20261010_v1": {
+      "status": "complete",
+      "started_utc": "2026-10-10T00:09:33.343614+00:00",
+      "finished_utc": "2026-10-10T00:20:11.993735+00:00",
+      "git_head": "eec9adf0d0bffb011739d9542888350fedf467a7",
+      "pid": 6832
+    }
+  },
+  "superseded_runs": {
+    "tuning_adequacy_20261010_v1": "lacked per-fold scores",
+    "precision_planning_20261010_v1": "lacked case-ID columns; otherwise identical"
+  },
+  "export_check": {
+    "status": "pass",
+    "bundles": 13,
+    "artifacts": 105
+  },
+  "protected_files_unchanged": {
+    "raw_files": 12,
+    "historical_artifacts": 45,
+    "frozen_files": 8,
+    "reference": "docs/research/execution/workspace_snapshot_2026-10-09.json"
+  },
+  "historical_requirements_unchanged": true,
+  "decisions": [
+    "docs/research/execution/tuning_decision.md",
+    "docs/research/execution/primary_contrast.md",
+    "docs/research/execution/analysis_specification.md"
+  ],
+  "running_milestone_jobs": [],
+  "scientific_bank_opened": false,
+  "independent_scientific_review_complete": false,
+  "label_free_access_note": "One label-free numerical-integration accuracy check (300 random posteriors, seed 11) used the candidate scientific noise covariance before the sensitivity contract was fixed; no scenario, label or model was involved."
+}

@@ -1,5 +1,19 @@
 # Research direction and paper roadmap
 
+## V02 complete; V03 freeze next - 10 October 2026
+
+The development record now supports a specific confirmatory question. Reuse of
+observations at 90% overlap degrades a history-based forecaster by more than
+0.02 nats when the latest message and the label are fixed. Development shows
+0.044-0.079 across configurations with matched training and independent banks.
+Neither grouping nor privileged lineage weighting reduces this.
+
+V03 transcribes the analysis specification into an immutable protocol, with
+code hashes and a reservation manifest. V04, generating and evaluating the
+reserved scientific bank, consumes the holdout irreversibly. It should follow an
+independent check of the frozen analysis on boundary-null cases, as Report 2's
+freeze list asks.
+
 ## Primary claim candidate - 10 October 2026
 
 The paper's proposed primary claim is now a **measurement of reuse-induced

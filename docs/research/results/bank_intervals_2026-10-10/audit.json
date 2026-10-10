@@ -1,0 +1,12 @@
+{
+  "fitting_performed": false,
+  "rows": 18,
+  "scientific_bank_opened": false,
+  "source_run": {
+    "archived_sources_verified": 96,
+    "artifacts_verified": 1170,
+    "inputs_verified": 1,
+    "run_id": "sensitivity_20261010_v1",
+    "status": "complete"
+  }
+}

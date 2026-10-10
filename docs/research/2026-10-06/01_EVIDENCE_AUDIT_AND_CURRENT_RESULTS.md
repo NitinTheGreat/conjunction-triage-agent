@@ -1,5 +1,29 @@
 # Report 1 — Evidence audit and current research results
 
+## V02 sensitivity and independent training banks - 10 October 2026
+
+A contract-first development campaign (`sensitivity_20261010_v1`) generated 14
+independent training banks and 5 evaluation banks under fresh seeds, with 56
+models and 2,128,000 predictions
+([report](../results/sensitivity_2026-10-10/report.md)).
+
+- **P1 persists:** reuse degradation stays positive and above the 0.02-nat margin
+  on every independent isotropic bank (0.051-0.074). It does the same under noise
+  anisotropy ratios 2 and 8 (0.054-0.079) and doubled noise (0.044-0.052), with
+  in-configuration training.
+- **Shared bias corrected:** with bias-matched training, P1 is +0.020. The earlier
+  negative bias results reflected models trained without bias and evaluated with
+  it (P1 -0.131 under such transfer).
+- **Bank variance:** independent training banks vary about 3.6 times more than
+  the overlapping trials suggested. Intervals conditional on one fitted model
+  under-cover: 0.66-0.93 in simulation, versus 0.95-0.97 for the bank-combined
+  interval adopted in the [analysis specification](../execution/analysis_specification.md).
+- **Small or null:** S1 (the remaining history advantage at 90% overlap) is near
+  zero, and grouping and oracle weighting give no material reduction.
+
+These remain exposed development results; the scientific configuration and
+reservation are unopened.
+
 ## V02 precision-planning follow-up - 10 October 2026
 
 The [precision planning run](../results/precision_2026-10-10/report.md)
