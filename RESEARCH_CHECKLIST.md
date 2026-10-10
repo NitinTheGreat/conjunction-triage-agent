@@ -18,7 +18,7 @@ This is the live execution record. Update it as work happens. Checked preparatio
 | Research blockers | None preventing V01/V02 preparation. Full methods for some close papers and independent operational data remain unavailable; no novelty or real efficacy claim is established. |
 | Current machine | Windows, PowerShell; repository at `F:\conjunction-triage`; Python environment at `.venv\Scripts\python.exe`. Paths elsewhere in this file are relative to the repository root. |
 | HEAD when this checklist was created | `89d7f2efb8bf135e02fa51760e0ed3bb33a105c9`; working tree contains pre-existing modifications and untracked files. |
-| Latest validation | After freeze: full suite 479 passed / 1 skipped (111.72 s). 13 bundles / 105 artifacts pass. 12 raw, 45 historical and 8 frozen files unchanged. Frozen protocol accepted by the runner. |
+| Latest validation | After A01 and the A02 draft: full suite 488 passed / 1 skipped (127.75 s). 15 bundles / 120 artifacts pass. 12 raw, 45 historical and 8 frozen files unchanged. Frozen V03 protocol still accepted (no pinned file changed). Claim register: 23 claims regenerate. |
 | New scientific runs | Development runs this session: tuning_adequacy_20261010_v2, precision_planning_20261010_v2, interval_validation_20261010_v1/v2, sensitivity_preflight_20261010_v1, sensitivity_20261010_v1, sensitivity_summary_20261010_v1 and bank_interval_validation_20261010_v1. No frozen scientific evaluation. |
 | Scientific holdout status | Seed 20261012 / scientific:00000..04999 reserved **but not generated**. Training-bank seeds 20261301-20261310 and the `scitrain` prefix are also reserved in code. Candidate configuration: ratio 4, rotated 30 degrees (unexposed). Kelvins and all development banks are exposed. |
 | Running jobs / processes | None for this project. |
@@ -179,7 +179,7 @@ Grouping, oracle weighting and the neural arms are retained only as secondary or
 
 All results are labelled exposed and are separate from simulation. Main result: the history summary is worse than latest-message metadata (R1 +0.0030 out-of-fold, +0.026 historical test).
 
-- [ ] **A02 — assemble a claim-to-evidence register.** Depends on: V04 and A01 for Track R, or the completed alternative study explicitly selected in F02. **Do:** map each proposed abstract/result/conclusion claim to its experiment, metric, cohort, interval, limitations, and source. **Expected:** `claim_evidence.csv` or equivalent structured table. **Done when:** null, negative, and inconclusive findings are included, all quantitative claims regenerate, and no statement exceeds its evidence type.
+- [ ] **A02 — assemble a claim-to-evidence register.** Depends on: V04 and A01 for Track R, or the completed alternative study explicitly selected in F02. **Do:** map each proposed abstract/result/conclusion claim to its experiment, metric, cohort, interval, limitations, and source. **Expected:** `claim_evidence.csv` or equivalent structured table. **Done when:** null, negative, and inconclusive findings are included, all quantitative claims regenerate, and no statement exceeds its evidence type. **IN PROGRESS (10 October 2026):** a draft [register](docs/research/claims/claim_evidence.csv) holds 28 claims. 23 regenerate exactly from committed bundles, including 9 null or adverse findings; 2 are documented protocol claims; 3 V04 rows are pending. Verify with `python -m research.claim_register`. This stays unchecked until V04 is complete and the manuscript's wording is mapped row by row.
 
 - [ ] **A03 — perform independent reproduction and claim review.** Depends on: A02. **Do:** have another assistant/reviewer reconstruct key tables from saved artifacts; obtain domain/statistical scrutiny where needed. **Expected:** reproduction instructions, discrepancy log, and review resolutions. **Done when:** independent reconstruction agrees within declared tolerances and unresolved scientific limitations are stated. Changing assistants alone is not independent scientific validation; log what was actually checked.
 
@@ -854,4 +854,14 @@ is retained as a failed run.
 
 Next: draft the A02 claim-evidence register for development, A01 and protocol
 claims, leaving the V04 rows visibly pending. V04 still waits on the user.
+
+### A02 draft - 10 October 2026
+
+Added `research/claim_register.py` (2 tests) and
+`docs/research/claims/claim_evidence.csv`: 23 regenerated, 2 documented and
+3 pending claims. Exposed simulation, exposed real-data, protocol and pending
+evidence are kept as separate types.
+
+The remaining main-line tasks (V04, then A02 completion, A03 and W02-W04) depend
+on the user's V04 decision.
 
