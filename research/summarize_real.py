@@ -37,7 +37,8 @@ def recalibration(y, q) -> dict:
         r = expit(z) - y
         return np.mean(np.logaddexp(0, z) - y * z), np.array([r.mean(), (r * x).mean()])
     fit = minimize(objective, [0., 1.], jac=True, method='BFGS', options={'gtol': 1e-10, 'maxiter': 1000})
-    if not fit.success:
+    # BFGS can stop on precision loss after reaching the optimum; accept only a near-zero gradient.
+    if not (fit.success or np.max(np.abs(fit.jac)) < 1e-8):
         raise RuntimeError('Recalibration did not converge')
     return {'calibration_intercept': float(fit.x[0]), 'calibration_slope': float(fit.x[1]),
             'mean_q_minus_observed': float(np.mean(q) - y.mean())}
@@ -224,6 +225,14 @@ operational workload or safety estimate. The label is final recorded log-risk
 - **Reproduction:** {int(reproduction.identical_predictions.sum())}/{len(reproduction)} arm-folds reproduce
   the earlier narrower-grid run's predictions exactly. Changed folds:
   {', '.join(f"{r.arm} fold {r.fold} (C {r.previous_C:g} to {r.C:g})" for r in changed.itertuples()) or 'none'}.
+
+## Label shift between the two exposed sets
+
+The training cohort's positive share is {metrics[metrics.split == 'training_oof'].positives.iloc[0] / metrics[metrics.split == 'training_oof'].n.iloc[0]:.2%};
+the historical test split's is {metrics[metrics.split == 'historical_test'].positives.iloc[0] / metrics[metrics.split == 'historical_test'].n.iloc[0]:.2%}.
+Probabilities calibrated on the training cohort therefore under-predict on the
+test split; see the calibration intercepts. Ranking metrics and paired contrasts
+are less affected than calibration-in-the-large.
 
 ## Discrimination, loss and nominal operating points
 
