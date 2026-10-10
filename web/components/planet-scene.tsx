@@ -25,7 +25,7 @@ type SceneAPI = {
   stopTransition: () => void;
 };
 
-const EARTH_RADIUS = 6.378137;
+export const EARTH_RADIUS = 6.378137;
 const RAMP = [new THREE.Color("#858c56"), new THREE.Color("#d1d58a"), new THREE.Color("#d49a58"), new THREE.Color("#d35c3d")];
 
 function probabilityColor(event: ConjunctionEvent) {
@@ -40,7 +40,7 @@ function xyz(position: number[]) {
   return new THREE.Vector3(position[0] / 1000, position[2] / 1000, -position[1] / 1000);
 }
 
-function markerTexture(ring = false) {
+export function markerTexture(ring = false) {
   const canvas = document.createElement("canvas");
   canvas.width = canvas.height = 64;
   const ctx = canvas.getContext("2d")!;
@@ -62,7 +62,7 @@ function markerTexture(ring = false) {
 }
 
 /** Natural Earth coastlines plus decorative contour lines; all assets are bundled locally. */
-function atlasTexture(land?: LandPolygon[]) {
+export function atlasTexture(land?: LandPolygon[]) {
   const canvas = document.createElement("canvas");
   canvas.width = 2048;
   canvas.height = 1024;
@@ -137,7 +137,7 @@ function atlasTexture(land?: LandPolygon[]) {
   return texture;
 }
 
-function latitudeLongitude(radius: number) {
+export function latitudeLongitude(radius: number) {
   const points: number[] = [];
   const at = (lat: number, lon: number) => {
     const phi = THREE.MathUtils.degToRad(lat);

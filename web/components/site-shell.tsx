@@ -12,6 +12,7 @@ const navigation = [
   ["/observatory", "Observatory"],
   ["/laboratory", "Laboratory"],
   ["/evidence", "The evidence"],
+  ["/findings", "The findings"],
 ];
 
 const glossary = [

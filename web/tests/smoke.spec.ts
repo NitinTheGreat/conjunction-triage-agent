@@ -79,7 +79,7 @@ test("phone navigation and every route fit the viewport", async ({ page }) => {
   await page.locator(".mobile-nav-dialog").getByRole("link", { name: /Laboratory/ }).click();
   await expect(page).toHaveURL(/\/laboratory$/);
   await expect(page.locator(".mobile-nav-dialog")).not.toBeVisible();
-  for (const path of ["/", "/observatory", "/laboratory", "/evidence"]) {
+  for (const path of ["/", "/observatory", "/laboratory", "/evidence", "/findings"]) {
     await page.goto(path);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -100,4 +100,23 @@ test("disabling motion restores exact counts and keeps content visible", async (
   await guide.click();
   await expect(page.locator(".field-guide-dialog")).toBeVisible();
   await expect(page.locator(".field-guide-dialog")).toHaveCSS("opacity", "1");
+});
+
+test("the findings page links the globe, windows and frozen contrasts without a backend", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/findings");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Fifteen");
+  await expect(page.locator(".fd-readout")).toContainText("15 distinct observations behind 60");
+  await page.getByRole("group", { name: "Reuse condition", exact: true }).getByRole("button", { name: "No reuse", exact: true }).click();
+  await expect(page.locator(".fd-readout")).toContainText("60 distinct observations behind 60");
+  await page.getByRole("group", { name: "Messages", exact: true }).getByRole("button", { name: /Message m2/ }).click();
+  await expect(page.locator(".fd-readout")).toContainText("Message m2");
+  await expect(page.locator(".fd-verdict")).toContainText("Material degradation confirmed");
+  await page.locator(".fd-forest-row").nth(3).click();
+  await expect(page.locator(".fd-contrast-detail")).toContainText("grouping");
+  await page.getByRole("button", { name: "Historical test split", exact: true }).click();
+  await expect(page.locator(".fd-real-grid")).toContainText("not evaluated on this split");
+  expect(errors).toEqual([]);
 });

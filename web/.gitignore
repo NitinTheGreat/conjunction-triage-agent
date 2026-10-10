@@ -14,3 +14,7 @@ public/data/events.json
 public/data/summary.json
 public/data/phase7_results.json
 public/data/triage_example.json
+
+# Written by `next dev` (Next.js agent rules); regenerated on every dev run
+AGENTS.md
+CLAUDE.md
