@@ -21,6 +21,17 @@ def test_claims_must_round_from_the_register_and_appear_in_the_text(tmp_path):
     assert any('does not round' in p for p in pt.check(base, register(A=0.0640, B=0.0874, C=4.0, D=7700.0), tmp_path))
     assert any('not in the text' in p for p in pt.check(base.replace('0.063 and', 'and'), good, tmp_path))
     assert any('not in the claim register' in p for p in pt.check(base, register(A=0.0628, B=0.0874, C=4.0), tmp_path))
+    # A number word may open a sentence; it is matched as a whole word, ignoring case.
+    assert pt.check('% claims: C=four\nFour of them.\n', register(C=4.0), tmp_path) == []
+    assert any('not in the text' in p for p in pt.check('% claims: C=four\nFourteen of them.\n', register(C=4.0), tmp_path))
+
+
+def test_references_must_follow_the_order_of_first_citation(tmp_path):
+    tex = ('First~\\cite{b}, then~\\cite{a,b}.\n'
+           '\\begin{thebibliography}{9}\\bibitem{a} A.\\bibitem{b} B.\\end{thebibliography}\n')
+    assert any('order of first citation' in p for p in pt.check(tex, register(), tmp_path))
+    ordered = tex.replace('\\bibitem{a} A.\\bibitem{b} B.', '\\bibitem{b} B.\\bibitem{a} A.')
+    assert pt.check(ordered, register(), tmp_path) == []
 
 
 def test_citations_figures_and_references_are_checked(tmp_path):

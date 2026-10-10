@@ -1,199 +1,211 @@
 % =====================================================================
-% Observation reuse and history-based forecasting of conjunction risk
+% Observation Reuse and History-Based Forecasting of Conjunction Risk
 %
-% Single self-contained source for Overleaf: paste this file as main.tex
-% and upload the six figures from paper/figures/ (PDF preferred, PNG also
-% works) either to the project root or to a folder named figures/.
-% Figures are referenced by file name only:
+% IEEE conference format (IEEEtran, two columns). Single self-contained
+% source for Overleaf: paste this file as main.tex and upload the six
+% figures from paper/figures/ (PDF preferred, PNG also works) either to
+% the project root or to a folder named figures/. Figures are referenced
+% by file name only:
 %   observation_windows, overlap_response, frozen_contrasts,
 %   development_banks, real_contrasts, real_frontier
-% The bibliography is inline (no .bib file is needed).
+% They are drawn at their printed size: observation_windows spans both
+% columns and the others fit one column. The bibliography is inline (no
+% .bib file is needed) and numbered in order of first citation.
 %
 % Every estimate carries a comment "% claims: ID=value" naming the row of
 % docs/research/claims/claim_evidence.csv that regenerates it; tables
 % between "BEGIN GENERATED" and "END GENERATED" are written from the
-% committed result bundles. Check both with:
-%   python -m research.paper_tex --check
+% committed result bundles. Check both, and the order of the references,
+% with:
+%   python -m research.paper_tex
 % Comments do not appear in the PDF.
 % =====================================================================
-\documentclass[11pt,a4paper]{article}
+\documentclass[conference]{IEEEtran}
 
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage{lmodern}
-\usepackage{microtype}
-\usepackage[margin=2.5cm]{geometry}
-\usepackage{amsmath,amssymb,amsthm}
+\usepackage{cite}
+\usepackage{amsmath,amssymb}
 \usepackage{graphicx}
 \usepackage{booktabs}
-\usepackage{array}
-\usepackage{xcolor}
-\usepackage[font=small,labelfont=bf]{caption}
-\usepackage{flafter}
-\usepackage[hidelinks]{hyperref}
+\usepackage{url}
+\urlstyle{same}
+% Balances the two columns of the last page, as IEEE asks (\balance is issued before the references).
+\usepackage{balance}
+% Font expansion is off so that pdfLaTeX (Overleaf) breaks lines exactly as checked.
+\usepackage[expansion=false]{microtype}
 
 \graphicspath{{figures/}{./}}
 
-\theoremstyle{plain}
 \newtheorem{result}{Result}
-
 \newcommand{\Pone}{\mathrm{P1}}
-\newcommand{\E}{\mathbb{E}}
 
-\title{Observation reuse and history-based forecasting\\ of conjunction risk}
-\author{Author Name\\ \small Affiliation\\ \small \texttt{email@example.org}}
-\date{October 2026}
+% A note under a table, as wide as the table itself.
+\newsavebox{\tablebox}
+\newcommand{\tablenote}[1]{\par\smallskip\parbox{\wd\tablebox}{\footnotesize #1}}
 
 \begin{document}
+
+\title{Observation Reuse and History-Based Forecasting of Conjunction Risk}
+
+\author{\IEEEauthorblockN{Nitin Kumar Pandey\textsuperscript{1}, Guneet Kaur Arora\textsuperscript{2}, Ayush Raj\textsuperscript{3},\\ Abhay Mahantesh Zalaki\textsuperscript{4}, Syamasudha Veeragandham\textsuperscript{5}}
+\IEEEauthorblockA{\textsuperscript{1,2,3,4,5}School of Computer Science and Engineering, Vellore Institute of Technology,\\
+Vellore, Tamil Nadu, India -- 632014\\
+Email: \textsuperscript{1}nitinkumar.pandey2023@vitstudent.ac.in, \textsuperscript{2}guneetkaur.arora2023@vitstudent.ac.in,\\
+\textsuperscript{3}ayush.raj2023a@vitstudent.ac.in, \textsuperscript{4}abhay.mahantesh2023@vitstudent.ac.in,\\
+\textsuperscript{5}syamasudha.v@vit.ac.in\\
+\textsuperscript{5}Corresponding author}}
 
 \maketitle
 
 \begin{abstract}
-A conjunction data message (CDM) reports a predicted close approach of two space objects, and an encounter is usually reported many times before it happens. Forecasting models that summarize the whole sequence of messages treat each message as further evidence, whereas successive messages may be computed from largely the same tracking observations. We study what such observation reuse does to a forecaster which reads the history. We use a controlled two-dimensional encounter-plane simulator in which every observation has an identity, so that the reuse between messages is known exactly, while the final label of each scenario, and in all but one condition its latest message, are held fixed. The analysis was frozen before the evaluation data were generated.
+A conjunction data message (CDM) reports a predicted close approach of two space objects. An encounter is usually reported many times, and successive messages may be computed from largely the same tracking observations. We measure what such observation reuse costs a forecaster which summarizes the history of messages. We use a two-dimensional encounter-plane simulator in which every observation has an identity, so that reuse is known exactly while the label and, in all but one condition, the latest message stay fixed. The analysis was frozen before the evaluation data were generated.
 % claims: V01=0.063 V02=0.053 V03=0.074
-In a held-out noise configuration, with ten independently trained model banks and 5,000 evaluation scenarios, 90\% overlap between successive observation windows increased the clipped log loss of a history-summary logistic forecaster by 0.063 nats relative to a forecaster which reads only the latest message (95\% interval 0.053 to 0.074; prespecified margin 0.02).
+In a held-out noise configuration, with ten independently trained model banks and 5,000 evaluation scenarios, 90\% overlap between successive observation windows increased the clipped log loss of a history-summary logistic forecaster by 0.063 nats relative to a latest-message forecaster (95\% interval 0.053 to 0.074; prespecified margin 0.02).
 % claims: V11=0.082 V12=0.149
-Without reuse the history summary is clearly better than the latest message, 0.082 against 0.149 nats. At 90\% overlap it keeps essentially none of this advantage, and when one solution is republished six times it does worse than the latest message. Neither label-free grouping of the messages nor weighting them by the true observation lineage reduces the degradation by more than 0.01.
+Without reuse the history summary is clearly better, 0.082 against 0.149 nats, but at 90\% overlap it keeps essentially none of this advantage. Neither label-free grouping of the messages nor weighting them by the true observation lineage reduces the degradation by more than 0.01.
 % claims: R01=0.003 R03=0.026
-On the public Kelvins data, where the lineage is unknown, a history summary is also slightly worse than the latest message, by 0.003 nats out of fold and 0.026 on the historical test split, which agrees with the simulation in direction only. The results suggest that a forecaster which reads CDM histories should be compared with a latest-message forecaster under explicit reuse before its history features are trusted.
+On the public Kelvins data, where the lineage is unknown, a history summary is also slightly worse than the latest message, by 0.003 nats out of fold and 0.026 on the historical test split, agreeing with the simulation in direction only. History features should therefore be tested against a latest-message forecaster under explicit reuse before they are trusted.
 \end{abstract}
 
-\noindent\textbf{Keywords:} conjunction assessment; conjunction data messages; observation reuse; dependent evidence; risk forecasting; preregistered evaluation.
+\begin{IEEEkeywords}
+Conjunction assessment, conjunction data messages, observation reuse, dependent evidence, risk forecasting, preregistered evaluation
+\end{IEEEkeywords}
 
 % ---------------------------------------------------------------------
 \section{Introduction}\label{sec:intro}
 
-\paragraph{Conjunction data messages.}
+\subsubsection*{Conjunction data messages}
 A conjunction is a predicted close approach between two space objects. An operator learns about a conjunction through conjunction data messages (CDMs), a standard format~\cite{ccsds2013} which reports, among other things, the predicted miss distance, the uncertainty of the position of each object and a probability of collision. Each message is computed from the most recent orbit determination of the two objects, and new messages are issued as the orbits are updated, until the time of closest approach (TCA)~\cite{nasa2026}. A single encounter therefore produces a sequence of messages, and decisions are made while the sequence is still growing.
 
-It is common to regard the latest message as the best available description of an encounter~\cite{pinto2020}. In the collision avoidance challenge organised by the European Space Agency on its Kelvins platform~\cite{uriot2022}, the task was to predict the risk reported in the last message of an encounter from the messages available at least two days before TCA. Many methods proposed for this and related tasks read the whole sequence of messages, with recurrent networks, hidden Markov models, gradient boosting or summary statistics of the history~\cite{catulo2023,pinto2020,tok2026,uriot2022,zerrouki2026}.
+It is common to regard the latest message as the best available description of an encounter~\cite{pinto2020}. In the collision avoidance challenge organized by the European Space Agency on its Kelvins platform~\cite{uriot2022}, the task was to predict the risk reported in the last message of an encounter from the messages available at least two days before TCA. Many methods proposed for this and related tasks read the whole sequence of messages, with recurrent networks, hidden Markov models, gradient boosting or summary statistics of the history~\cite{catulo2023,pinto2020,tok2026,uriot2022,zerrouki2026}.
 
-\paragraph{Observation reuse.}
+\subsubsection*{Observation reuse}
 It seems natural to treat six messages about an encounter as stronger evidence than one. However, an orbit determination is fitted to tracking observations collected over a span of days, and a message reports how many observations were used and how long this span was, but not which observations they were~\cite{ccsds2013}. Two solutions computed a few hours apart can therefore share most of their observations. In that case six messages are closer to one message published six times than to six independent reports, and a forecaster which reads the history has no means of telling the two situations apart.
 
-As a simple example, suppose that sixty observations of an object are available before the first message is issued, and that each of six messages is computed from a window of ten of them. If the windows are disjoint, the six messages together rest on sixty distinct observations, while the latest message alone rests on ten. If instead each window shares nine of its ten observations with the previous one, the six messages rest on only fifteen distinct observations (Figure~\ref{fig:windows}). The latest message is the same in both cases, and so a forecaster which reads only the latest message gives the same answer in both cases. A forecaster which reads the history sees six messages in either case.
+As a simple example, suppose that sixty observations of an object are available before the first message is issued, and that each of six messages is computed from a window of ten of them. If the windows are disjoint, the six messages together rest on sixty distinct observations, while the latest message alone rests on ten. If instead each window shares nine of its ten observations with the previous one, the six messages rest on only fifteen distinct observations (Fig.~\ref{fig:windows}). The latest message is the same in both cases, and so a forecaster which reads only the latest message gives the same answer in both cases. A forecaster which reads the history sees six messages in either case.
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=\textwidth]{observation_windows}
+  \caption{Observation windows of the six messages $m_1,\dots,m_6$ in five of the conditions, generated from the simulator. Each row is one message, with the latest message $m_6$ at the bottom, and each bar covers the identities of the observations which the message uses. Blue marks observations which no earlier message used and orange those which an earlier message has already used. The number of distinct observations behind all six messages is given above each panel. In the first four conditions the latest message uses the same window, observations 50 to 59; in the new-information condition it uses all sixty visible observations.}
+  \label{fig:windows}
+\end{figure*}
 
 The question we study in this paper is how much such reuse costs a forecaster which reads the history. With real messages this cannot be measured, since the observations behind each message are not reported. We therefore use a controlled simulation in which every observation has an identity, so that the reuse between messages is known exactly, and we evaluate it with an analysis which was fixed before the evaluation data existed.
 
-\paragraph{Previous work.}
+\subsubsection*{Previous work}
 The danger of counting shared information twice is well known in estimation and data fusion~\cite{barshalom1986,julier1997}, and in statistics, where the use of dependent replicates as if they were independent is called pseudoreplication~\cite{hurlbert1984}. For forecasting from CDMs the strength of the latest message has been noted repeatedly. In the Kelvins challenge a baseline which keeps the latest reported risk was hard to beat~\cite{uriot2022}, and Catulo et al.~\cite{catulo2023} related this to an approximately Markovian sequence of reported risks. We are not aware of a study which measures how the reuse of observations between messages affects forecasts made from the history of an encounter. Section~\ref{sec:related} discusses related work in more detail.
 
-\paragraph{Summary of results.}
+\subsubsection*{Summary of results}
 We use a static two-dimensional encounter-plane simulator in which each scenario has one latent encounter, eighty observations with identities and one final label. Seven conditions change which observations the six messages of a scenario use, or how often the messages are repeated, while the label stays fixed; in all conditions but one, the latest message stays fixed as well. We compare a forecaster which reads only the latest message with three forecasters which read the history: a plain summary of the history, a summary of label-free groups of messages, and a summary which weights the messages by the true observation lineage. The evaluation was frozen before its data were generated, in a noise configuration not used during development, with ten independently generated training banks and 5,000 evaluation scenarios. Our main results are as follows.
 \begin{itemize}
 % claims: V01=0.063 V02=0.053 V03=0.074
-\item[--] Result~\ref{res:primary} (Section~\ref{sec:results}): 90\% overlap between successive observation windows increases the clipped log loss of the history summary by 0.063 nats relative to the latest message, with 95\% interval from 0.053 to 0.074. By the frozen rule, with margin 0.02, the degradation is material.
+\item Result~\ref{res:primary} (Section~\ref{sec:results}): 90\% overlap between successive observation windows increases the clipped log loss of the history summary by 0.063 nats relative to the latest message, with 95\% interval from 0.053 to 0.074. By the frozen rule, with margin 0.02, the degradation is material.
 % claims: V05=0.077
-\item[--] Result~\ref{res:secondary}: without reuse the history summary is much better than the latest message, but at 90\% overlap it keeps none of this advantage, and when one solution is republished six times it degrades by 0.077 nats.
-\item[--] Result~\ref{res:repairs}: neither label-free grouping nor weighting by the true lineage reduces the degradation by as much as 0.01.
+\item Result~\ref{res:secondary}: without reuse the history summary is much better than the latest message, but at 90\% overlap it keeps none of this advantage, and when one solution is republished six times it degrades by 0.077 nats.
+\item Result~\ref{res:repairs}: neither label-free grouping nor weighting by the true lineage reduces the degradation by as much as 0.01.
 % claims: V14=1.4% V10=8.7%
-\item[--] At the nominal 95\% recall threshold, the share of high-risk scenarios which the history summary misses rises from 1.4\% without reuse to 8.7\% at 90\% overlap (Section~\ref{sec:misses}).
-\item[--] Before the freeze, the degradation exceeded the margin in every independently trained development bank of the isotropic, anisotropic and doubled-noise configurations, and it was at the margin when the observations shared a bias (Section~\ref{sec:development}).
+\item At the nominal 95\% recall threshold, the share of high-risk scenarios which the history summary misses rises from 1.4\% without reuse to 8.7\% at 90\% overlap (Section~\ref{sec:misses}).
+\item Before the freeze, the degradation exceeded the margin in every independently trained development bank of the isotropic, anisotropic and doubled-noise configurations, and it was at the margin when the observations shared a bias (Section~\ref{sec:development}).
 % claims: R01=0.003 R03=0.026
-\item[--] On the public Kelvins data a history summary is slightly worse than the latest message, by 0.003 nats out of fold and by 0.026 on the historical test split (Section~\ref{sec:real}). This agrees with the simulation in direction only.
+\item On the public Kelvins data a history summary is slightly worse than the latest message, by 0.003 nats out of fold and by 0.026 on the historical test split (Section~\ref{sec:real}). This agrees with the simulation in direction only.
 \end{itemize}
 
-\paragraph{Organisation.}
-The rest of the paper is organised as follows. In Section~\ref{sec:related} we review related work. Section~\ref{sec:model} describes the simulator, the forecasters and the real data, and Section~\ref{sec:protocol} the frozen evaluation. The results on simulated data are given in Section~\ref{sec:results} and those on real data in Section~\ref{sec:real}. In Section~\ref{sec:discussion} we discuss what the results show and what they do not, and list some further questions.
+\subsubsection*{Organization}
+The rest of the paper is organized as follows. In Section~\ref{sec:related} we review related work. Section~\ref{sec:model} describes the simulator, the forecasters and the real data, and Section~\ref{sec:protocol} the frozen evaluation. The results on simulated data are given in Section~\ref{sec:results} and those on real data in Section~\ref{sec:real}. In Section~\ref{sec:discussion} we discuss what the results show and what they do not, and list some further questions.
 
 % ---------------------------------------------------------------------
-\section{Related work}\label{sec:related}
+\section{Related Work}\label{sec:related}
 
-\paragraph{Forecasting from conjunction data messages.}
+\subsubsection*{Forecasting from conjunction data messages}
 Uriot et al.~\cite{uriot2022} describe the Kelvins collision avoidance challenge, in which 96 teams forecast the final reported risk of encounters from CDMs collected by the European Space Agency between 2015 and 2019. Simple baselines built on the latest message proved difficult to improve upon. Pinto et al.~\cite{pinto2020} trained Bayesian recurrent networks to predict the future CDM features of an encounter together with their uncertainty. Catulo et al.~\cite{catulo2023} fitted hidden Markov models to the sequence of reported risks and argued that the strength of the latest message reflects an approximately Markovian sequence. S\'anchez et al.~\cite{sanchez2024cec,sanchez2024asr} treat the epistemic uncertainty of conjunction analysis with belief functions. More recent work predicts the probability in the next message~\cite{tok2026} or the whole remaining sequence~\cite{zerrouki2026}, combines models in Monte Carlo ensembles~\cite{ouari2026}, or identifies conjunctions with large covariance early~\cite{olson2026}. These studies use different targets, data splits and scores, and, as far as we can tell, none of them controls for the reuse of observations between messages. This is not a criticism, since the reuse cannot be observed in public data.
 
-\paragraph{Correlated estimates in estimation and fusion.}
+\subsubsection*{Correlated estimates in estimation and fusion}
 When two estimates share information, treating them as independent overstates the confidence of their combination. Bar-Shalom and Campo~\cite{barshalom1986} showed that common process noise correlates the errors of two trackers, and gave the fused covariance which accounts for it. Covariance intersection~\cite{julier1997} gives a consistent fusion when the correlation is unknown, and recent work uses partial knowledge of the shared sources~\cite{pedroso2026}. In evidence theory, Den\oe ux~\cite{denoeux2008,denoeux2024} proposed rules for combining evidence from sources which are not distinct, and Agrawal and Ansari~\cite{agrawal2025} discuss data fusion for conjunction assessment when the correlation between sources is unknown. These methods combine estimates, and they need some description of the shared information, which public CDMs do not contain. Our question is a different one: how much a learned forecaster which summarizes the messages loses when the messages overlap.
 
-\paragraph{Dependent data and the evaluation of learned models.}
+\subsubsection*{Dependent data and the evaluation of learned models}
 Hurlbert~\cite{hurlbert1984} gave the name pseudoreplication to the use of dependent replicates as if they were independent, and the design effect of Kish~\cite{kish1965} measures how much dependence reduces the information in a sample. Similar issues arise when learned models are compared. Overlapping training sets make naive variance estimates too small~\cite{dietterich1998,nadeau2003}; the variation due to data sampling, initialization and hyperparameter search can be larger than the differences being measured~\cite{bouthillier2021}; and models trained in the same way can behave differently away from their training data~\cite{damour2022}. Reusing a holdout set for adaptively chosen analyses invalidates the usual guarantees~\cite{dwork2015}, and information which would not be available at prediction time can leak into a model~\cite{kaufman2012}. Our design follows these lessons. The training banks are generated independently, the interval includes the variation between training banks, and the analysis was frozen before the evaluation data existed.
 
-\paragraph{Collision probability.}
+\subsubsection*{Collision probability}
 The probability of collision in a short encounter is usually computed in the two-dimensional encounter plane~\cite{akella2000}, as it is in our simulator. Alfano~\cite{alfano2005} studied how the probability depends on the size of the position uncertainty, and Balch et al.~\cite{balch2019} showed that a low probability can be a symptom of poor knowledge rather than of safety. We follow the Kelvins challenge in using the class of the final reported risk as the label. It is a well-defined target for forecasting, but it is not the occurrence of a collision.
 
-\paragraph{Our contribution.}
+\subsubsection*{Our contribution}
 That shared information should not be counted twice is not new. What this paper adds is a controlled measurement of what the reuse of observations costs a forecaster of conjunction risk which reads the history of messages, made with matched comparators and an evaluation fixed in advance, together with an analysis of public data which is consistent with it.
 
 % ---------------------------------------------------------------------
-\section{Simulator, forecasters and data}\label{sec:model}
+\section{Simulator, Forecasters and Data}\label{sec:model}
 
-\subsection{The simulator}
+\subsection{The Simulator}
 
-\paragraph{Encounters and observations.}
+\subsubsection*{Encounters and observations}
 A scenario is a latent relative position $x\in\mathbb{R}^2$ of two objects in the encounter plane. With probability $0.3$ it is drawn from $N(0,0.12^2 I)$, so that the population contains many near misses, and otherwise from $N(0,1.5^2 I)$. The collision region is the disk of radius $\rho=0.02$ centred at the origin; the units are synthetic. A scenario has eighty observations
 \[
   z_i = x+\beta+\varepsilon_i, \qquad i=0,\dots,79,
 \]
 where the $\varepsilon_i$ are independent $N(0,R)$ errors and $\beta\sim N(0,B)$ is a bias shared by all observations of the scenario. Observation $i$ has an identity, namely $i$, and an availability time $a_i$ measured in days before TCA. The first sixty observations become available between 8 and 6.1 days before TCA, and the last twenty between 1 and 0.1 days, that is, after the two-day cutoff used for forecasting.
 
-\paragraph{Messages.}
+\subsubsection*{Messages}
 A message is computed from a window $W\subseteq\{0,\dots,59\}$ of observation identities. It reports the Gaussian posterior of $x$ given the observations in $W$, under the prior $N(0,2.25\,I)$ and ignoring the shared bias. With $m=|W|$ and $\bar z_W$ the mean of the observations in $W$,
 \begin{equation}\label{eq:posterior}
-  \Sigma_W=\Bigl(\tfrac{1}{2.25}\,I+m R^{-1}\Bigr)^{-1},\qquad
+  \Sigma_W=\Bigl(\tfrac{1}{2.25}\,I+m R^{-1}\Bigr)^{-1},\quad
   \mu_W=\Sigma_W\, m R^{-1}\bar z_W .
 \end{equation}
 The risk reported by the message is $r_W=\log_{10}\Pr(\|u\|\le\rho)$ for $u\sim N(\mu_W,\Sigma_W)$; the probability is computed by quadrature, and two independent quadratures agree to a relative difference below $2\times10^{-7}$. Like a real CDM, a message also reports the time to TCA, the miss distance $\|\mu_W\|$, position uncertainties derived from $\Sigma_W$, the number of observations used, the span of their availability times, a weighted root mean square of the residuals, and the age class of the newest observation used.
 
-\paragraph{Label.}
+\subsubsection*{Label}
 The label of a scenario is $y=1$ if the final risk, computed in the same way from all eighty observations with the shared bias taken into account, is at least $10^{-6}$, that is, if the final log risk is at least $-6$, as in the Kelvins challenge. The label uses twenty observations which no message sees, and it is the same in every condition.
 
-\paragraph{Conditions.}
+\subsubsection*{Conditions}
 Six messages are published, at about 6.0, 5.9, 5.75, 3.5, 2.09 and 2.0 days before TCA; the times vary slightly between scenarios. Let $W_1,\dots,W_6$ be the windows of the six messages, so that $W_6$ belongs to the latest message. We use the following seven conditions.
 \begin{itemize}
-\item[--] \emph{No reuse}: $W_k=\{10(k-1),\dots,10k-1\}$, six disjoint windows.
-\item[--] \emph{50\% overlap}: $W_k=\{20+5k,\dots,29+5k\}$, each sharing five observations with the previous window.
-\item[--] \emph{90\% overlap}: $W_k=\{44+k,\dots,53+k\}$, each sharing nine observations with the previous window.
-\item[--] \emph{Solution reissue}: $W_k=\{50,\dots,59\}$ for every $k$, so that one solution is published six times.
-\item[--] \emph{Exact replay}: the no-reuse messages, each sent three times.
-\item[--] \emph{Burst reissue}: the no-reuse solutions repeated $2,1,3,1,2$ and $1$ times at new publication times.
-\item[--] \emph{New information}: $W_k=\{0,\dots,10k-1\}$, each message adding ten observations to all earlier ones.
+\item \emph{No reuse}: $W_k=\{10(k-1),\dots,10k-1\}$, six disjoint windows.
+\item \emph{50\% overlap}: $W_k=\{20+5k,\dots,29+5k\}$, each sharing five observations with the previous window.
+\item \emph{90\% overlap}: $W_k=\{44+k,\dots,53+k\}$, each sharing nine observations with the previous window.
+\item \emph{Solution reissue}: $W_k=\{50,\dots,59\}$ for every $k$, so that one solution is published six times.
+\item \emph{Exact replay}: the no-reuse messages, each sent three times.
+\item \emph{Burst reissue}: the no-reuse solutions repeated $2,1,3,1,2$ and $1$ times at new publication times.
+\item \emph{New information}: $W_k=\{0,\dots,10k-1\}$, each message adding ten observations to all earlier ones.
 \end{itemize}
-In every condition except the last, the latest message uses the window $\{50,\dots,59\}$ and is identical. The six windows contain sixty distinct observations without reuse, 35 at 50\% overlap, 15 at 90\% overlap and 10 under solution reissue (Figure~\ref{fig:windows}). The new-information condition is a control in which a longer history really does carry more evidence.
+In every condition except the last, the latest message uses the window $\{50,\dots,59\}$ and is identical. The six windows contain sixty distinct observations without reuse, 35 at 50\% overlap, 15 at 90\% overlap and 10 under solution reissue (Fig.~\ref{fig:windows}). The new-information condition is a control in which a longer history really does carry more evidence.
 
-\begin{figure}[htb]
-  \centering
-  \includegraphics[width=\linewidth]{observation_windows}
-  \caption{Observation windows of the six messages $m_1,\dots,m_6$ in five of the conditions, generated from the simulator. Each row is one message, with the latest message $m_6$ at the bottom, and each bar covers the identities of the observations which the message uses. Blue marks observations which no earlier message used and orange those which an earlier message has already used. The number of distinct observations behind all six messages is given above each panel. In the first four conditions the latest message uses the same window, observations 50 to 59; in the new-information condition it uses all sixty visible observations.}
-  \label{fig:windows}
-\end{figure}
-
-\paragraph{Configurations.}
+\subsubsection*{Configurations}
 During development the observation noise was isotropic, $R=0.09\,I$, and four further configurations varied it: anisotropic noise with eigenvalues $0.12$ and $0.06$, or $0.16$ and $0.02$, rotated by $60^\circ$; doubled noise, $R=0.18\,I$; and a shared bias with $B=0.01\,I$. Elsewhere $B=0$. The held-out configuration, used only in the frozen evaluation, has eigenvalues $0.144$ and $0.036$, a variance ratio of 4 with the same trace as the isotropic case, rotated by $30^\circ$, and no shared bias.
 
 \subsection{Forecasters}
 
 All forecasters predict the label from the messages available at least two days before TCA, and they share the same logistic readout; they differ only in what they read.
 \begin{itemize}
-\item[--] \emph{Latest message}: the features of the latest message and indicators of missing values.
-\item[--] \emph{History summary}: exact retransmissions are removed first. The forecaster then reads the features of the latest message, the mean and the variance of each feature over the messages, the time between the first and the latest message, the number of messages, and the share of missing values.
-\item[--] \emph{Grouped history}: the messages are partitioned in up to eight label-free ways, by agreement of their orbit-determination fields and by the gaps between their publication times. Each partition gives a summary as above, with weights under which every group has the same total weight, and the score of an encounter is the largest of its partition scores.
-\item[--] \emph{Lineage-weighted history}: a privileged forecaster, available only in simulation. Each distinct observation divides one unit of weight equally among the messages which use it, and the mean and the variance are computed with the resulting message weights; the other features are as in the history summary. It is a descriptive control, not an optimal fusion rule.
+\item \emph{Latest message}: the features of the latest message and indicators of missing values.
+\item \emph{History summary}: exact retransmissions are removed first. The forecaster then reads the features of the latest message, the mean and the variance of each feature over the messages, the time between the first and the latest message, the number of messages, and the share of missing values.
+\item \emph{Grouped history}: the messages are partitioned in up to eight label-free ways, by agreement of their orbit-determination fields and by the gaps between their publication times. Each partition gives a summary as above, with weights under which every group has the same total weight, and the score of an encounter is the largest of its partition scores.
+\item \emph{Lineage-weighted history}: a privileged forecaster, available only in simulation. Each distinct observation divides one unit of weight equally among the messages which use it, and the mean and the variance are computed with the resulting message weights; the other features are as in the history summary. It is a descriptive control, not an optimal fusion rule.
 \end{itemize}
 
-\paragraph{Training and selection.}
+\subsubsection*{Training and selection}
 A training bank has 1,000 scenarios. Each scenario appears in the six conditions other than exact replay, each copy with weight $1/6$, so that every scenario carries a total weight of one, and the folds of cross-validation split whole scenarios. The regularization parameter $C\in\{0.01,0.1,1,10,100,1000\}$ is chosen by the smallest weighted clipped log loss in threefold inner cross-validation. The selected out-of-fold scores are calibrated by a monotone Platt fit~\cite{platt1999}, a review threshold is set at a nominal 95\% recall of the training positives, and the model is refitted on the whole bank. Probabilities are clipped to $[10^{-6},1-10^{-6}]$ before log losses are computed.
 
-\subsection{Real data}
+\subsection{Real Data}
 
-\paragraph{The Kelvins data.}
+\subsubsection*{The Kelvins data}
 We also analyse the public data of the Kelvins challenge~\cite{uriot2022}, in which, as in our simulator, the label is the class of the final reported risk.
 % claims: R15=13,154 R08=8,293 R09=66 R10=2,167 R07=150
 From 13,154 events in the training release, the training cohort has 8,293 eligible events, 66 of them positive, and the historical test split has 2,167 events, 150 of them positive.
 % claims: R12=6,838 R08=8,293
 Only messages issued at least two days before TCA are read. Eligibility depends on the last message and is therefore retrospective. In 6,838 of the 8,293 training events the final risk is at the reporting floor of $10^{-30}$.
 
-\paragraph{Forecasters and evaluation.}
+\subsubsection*{Forecasters and evaluation}
 We refitted the latest-risk, latest-message, history-summary and grouped forecasters with the choices described above, in five outer and three inner folds of whole events, and compared them with the predictions of a gradient boosting model from an earlier analysis.
 % claims: R11=19
 The refit reproduced the earlier predictions exactly in 19 of 20 combinations of forecaster and fold. Final models fitted on the training cohort were evaluated once on the historical test split, whose labels have long been public but were not used for any choice. We report paired differences in clipped log loss per event, with event-level studentized bootstrap intervals and mission-cluster bootstrap-$t$ intervals~\cite{cameron2008}, the latter over 19 missions in the training cohort and 18 in the test split. Real messages carry no observation lineage, so no reuse condition can be constructed, and the forecasters are compared as they are.
 
 % ---------------------------------------------------------------------
-\section{The frozen evaluation}\label{sec:protocol}
+\section{The Frozen Evaluation}\label{sec:protocol}
 
-\paragraph{What was fixed in advance.}
+\subsubsection*{What was fixed in advance}
 After development, and before any scenario of the evaluation existed, we wrote a protocol containing the claim, the configuration, the sample sizes, the contrasts, the margin, the decision rule, the interval method, the multiplicity rule and the random seeds, and committed it together with the identities of the 45 code files on which it depends. The scenarios of the evaluation were generated only afterwards. All 1,400,000 predictions were written and hashed before any label was read, and every number reported below was reconstructed exactly from the saved predictions.
 
-\paragraph{Primary contrast.}
+\subsubsection*{Primary contrast}
 Let $\ell_{f,b}(s,c)$ be the clipped log loss of forecaster $f$, trained on bank $b$, on scenario $s$ in condition $c$, and let $c_0$ and $c_{90}$ denote no reuse and 90\% overlap. The degradation of $f$ is
 \[
   D_{f,b}(s)=\ell_{f,b}(s,c_{90})-\ell_{f,b}(s,c_{0}),
@@ -204,17 +216,17 @@ and the primary contrast, averaged over $K=10$ banks and $n=5{,}000$ scenarios, 
 \end{equation}
 where $H$ is the history summary and $L$ the latest message. Since the latest message is the same in both conditions, $D_{L,b}(s)=0$ for every scenario and bank, and $\Pone$ is simply the extra loss of the history summary.
 
-\paragraph{Decision rule.}
+\subsubsection*{Decision rule}
 % claims: X14 is documented in primary_contrast.md
 We fixed a margin of 0.02 nats, about a quarter of the advantage of the history summary over the latest message without reuse in development; we note that it was chosen after the development effect had been seen. The rule was to call the degradation \emph{material} if the whole 95\% interval lies above the margin, \emph{not material} if it lies below, and \emph{inconclusive} otherwise.
 
-\paragraph{Interval.}
+\subsubsection*{Interval}
 For a contrast with per-scenario, per-bank values $d_{s,b}$, let $\bar d_s=\frac1K\sum_b d_{s,b}$. Let $\hat\theta$ and $\hat\sigma$ be the mean of the $\bar d_s$ and its standard error, and let $t^*_\alpha$ be the $\alpha$-quantile of the studentized statistic over $9{,}999$ bootstrap resamples of scenarios~\cite{efron1993}. With $\hat\tau$ the standard deviation of the $K$ bank means and $t_{K-1}$ the $0.975$-quantile of Student's distribution with $K-1$ degrees of freedom, the 95\% interval is
 \begin{equation}\label{eq:interval}
-  \Bigl[\hat\theta-\sqrt{(t^*_{0.975}\hat\sigma)^2+(t_{K-1}\hat\tau/\sqrt K)^2},\;
-  \hat\theta+\sqrt{(t^*_{0.025}\hat\sigma)^2+(t_{K-1}\hat\tau/\sqrt K)^2}\Bigr].
+  \bigl[\hat\theta-h_{0.975},\;\hat\theta+h_{0.025}\bigr],\quad
+  h_\alpha=\sqrt{(t^*_\alpha\hat\sigma)^2+t_{K-1}^2\hat\tau^2/K}.
 \end{equation}
-The studentized bootstrap keeps the asymmetry of a skewed contrast, and the second term adds the variation between independently trained models.
+The studentized bootstrap keeps the asymmetry of a skewed contrast, and the second term under the square root adds the variation between independently trained models.
 % claims: D10=0.008
 Both choices were made because of what we saw in development. Between independently generated training banks, $\Pone$ varied with standard deviation 0.008, about 3.6 times what overlapping subsets of one training bank had suggested.
 % claims: D11=66% D12=95%
@@ -222,63 +234,72 @@ In simulation, intervals which ignore this variation covered the true value as r
 % claims: D22=4.5 D20=0.021 D19=0.034 D21=0.026 D13=0.029
 The contrast is also strongly skewed, with skewness 4.5 in development, and there the two one-sided errors of the Student $t$ interval were 0.021 and 0.034, against 0.026 and 0.029 for the studentized bootstrap, the nominal value being 0.025.
 
-\paragraph{Secondary hypotheses.}
+\subsubsection*{Secondary hypotheses}
 Four secondary hypotheses were tested with Holm's procedure~\cite{holm1979} at familywise one-sided level 0.05, each by the smallest level at which the corresponding one-sided interval excludes the null value. In the notation of~\eqref{eq:p1}:
 \begin{itemize}
-\item[--] S1, the advantage left at 90\% overlap: the mean of $\ell_{H,b}(s,c_{90})-\ell_{L,b}(s,c_{90})$; the null hypothesis is that it is at most $-0.02$, that is, that the history summary keeps an advantage of at least 0.02.
-\item[--] S5, the degradation under solution reissue: as $\Pone$ with solution reissue in place of 90\% overlap; null at most 0.02.
-\item[--] S2, the effect of grouping: the mean of $D_{G,b}(s)-D_{H,b}(s)$ for the grouped forecaster $G$; the null hypothesis is that it is at most $-0.01$, that is, that grouping reduces the degradation by at least 0.01.
-\item[--] S3, the effect of lineage weighting: as S2 for the lineage-weighted forecaster; null at most $-0.01$.
+\item S1, the advantage left at 90\% overlap: the mean of $\ell_{H,b}(s,c_{90})-\ell_{L,b}(s,c_{90})$; the null hypothesis is that it is at most $-0.02$, that is, that the history summary keeps an advantage of at least 0.02.
+\item S5, the degradation under solution reissue: as $\Pone$ with solution reissue in place of 90\% overlap; null at most 0.02.
+\item S2, the effect of grouping: the mean of $D_{G,b}(s)-D_{H,b}(s)$ for the grouped forecaster $G$; the null hypothesis is that it is at most $-0.01$, that is, that grouping reduces the degradation by at least 0.01.
+\item S3, the effect of lineage weighting: as S2 for the lineage-weighted forecaster; null at most $-0.01$.
 \end{itemize}
 A sixth contrast, S6, the difference between the history summary and the latest message under solution reissue, was reported without a test, since its development effect was small and variable. Under the development effect sizes the approximate power was at least 0.91 for each confirmatory hypothesis.
 
-\paragraph{One run.}
+\subsubsection*{One run}
 The evaluation was run once, as specified, without deviations from the protocol. An independent check of the decision rule, planned before the run, was not carried out; we return to this in Section~\ref{sec:discussion}.
 
 % ---------------------------------------------------------------------
-\section{Results on simulated data}\label{sec:results}
+\section{Results on Simulated Data}\label{sec:results}
 
-\paragraph{Absolute losses.}
-Table~\ref{tab:losses} and Figure~\ref{fig:response} give the mean clipped log loss of the four forecasters in every condition.
+\subsection{Absolute Losses}
+
+Table~\ref{tab:losses} and Fig.~\ref{fig:response} give the mean clipped log loss of the four forecasters in every condition.
 % claims: V12=0.149
-The flat curve in Figure~\ref{fig:response} is the latest message, at 0.149 in every reuse condition because its input does not change.
+The flat curve in Fig.~\ref{fig:response} is the latest message, at 0.149 in every reuse condition because its input does not change.
 % claims: V11=0.082 V31=0.098 V13=0.145 V32=0.159
 The history summary starts at 0.082 without reuse and rises to 0.098 at 50\% overlap, 0.145 at 90\% overlap and 0.159 under solution reissue. The grouped and lineage-weighted forecasters, drawn in grey, follow the history summary closely. Exact replay changes nothing, since exact retransmissions are removed before any summary is computed, while burst reissue, which repeats the no-reuse solutions at new publication times, raises the loss of the history summary slightly.
 
-\begin{table}[htb]
-  \centering
-  \caption{Mean clipped log loss (nats) in the frozen evaluation, over ten training banks and 5,000 scenarios. The latest message is the same in every condition except new information, where it carries all sixty observations, so the latest-message forecaster scores the same in the other six columns. Replay and burst are the exact-replay and burst-reissue conditions.}
+\begin{table}[!t]
+  \caption{Mean Clipped Log Loss in the Frozen Evaluation (nats)}
   \label{tab:losses}
-  \small
+  \centering
+  \footnotesize
+  \begin{lrbox}{\tablebox}
 % BEGIN GENERATED: losses
-\begin{tabular}{lccccccc}
+\begin{tabular}{lcccc}
 \toprule
-Forecaster & No reuse & 50\% & 90\% & Reissue & Replay & Burst & New inf. \\
+Condition & History & Latest & Grouped & Lineage- \\
+ & summary & message & history & weighted \\
 \midrule
-History summary & 0.0819 & 0.0976 & 0.1447 & 0.1592 & 0.0819 & 0.0853 & 0.0471 \\
-Latest message & 0.1486 & 0.1486 & 0.1486 & 0.1486 & 0.1486 & 0.1486 & 0.0422 \\
-Grouped history & 0.0819 & 0.0977 & 0.1453 & 0.1599 & 0.0819 & 0.0864 & 0.0478 \\
-Lineage-weighted & 0.0800 & 0.0961 & 0.1450 & 0.1596 & 0.0800 & 0.0802 & 0.0455 \\
+No reuse & 0.0819 & 0.1486 & 0.0819 & 0.0800 \\
+50\% overlap & 0.0976 & 0.1486 & 0.0977 & 0.0961 \\
+90\% overlap & 0.1447 & 0.1486 & 0.1453 & 0.1450 \\
+Solution reissue & 0.1592 & 0.1486 & 0.1599 & 0.1596 \\
+Exact replay & 0.0819 & 0.1486 & 0.0819 & 0.0800 \\
+Burst reissue & 0.0853 & 0.1486 & 0.0864 & 0.0802 \\
+New information & 0.0471 & 0.0422 & 0.0478 & 0.0455 \\
 \bottomrule
 \end{tabular}
 % END GENERATED: losses
+  \end{lrbox}
+  \usebox{\tablebox}
+  \tablenote{Means over ten training banks and 5,000 scenarios. The latest message is the same in every condition except new information, where it carries all sixty observations, so the latest-message forecaster scores the same in the other six rows.}
 \end{table}
 
-\begin{figure}[htb]
+\begin{figure}[!t]
   \centering
-  \includegraphics[width=0.78\linewidth]{overlap_response}
+  \includegraphics[width=\columnwidth]{overlap_response}
   \caption{Mean clipped log loss of the four forecasters in the frozen evaluation, by reuse condition (held-out configuration; ten independently trained banks, each evaluated on the same 5,000 scenarios). Points are means over banks and scenarios, and the whiskers of the orange and blue curves span the ten bank means. The blue curve is the latest-message forecaster, whose input does not change with reuse. The orange curve is the history summary; the two grey curves, which almost coincide with it, are the grouped and the lineage-weighted forecasters.}
   \label{fig:response}
 \end{figure}
 
-\paragraph{The primary contrast.}
+\subsection{Frozen Contrasts}
 
 % claims: V01=0.063 V02=0.053 V03=0.074
 \begin{result}\label{res:primary}
 In the held-out configuration, with ten independently trained banks and 5,000 evaluation scenarios, 90\% overlap between successive observation windows increases the clipped log loss of the history summary by $\Pone=0.063$ nats relative to the latest message, with frozen 95\% interval $[0.053,0.074]$. Since the whole interval lies above the margin 0.02, the degradation is material by the frozen rule.
 \end{result}
 
-In other words, at 90\% overlap the history summary loses nearly all of its advantage over the latest message, as the next result shows directly. Table~\ref{tab:contrasts} gives all frozen contrasts and Figure~\ref{fig:contrasts} shows them together with the estimates of the ten individual banks.
+In other words, at 90\% overlap the history summary loses nearly all of its advantage over the latest message, as the next result shows directly. Table~\ref{tab:contrasts} gives all frozen contrasts and Fig.~\ref{fig:contrasts} shows them together with the estimates of the ten individual banks.
 
 % claims: V08=four V04=-0.004 V21=-0.011 V22=0.004 V05=0.077 V23=0.066 V24=0.090
 \begin{result}\label{res:secondary}
@@ -293,14 +314,14 @@ Neither repair reduces the degradation by as much as 0.01. Grouping changes it b
 % claims: V09=0.011 V29=0.005 V30=0.017
 Under solution reissue, the history summary is worse than the latest message by 0.011 nats, with interval $[0.005,0.017]$. This contrast, S6, was not tested, and we report it as exploratory. The four secondary $p$-values lie at the bootstrap floor of $1/10{,}000$.
 
-\begin{table}[htb]
-  \centering
-  \caption{Frozen contrasts in the held-out configuration. Estimates are means over ten training banks and 5,000 scenarios; intervals are the bank-combined 95\% intervals of~\eqref{eq:interval}. P1 is decided by the margin 0.02; S1, S5, S2 and S3 are tested against their null values with Holm's procedure at familywise one-sided level 0.05; S6 is exploratory.}
+\begin{table*}[!t]
+  \caption{Frozen Contrasts in the Held-Out Configuration}
   \label{tab:contrasts}
-  \small
-  \setlength{\tabcolsep}{4pt}
+  \centering
+  \footnotesize
+  \begin{lrbox}{\tablebox}
 % BEGIN GENERATED: contrasts
-\begin{tabular}{l>{\raggedright\arraybackslash}p{5.0cm}rrcl}
+\begin{tabular}{llrrcl}
 \toprule
  & Contrast & Null & Estimate & 95\% interval & Outcome \\
 \midrule
@@ -313,23 +334,28 @@ S6 & History summary minus latest message, reissue & -- & 0.0106 & [0.0050, 0.01
 \bottomrule
 \end{tabular}
 % END GENERATED: contrasts
-\end{table}
+  \end{lrbox}
+  \usebox{\tablebox}
+  \tablenote{Estimates are means over ten training banks and 5,000 scenarios; intervals are the bank-combined 95\% intervals of~\eqref{eq:interval}. P1 is decided by the margin 0.02; S1, S5, S2 and S3 are tested against their null values with Holm's procedure at familywise one-sided level 0.05; S6 is exploratory.}
+\end{table*}
 
-\begin{figure}[htb]
-  \centering
-  \includegraphics[width=0.8\linewidth]{frozen_contrasts}
-  \caption{Frozen contrasts. Black points and bars are the estimates and their bank-combined 95\% intervals; the small grey dots above them are the estimates of the ten individual training banks; orange ticks mark the null value of each hypothesis, which for P1 is the margin 0.02. S6, in grey, is exploratory.}
-  \label{fig:contrasts}
-\end{figure}
+\subsection{Missed Alerts}\label{sec:misses}
 
-\paragraph{Missed alerts.}\label{sec:misses}
 Each forecaster flags for review the scenarios whose calibrated probability exceeds a threshold chosen to catch 95\% of the high-risk training scenarios.
 % claims: V14=1.4% V10=8.7% V19=4.7%
 The history summary misses 1.4\% of the high-risk evaluation scenarios without reuse and 8.7\% at 90\% overlap, while the latest message misses 4.7\% in every reuse condition.
 % claims: V16=599 V17=33 V18=7,700
 Pooled over the ten banks, 90\% overlap makes the history summary miss 599 positive pairs of bank and scenario which it flags without reuse, and flag 33 which it misses without reuse, out of 7,700. Since the banks share their evaluation scenarios, these counts are descriptive. The population is enriched with near misses, so the review fractions say nothing about the workload of an operator.
 
-\paragraph{Diagnostics.}
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\columnwidth]{frozen_contrasts}
+  \caption{Frozen contrasts. Black points and bars are the estimates and their bank-combined 95\% intervals; the small grey dots above them are the estimates of the ten individual training banks; orange ticks mark the null value of each hypothesis, which for P1 is the margin 0.02. S6, in grey, is exploratory.}
+  \label{fig:contrasts}
+\end{figure}
+
+\subsection{Diagnostics}
+
 % claims: V15=18
 The largest value of $C$ in the grid was selected for 18 of the 40 models, but in these cases the last step of the grid improved the inner loss by at most 0.0011, far less than the margin, and it cannot affect $\Pone$, since the degradation of the latest message is zero by construction.
 % claims: V20=0.0057 D10=0.008
@@ -337,7 +363,7 @@ The standard deviation of $\Pone$ between the ten banks was 0.0057, compared wit
 
 \subsection{Development}\label{sec:development}
 
-The results of this subsection were obtained before the protocol was frozen, on scenarios which shaped the protocol, and we report them as development evidence rather than as confirmation. We trained independent banks of 1,000 scenarios in each development configuration and evaluated each bank on 2,000 new scenarios of the same configuration (Figure~\ref{fig:development}).
+The results of this subsection were obtained before the protocol was frozen, on scenarios which shaped the protocol, and we report them as development evidence rather than as confirmation. We trained independent banks of 1,000 scenarios in each development configuration and evaluated each bank on 2,000 new scenarios of the same configuration (Fig.~\ref{fig:development}).
 % claims: D01=0.051 D02=0.038
 In the isotropic configuration $\Pone$ exceeded the margin in all six banks, the smallest bank estimate being 0.051 and the smallest lower bound of a per-bank interval 0.038.
 % claims: D03=0.044
@@ -349,19 +375,19 @@ The advantage left at 90\% overlap ranged from $-0.009$ to $0.005$ over the deve
 % claims: D18=7 D14=0.0006
 Under the matched training of Section~\ref{sec:model} the grid of $C$ was not binding: 7 of 60 selections were at its edge, and the last step gained at most 0.0006.
 
-\begin{figure}[htb]
+\begin{figure}[!t]
   \centering
-  \includegraphics[width=0.78\linewidth]{development_banks}
-  \caption{Development results, obtained before the protocol was frozen. Each point is $\Pone$ for one independently generated training bank, with training and evaluation in the same configuration and 2,000 evaluation scenarios per bank; bars are 95\% intervals conditional on the fitted bank. Six banks were generated in the isotropic configuration and two in each of the others; the horizontal line is the margin 0.02.}
+  \includegraphics[width=\columnwidth]{development_banks}
+  \caption{Development results, obtained before the protocol was frozen. Each point is $\Pone$ for one independently generated training bank, with training and evaluation in the same configuration and 2,000 evaluation scenarios per bank; bars are 95\% intervals conditional on the fitted bank. Six banks were generated in the isotropic configuration and two in each of the others; the anisotropic configurations have variance ratios 2 and 8. The horizontal line is the margin 0.02.}
   \label{fig:development}
 \end{figure}
 
 Several further forecasters were examined during development on the same exposed scenarios. Weighting the messages by a proxy of their covariance volume did not beat the latest message. Gaussian fusion of overlapping messages reproduced the known overconfidence of double counting, with uncertainty ellipses which were far too small. A recurrent network, given a fixed and bounded training budget, did not establish an advantage over the simple forecasters, and removing provenance fields from the summaries made only small differences once the models were retuned. We mention these results for completeness; the frozen evaluation concerns only the four forecasters described above.
 
 % ---------------------------------------------------------------------
-\section{Results on real data}\label{sec:real}
+\section{Results on Real Data}\label{sec:real}
 
-Table~\ref{tab:real} and Figure~\ref{fig:real} give the paired differences on the Kelvins data.
+Table~\ref{tab:real} and Fig.~\ref{fig:real} give the paired differences on the Kelvins data.
 % claims: R01=0.003 R02=0.0006 R03=0.026
 The history summary is worse than the latest message in both splits: by 0.003 nats out of fold in the training cohort, with the lower end of the mission-cluster interval at 0.0006, and by 0.026 on the historical test split.
 % claims: R13=0.0022 R14=0.019
@@ -371,33 +397,41 @@ Grouping makes no difference out of fold (0.0003), and on the test split it is b
 % claims: R05=-0.0023
 The latest-risk and latest-message forecasters are indistinguishable, and gradient boosting is better than the latest message out of fold, with a difference of $-0.0023$; the event-level interval of this difference excludes zero, but the mission-cluster interval does not.
 
-\begin{table}[htb]
-  \centering
-  \caption{Paired differences in clipped log loss per event on the exposed Kelvins data (first forecaster minus second; positive values favour the second). Intervals are event-level studentized bootstrap and mission-cluster bootstrap-$t$ 95\% intervals. The gradient boosting model was not evaluated on the test split.}
+\begin{table}[!t]
+  \caption{Paired Differences in Clipped Log Loss per Event on the Kelvins Data}
   \label{tab:real}
-  \small
+  \centering
+  \footnotesize
   \setlength{\tabcolsep}{4pt}
+  \begin{lrbox}{\tablebox}
 % BEGIN GENERATED: real
-\begin{tabular}{>{\raggedright\arraybackslash}p{4.1cm}lrcc}
+\begin{tabular}{lrcc}
 \toprule
- & Split & Mean & Event interval & Mission interval \\
+Split & Mean & Event interval & Mission interval \\
 \midrule
-R1: history summary $-$ latest message & training & 0.0030 & [0.0013, 0.0048] & [0.0006, 0.0062] \\
- & test & 0.0263 & [0.0113, 0.0425] & [0.0045, 0.0576] \\
-R2: grouped $-$ history summary & training & 0.0003 & [$-0.0002$, 0.0013] & [$-0.0004$, 0.0012] \\
- & test & $-0.0087$ & [$-0.0320$, $-0.0032$] & [$-0.0459$, $-0.0016$] \\
-R3: latest message $-$ latest risk & training & $-0.0007$ & [$-0.0028$, 0.0013] & [$-0.0031$, 0.0012] \\
- & test & 0.0000 & [$-0.0101$, 0.0101] & [$-0.0143$, 0.0223] \\
-R4: gradient boosting $-$ latest message & training & $-0.0023$ & [$-0.0044$, $-0.0003$] & [$-0.0049$, 0.0001] \\
+\multicolumn{4}{l}{\emph{R1: history summary $-$ latest message}} \\
+\quad Training & 0.0030 & [0.0013, 0.0048] & [0.0006, 0.0062] \\
+\quad Test & 0.0263 & [0.0113, 0.0425] & [0.0045, 0.0576] \\
+\multicolumn{4}{l}{\emph{R2: grouped $-$ history summary}} \\
+\quad Training & 0.0003 & [$-0.0002$, 0.0013] & [$-0.0004$, 0.0012] \\
+\quad Test & $-0.0087$ & [$-0.0320$, $-0.0032$] & [$-0.0459$, $-0.0016$] \\
+\multicolumn{4}{l}{\emph{R3: latest message $-$ latest risk}} \\
+\quad Training & $-0.0007$ & [$-0.0028$, 0.0013] & [$-0.0031$, 0.0012] \\
+\quad Test & 0.0000 & [$-0.0101$, 0.0101] & [$-0.0143$, 0.0223] \\
+\multicolumn{4}{l}{\emph{R4: gradient boosting $-$ latest message}} \\
+\quad Training & $-0.0023$ & [$-0.0044$, $-0.0003$] & [$-0.0049$, 0.0001] \\
 \bottomrule
 \end{tabular}
 % END GENERATED: real
+  \end{lrbox}
+  \usebox{\tablebox}
+  \tablenote{First forecaster minus second; positive values favour the second. Intervals are event-level studentized bootstrap and mission-cluster bootstrap-$t$ 95\% intervals. Training rows are out of fold in the training cohort and test rows are on the historical test split, on which the gradient boosting model was not evaluated.}
 \end{table}
 
-\begin{figure}[htb]
+\begin{figure}[!t]
   \centering
-  \includegraphics[width=\linewidth]{real_contrasts}
-  \caption{Paired differences in clipped log loss per event on the public Kelvins data; positive values favour the second forecaster of each pair. Black bars are event-level studentized bootstrap 95\% intervals and grey bars mission-cluster bootstrap-$t$ intervals. Left: training cohort, out of fold (8,293 events, 66 positive, 19 missions). Right: historical test split (2,167 events, 150 positive, 18 missions), on which the gradient boosting model was not evaluated.}
+  \includegraphics[width=\columnwidth]{real_contrasts}
+  \caption{Paired differences in clipped log loss per event on the public Kelvins data; positive values favour the second forecaster of each pair. Black bars are event-level studentized bootstrap 95\% intervals and grey bars mission-cluster bootstrap-$t$ intervals. Top: training cohort, out of fold (8,293 events, 66 positive, 19 missions). Bottom: historical test split (2,167 events, 150 positive, 18 missions), on which the gradient boosting model was not evaluated.}
   \label{fig:real}
 \end{figure}
 
@@ -407,9 +441,9 @@ The test split is much richer in high-risk events, 150 of 2,167 against 66 of 8,
 % claims: R06=12
 At the threshold chosen on training data for a nominal recall of 95\%, the forecasters miss up to 12 of the 150 positive test events, and a nominal recall is therefore not a guarantee. Figure~\ref{fig:frontier} shows how the number of missed positives in the training cohort falls as more events are sent for review.
 
-\begin{figure}[htb]
+\begin{figure}[!t]
   \centering
-  \includegraphics[width=0.78\linewidth]{real_frontier}
+  \includegraphics[width=\columnwidth]{real_frontier}
   \caption{Number of positive events missed against the fraction of events sent for review, as the review threshold varies, in the training cohort of the Kelvins data, out of fold. Points mark the thresholds chosen on training data for a nominal recall of 95\%. The curves describe this retrospective cohort only; the review fractions are not an operational workload.}
   \label{fig:frontier}
 \end{figure}
@@ -419,16 +453,16 @@ The direction of these results agrees with the simulation, but they are not evid
 % ---------------------------------------------------------------------
 \section{Discussion}\label{sec:discussion}
 
-\paragraph{What the results show.}
+\subsubsection*{What the results show}
 In a controlled model in which the reuse of observations is known exactly, heavy reuse removes the advantage which a summary of the history has over the latest message, and when one solution is republished six times the summary does worse than the latest message. It is worth separating two mechanisms behind this. With the latest message fixed, 90\% overlap also leaves less new information in the history: the six messages rest on fifteen distinct observations instead of sixty, of which the latest message alone uses ten. Most of what made the history useful is then simply absent, and the forecaster, which cannot see the lineage, has no reason to discount the repeated messages. The primary contrast measures the combined effect. Solution reissue isolates the second mechanism, since there the history contains nothing beyond the latest message; the history summary is then worse than the latest message, by a small amount, which is the cost of reading repeated messages as if they were new (contrast S6, exploratory).
 
-\paragraph{Why the repairs do not help.}
+\subsubsection*{Why the repairs do not help}
 Grouping uses the orbit-determination fields and publication times, which do not reveal which observations were reused. Weighting by the true lineage does use this information, but it can only change how the messages are weighted; it cannot restore observations which no message used. We think that this, rather than a flaw in the weighting rule, is why neither repair recovers the loss, although our experiments do not separate the two explanations.
 
-\paragraph{Limitations.}
+\subsubsection*{Limitations}
 The simulator is a static two-dimensional encounter plane with a synthetic label, the class of the final reported risk; it has no orbital dynamics, no real sensor model, and its label is not the occurrence of a collision. The frozen evaluation covers one held-out noise configuration and a population enriched with near misses. The forecasters are logistic models with a declared grid of regularization parameters, and we make no claim about every possible model. The real data are exposed and retrospective, with few positive events, a strong difference between the splits and no lineage. The interval combines two components under an approximation which was validated only in simulation, and its one-sided $p$-values reached the floor of the bootstrap. Finally, the analysis has not yet been reproduced independently, and a check of the decision rule by an independent analyst, planned before the run, was not carried out. None of the results concerns collision avoidance decisions, operational workload or the frequency of missed collisions.
 
-\paragraph{Further questions.}
+\subsubsection*{Further questions}
 There are several open questions. A natural question is whether the reuse in real sequences of CDMs can be estimated from the fields which messages do report, such as the number of observations used and the span of the orbit determination, and whether a forecaster which uses such an estimate recovers part of the loss. An interesting question is how the cost of reuse depends on the forecaster: our forecasters summarize the history by fixed statistics, and a sequence model with enough capacity might learn to discount repeated messages, although our bounded experiments with recurrent networks did not show this. It would also be useful to repeat the measurement with orbital dynamics, realistic tracking schedules and labels based on later tracking rather than on the last reported risk. Finally, it is open how much reuse there is in practice. Those who produce CDMs know which observations each solution used, and they could measure it directly.
 
 % ---------------------------------------------------------------------
@@ -438,180 +472,121 @@ We measured, in a controlled simulation with known observation lineage and an ev
 % claims: V01=0.063 V02=0.053 V03=0.074
 At 90\% overlap a history summary loses 0.063 nats of clipped log loss relative to the latest message (interval 0.053 to 0.074), which is nearly all of its advantage, and neither grouping nor lineage weighting recovers the loss. Public data agree in direction. A forecaster which reads CDM histories should therefore be compared with a latest-message forecaster under explicit reuse before its history features are trusted.
 
-\section*{Data and code availability}
+\section*{Data and Code Availability}
 The code, the frozen protocol, the result bundles, the scripts which produce every figure and table, and a register which maps every number in this paper to the data which produce it are available in the project repository (URL to be added). The Kelvins data are available from the European Space Agency under their original terms.
+% The project's Git remote is https://github.com/NitinTheGreat/conjunction-triage-agent;
+% cite it here only once it is public and holds the commits this paper reports.
 
-\section*{Acknowledgements}
-To be completed by the authors.
-% Disclose any use of AI assistance in preparing this paper according to the venue's policy.
+\section*{Acknowledgment}
+The authors used the AI assistants Claude (Anthropic) and Codex (OpenAI) to write and test the simulation and analysis code and to produce the figures and tables, and Claude to draft the text of every section.
+% IEEE requires content generated by AI (text, figures, images, code) to be disclosed in this
+% section, naming the system and the parts of the paper it affected. Check this statement
+% against the tools actually used, add the authors' own statement of review and
+% responsibility, and add any other acknowledgments (funding, data, people).
 
 % ---------------------------------------------------------------------
-\begin{thebibliography}{99}
-
-\bibitem{agrawal2025}
-A.~Agrawal and T.~Ansari.
-\newblock Probabilistic multi-agent data fusion for reliable conjunction assessment and enhanced decision-making.
-\newblock In \emph{Proceedings of the Advanced Maui Optical and Space Surveillance Technologies Conference (AMOS)}, 2025.
-
-\bibitem{akella2000}
-M.~R. Akella and K.~T. Alfriend.
-\newblock Probability of collision between space objects.
-\newblock \emph{Journal of Guidance, Control, and Dynamics}, 23(5):769--772, 2000.
-
-\bibitem{alfano2005}
-S.~Alfano.
-\newblock Relating position uncertainty to maximum conjunction probability.
-\newblock \emph{The Journal of the Astronautical Sciences}, 53(2):193--205, 2005.
-
-\bibitem{balch2019}
-M.~S. Balch, R.~Martin, and S.~Ferson.
-\newblock Satellite conjunction analysis and the false confidence theorem.
-\newblock \emph{Proceedings of the Royal Society A}, 475(2227):20180565, 2019.
-
-\bibitem{barshalom1986}
-Y.~Bar-Shalom and L.~Campo.
-\newblock The effect of the common process noise on the two-sensor fused-track covariance.
-\newblock \emph{IEEE Transactions on Aerospace and Electronic Systems}, AES-22(6):803--805, 1986.
-
-\bibitem{bouthillier2021}
-X.~Bouthillier, P.~Delaunay, M.~Bronzi, A.~Trofimov, B.~Nichyporuk, J.~Szeto, N.~Mohammadi Sepahvand, E.~Raff, K.~Madan, V.~Voleti, S.~Ebrahimi Kahou, V.~Michalski, T.~Arbel, C.~Pal, G.~Varoquaux, and P.~Vincent.
-\newblock Accounting for variance in machine learning benchmarks.
-\newblock In \emph{Proceedings of Machine Learning and Systems}, volume~3, 2021.
-
-\bibitem{cameron2008}
-A.~C. Cameron, J.~B. Gelbach, and D.~L. Miller.
-\newblock Bootstrap-based improvements for inference with clustered errors.
-\newblock \emph{The Review of Economics and Statistics}, 90(3):414--427, 2008.
-
-\bibitem{catulo2023}
-J.~S. Catulo, C.~Soares, and M.~Guimar\~aes.
-\newblock Predicting the probability of collision of a satellite with space debris: a {B}ayesian machine learning approach.
-\newblock arXiv preprint 2311.10633, 2023.
+% References in IEEE style, numbered in order of first citation.
+\balance
+\begin{thebibliography}{00}
 
 \bibitem{ccsds2013}
-Consultative Committee for Space Data Systems.
-\newblock \emph{Conjunction Data Message}.
-\newblock Recommended Standard CCSDS 508.0-B-1 (Blue Book), 2013.
-
-\bibitem{damour2022}
-A.~D'Amour, K.~Heller, D.~Moldovan, et~al.
-\newblock Underspecification presents challenges for credibility in modern machine learning.
-\newblock \emph{Journal of Machine Learning Research}, 23(226):1--61, 2022.
-
-\bibitem{denoeux2008}
-T.~Den\oe ux.
-\newblock Conjunctive and disjunctive combination of belief functions induced by nondistinct bodies of evidence.
-\newblock \emph{Artificial Intelligence}, 172(2--3):234--264, 2008.
-
-\bibitem{denoeux2024}
-T.~Den\oe ux.
-\newblock Combination of dependent and partially reliable {G}aussian random fuzzy numbers.
-\newblock \emph{Information Sciences}, 681:121208, 2024.
-
-\bibitem{dietterich1998}
-T.~G. Dietterich.
-\newblock Approximate statistical tests for comparing supervised classification learning algorithms.
-\newblock \emph{Neural Computation}, 10(7):1895--1923, 1998.
-
-\bibitem{dwork2015}
-C.~Dwork, V.~Feldman, M.~Hardt, T.~Pitassi, O.~Reingold, and A.~Roth.
-\newblock The reusable holdout: preserving validity in adaptive data analysis.
-\newblock \emph{Science}, 349(6248):636--638, 2015.
-
-\bibitem{efron1993}
-B.~Efron and R.~J. Tibshirani.
-\newblock \emph{An Introduction to the Bootstrap}.
-\newblock Chapman \& Hall, New York, 1993.
-
-\bibitem{holm1979}
-S.~Holm.
-\newblock A simple sequentially rejective multiple test procedure.
-\newblock \emph{Scandinavian Journal of Statistics}, 6(2):65--70, 1979.
-
-\bibitem{hurlbert1984}
-S.~H. Hurlbert.
-\newblock Pseudoreplication and the design of ecological field experiments.
-\newblock \emph{Ecological Monographs}, 54(2):187--211, 1984.
-
-\bibitem{julier1997}
-S.~J. Julier and J.~K. Uhlmann.
-\newblock A non-divergent estimation algorithm in the presence of unknown correlations.
-\newblock In \emph{Proceedings of the American Control Conference}, pages 2369--2373, 1997.
-
-\bibitem{kaufman2012}
-S.~Kaufman, S.~Rosset, C.~Perlich, and O.~Stitelman.
-\newblock Leakage in data mining: formulation, detection, and avoidance.
-\newblock \emph{ACM Transactions on Knowledge Discovery from Data}, 6(4):15, 2012.
-
-\bibitem{kish1965}
-L.~Kish.
-\newblock \emph{Survey Sampling}.
-\newblock Wiley, New York, 1965.
-
-\bibitem{nadeau2003}
-C.~Nadeau and Y.~Bengio.
-\newblock Inference for the generalization error.
-\newblock \emph{Machine Learning}, 52(3):239--281, 2003.
+\emph{Conjunction Data Message}, Recommended Standard CCSDS 508.0-B-1 (Blue Book), Consultative Committee for Space Data Systems, 2013.
 
 \bibitem{nasa2026}
-National Aeronautics and Space Administration.
-\newblock \emph{NASA Spacecraft Conjunction Assessment and Collision Avoidance Best Practices Handbook}.
-\newblock NASA/SP-20205011318, Revision~2, Volume~1, 2026.
-
-\bibitem{olson2026}
-T.~Olson, C.~Reid, J.~Stauch, C.~Grey, J.~Murphy, A.~Barton, P.~Minguijon-Pallas, D.~Kesler, and B.~Marchand.
-\newblock Contextual predictive model for early identification of high-covariance conjunctions.
-\newblock \emph{The Journal of the Astronautical Sciences}, 2026.
-
-\bibitem{ouari2026}
-M.~Ouari, F.~M. Zerrouki, S.~E. Bouziane, and A.~Gacem.
-\newblock Probabilistic satellite collision risk prediction via {M}onte {C}arlo ensembles.
-\newblock \emph{Applied Intelligence}, 2026.
-
-\bibitem{pedroso2026}
-L.~Pedroso, P.~Batista, and W.~P. M.~H. Heemels.
-\newblock Overlapping covariance intersection: fusion with partial structural knowledge of correlation from multiple sources.
-\newblock arXiv preprint 2603.16768, 2026.
+\emph{NASA Spacecraft Conjunction Assessment and Collision Avoidance Best Practices Handbook}, Rev.~2, vol.~1, NASA/SP-20205011318, National Aeronautics and Space Administration, Washington, DC, USA, 2026.
 
 \bibitem{pinto2020}
-F.~Pinto, G.~Acciarini, S.~Metz, S.~Boufelja, S.~Kaczmarek, K.~Merz, J.~A. Martinez-Heras, F.~Letizia, C.~Bridges, and A.~G. Baydin.
-\newblock Towards automated satellite conjunction management with {B}ayesian deep learning.
-\newblock In \emph{NeurIPS 2020 Workshop on AI for Earth Sciences}, 2020. arXiv preprint 2012.12450.
-
-\bibitem{platt1999}
-J.~C. Platt.
-\newblock Probabilistic outputs for support vector machines and comparisons to regularized likelihood methods.
-\newblock In A.~J. Smola, P.~Bartlett, B.~Sch\"olkopf, and D.~Schuurmans, editors, \emph{Advances in Large Margin Classifiers}, pages 61--74. MIT Press, 1999.
-
-\bibitem{saerens2002}
-M.~Saerens, P.~Latinne, and C.~Decaestecker.
-\newblock Adjusting the outputs of a classifier to new a priori probabilities: a simple procedure.
-\newblock \emph{Neural Computation}, 14(1):21--41, 2002.
-
-\bibitem{sanchez2024cec}
-L.~S\'anchez, V.~Rodr\'iguez-Fern\'andez, and M.~Vasile.
-\newblock Robust classification with belief functions and deep learning applied to {STM}.
-\newblock In \emph{IEEE Congress on Evolutionary Computation (CEC)}, 2024.
-
-\bibitem{sanchez2024asr}
-L.~S\'anchez, M.~Vasile, S.~Sanvido, K.~Merz, and C.~Taillan.
-\newblock Treatment of epistemic uncertainty in conjunction analysis with {D}empster--{S}hafer theory.
-\newblock \emph{Advances in Space Research}, 2024.
-
-\bibitem{tok2026}
-R.~T. Tok, B.~Ya\u{g}l\i{}o\u{g}lu, E.~Da\u{g}, and E.~O. Kahya.
-\newblock Early prediction of satellite collision probability using a hybrid {TCN}-{T}ransformer model for a {CDM}-based conjunction analysis framework.
-\newblock arXiv preprint 2609.13191, 2026.
+F.~Pinto \emph{et al.}, ``Towards automated satellite conjunction management with Bayesian deep learning,'' presented at the NeurIPS 2020 Workshop on AI for Earth Sciences, Dec. 2020, arXiv:2012.12450.
 
 \bibitem{uriot2022}
-T.~Uriot, D.~Izzo, L.~F. Sim\~oes, R.~Abay, N.~Einecke, S.~Rebhan, J.~Martinez-Heras, F.~Letizia, J.~Siminski, and K.~Merz.
-\newblock Spacecraft collision avoidance challenge: design and results of a machine learning competition.
-\newblock \emph{Astrodynamics}, 6(2):121--140, 2022.
+T.~Uriot \emph{et al.}, ``Spacecraft collision avoidance challenge: Design and results of a machine learning competition,'' \emph{Astrodynamics}, vol.~6, no.~2, pp.~121--140, 2022, doi: \url{10.1007/s42064-021-0101-5}.
+
+\bibitem{catulo2023}
+J.~S. Catulo, C.~Soares, and M.~Guimar\~aes, ``Predicting the probability of collision of a satellite with space debris: A Bayesian machine learning approach,'' 2023, arXiv:2311.10633.
+
+\bibitem{tok2026}
+R.~T. Tok, B.~Ya\u{g}l\i{}o\u{g}lu, E.~Da\u{g}, and E.~O. Kahya, ``Early prediction of satellite collision probability using a hybrid TCN-Transformer model for a CDM-based conjunction analysis framework,'' 2026, arXiv:2609.13191.
 
 \bibitem{zerrouki2026}
-F.~M. Zerrouki, M.~Ouari, S.~E. Bouziane, and A.~Gacem.
-\newblock Deep learning for full-horizon uncertainty-aware prediction of {CDM} sequences in spacecraft collision avoidance.
-\newblock \emph{Acta Astronautica}, 2026.
+F.~M. Zerrouki, M.~Ouari, S.~E. Bouziane, and A.~Gacem, ``Deep learning for full-horizon uncertainty-aware prediction of CDM sequences in spacecraft collision avoidance,'' \emph{Acta Astronaut.}, 2026, doi: \url{10.1016/j.actaastro.2026.08.013}.
+
+\bibitem{barshalom1986}
+Y.~Bar-Shalom and L.~Campo, ``The effect of the common process noise on the two-sensor fused-track covariance,'' \emph{IEEE Trans. Aerosp. Electron. Syst.}, vol.~AES-22, no.~6, pp.~803--805, 1986.
+
+\bibitem{julier1997}
+S.~J. Julier and J.~K. Uhlmann, ``A non-divergent estimation algorithm in the presence of unknown correlations,'' in \emph{Proc. Amer. Control Conf.}, 1997, pp.~2369--2373.
+
+\bibitem{hurlbert1984}
+S.~H. Hurlbert, ``Pseudoreplication and the design of ecological field experiments,'' \emph{Ecol. Monogr.}, vol.~54, no.~2, pp.~187--211, 1984, doi: \url{10.2307/1942661}.
+
+\bibitem{sanchez2024cec}
+L.~S\'anchez, V.~Rodr\'iguez-Fern\'andez, and M.~Vasile, ``Robust classification with belief functions and deep learning applied to STM,'' in \emph{Proc. IEEE Congr. Evol. Comput. (CEC)}, 2024, doi: \url{10.1109/CEC60901.2024.10612011}.
+
+\bibitem{sanchez2024asr}
+L.~S\'anchez, M.~Vasile, S.~Sanvido, K.~Merz, and C.~Taillan, ``Treatment of epistemic uncertainty in conjunction analysis with Dempster--Shafer theory,'' \emph{Adv. Space Res.}, 2024, doi: \url{10.1016/j.asr.2024.09.014}.
+
+\bibitem{ouari2026}
+M.~Ouari, F.~M. Zerrouki, S.~E. Bouziane, and A.~Gacem, ``Probabilistic satellite collision risk prediction via Monte Carlo ensembles,'' \emph{Appl. Intell.}, 2026, doi: \url{10.1007/s10489-026-07494-6}.
+
+\bibitem{olson2026}
+T.~Olson \emph{et al.}, ``Contextual predictive model for early identification of high-covariance conjunctions,'' \emph{J. Astronaut. Sci.}, 2026, doi: \url{10.1007/s40295-025-00549-9}.
+
+\bibitem{pedroso2026}
+L.~Pedroso, P.~Batista, and W.~P. M.~H. Heemels, ``Overlapping covariance intersection: Fusion with partial structural knowledge of correlation from multiple sources,'' 2026, arXiv:2603.16768.
+
+\bibitem{denoeux2008}
+T.~Den\oe ux, ``Conjunctive and disjunctive combination of belief functions induced by nondistinct bodies of evidence,'' \emph{Artif. Intell.}, vol.~172, no.~2--3, pp.~234--264, 2008, doi: \url{10.1016/j.artint.2007.05.008}.
+
+\bibitem{denoeux2024}
+T.~Den\oe ux, ``Combination of dependent and partially reliable Gaussian random fuzzy numbers,'' \emph{Inf. Sci.}, vol.~681, Art. no.~121208, 2024, doi: \url{10.1016/j.ins.2024.121208}.
+
+\bibitem{agrawal2025}
+A.~Agrawal and T.~Ansari, ``Probabilistic multi-agent data fusion for reliable conjunction assessment and enhanced decision-making,'' in \emph{Proc. Adv. Maui Opt. Space Surveill. Technol. Conf. (AMOS)}, 2025.
+
+\bibitem{kish1965}
+L.~Kish, \emph{Survey Sampling}. New York, NY, USA: Wiley, 1965.
+
+\bibitem{dietterich1998}
+T.~G. Dietterich, ``Approximate statistical tests for comparing supervised classification learning algorithms,'' \emph{Neural Comput.}, vol.~10, no.~7, pp.~1895--1923, 1998.
+
+\bibitem{nadeau2003}
+C.~Nadeau and Y.~Bengio, ``Inference for the generalization error,'' \emph{Mach. Learn.}, vol.~52, no.~3, pp.~239--281, 2003, doi: \url{10.1023/A:1024068626366}.
+
+\bibitem{bouthillier2021}
+X.~Bouthillier \emph{et al.}, ``Accounting for variance in machine learning benchmarks,'' in \emph{Proc. Mach. Learn. Syst. (MLSys)}, vol.~3, 2021.
+
+\bibitem{damour2022}
+A.~D'Amour \emph{et al.}, ``Underspecification presents challenges for credibility in modern machine learning,'' \emph{J. Mach. Learn. Res.}, vol.~23, no.~226, pp.~1--61, 2022.
+
+\bibitem{dwork2015}
+C.~Dwork, V.~Feldman, M.~Hardt, T.~Pitassi, O.~Reingold, and A.~Roth, ``The reusable holdout: Preserving validity in adaptive data analysis,'' \emph{Science}, vol.~349, no.~6248, pp.~636--638, 2015, doi: \url{10.1126/science.aaa9375}.
+
+\bibitem{kaufman2012}
+S.~Kaufman, S.~Rosset, C.~Perlich, and O.~Stitelman, ``Leakage in data mining: Formulation, detection, and avoidance,'' \emph{ACM Trans. Knowl. Discov. Data}, vol.~6, no.~4, Art. no.~15, 2012, doi: \url{10.1145/2382577.2382579}.
+
+\bibitem{akella2000}
+M.~R. Akella and K.~T. Alfriend, ``Probability of collision between space objects,'' \emph{J. Guid. Control Dyn.}, vol.~23, no.~5, pp.~769--772, 2000, doi: \url{10.2514/2.4611}.
+
+\bibitem{alfano2005}
+S.~Alfano, ``Relating position uncertainty to maximum conjunction probability,'' \emph{J. Astronaut. Sci.}, vol.~53, no.~2, pp.~193--205, 2005.
+
+\bibitem{balch2019}
+M.~S. Balch, R.~Martin, and S.~Ferson, ``Satellite conjunction analysis and the false confidence theorem,'' \emph{Proc. R. Soc. A}, vol.~475, no.~2227, Art. no.~20180565, 2019.
+
+\bibitem{platt1999}
+J.~C. Platt, ``Probabilistic outputs for support vector machines and comparisons to regularized likelihood methods,'' in \emph{Advances in Large Margin Classifiers}, A.~J. Smola, P.~Bartlett, B.~Sch\"olkopf, and D.~Schuurmans, Eds. Cambridge, MA, USA: MIT Press, 1999, pp.~61--74.
+
+\bibitem{cameron2008}
+A.~C. Cameron, J.~B. Gelbach, and D.~L. Miller, ``Bootstrap-based improvements for inference with clustered errors,'' \emph{Rev. Econ. Statist.}, vol.~90, no.~3, pp.~414--427, 2008.
+
+\bibitem{efron1993}
+B.~Efron and R.~J. Tibshirani, \emph{An Introduction to the Bootstrap}. New York, NY, USA: Chapman \& Hall, 1993.
+
+\bibitem{holm1979}
+S.~Holm, ``A simple sequentially rejective multiple test procedure,'' \emph{Scand. J. Statist.}, vol.~6, no.~2, pp.~65--70, 1979.
+
+\bibitem{saerens2002}
+M.~Saerens, P.~Latinne, and C.~Decaestecker, ``Adjusting the outputs of a classifier to new a priori probabilities: A simple procedure,'' \emph{Neural Comput.}, vol.~14, no.~1, pp.~21--41, 2002.
 
 \end{thebibliography}
 
