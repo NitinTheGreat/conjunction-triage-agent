@@ -111,3 +111,18 @@ def test_freeze_builder_matches_the_runner_and_reservation():
     ids = {c['id'] for c in p['analysis']['contrasts']}
     assert set(p['analysis']['confirmatory_secondary']) <= ids and p['analysis']['primary'] in ids
     assert [c for c in p['analysis']['contrasts'] if c['id'] == 'S6'][0]['null'] is None
+
+
+def test_report_reconstructs_analysis_exactly_and_detects_tampering(completed):
+    from research.summarize_track_r import bank_contrast_table, descriptive, reconstruct, same
+    p, run, _, results = completed
+    labelled = read_table(run.path / 'predictions_labelled.parquet')
+    recorded = json.loads((run.path / 'analysis.json').read_text())
+    assert same(json.loads(json.dumps(reconstruct(labelled, p))), recorded)
+    tampered = labelled.copy()
+    used = tampered.index[(tampered.arm == 'singleton') & (tampered.condition == 'overlap_90')][0]
+    tampered.loc[used, 'log_loss'] += 1.0
+    assert not same(json.loads(json.dumps(reconstruct(tampered, p))), recorded)
+    tables = descriptive(labelled)
+    assert {'losses.csv', 'calibration.csv', 'per_bank_losses.csv'} == set(tables)
+    assert len(bank_contrast_table(labelled, p)) == len(p['analysis']['contrasts']) * 2
