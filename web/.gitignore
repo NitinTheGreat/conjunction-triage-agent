@@ -1,0 +1,16 @@
+node_modules/
+.next/
+out/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+.env*
+!.env.example
+next-env.d.ts
+
+# Copied from ../frontend/data by `npm run sync-data`
+public/data/events.json
+public/data/summary.json
+public/data/phase7_results.json
+public/data/triage_example.json
