@@ -50,7 +50,7 @@ COPY frontend/lib/ /lib/
 # http://127.0.0.1:8000) rather than through this container, so this is a plain static
 # file server - no reverse proxy needed.
 FROM nginx:1.27-alpine AS frontend-web
-COPY frontend/index.html frontend/app.js frontend/charts.js frontend/live.js /usr/share/nginx/html/
+COPY frontend/index.html frontend/styles.css frontend/app.js frontend/charts.js frontend/live.js frontend/ui.js /usr/share/nginx/html/
 COPY frontend/data/ /usr/share/nginx/html/data/
 COPY --from=webassets /lib/ /usr/share/nginx/html/lib/
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
